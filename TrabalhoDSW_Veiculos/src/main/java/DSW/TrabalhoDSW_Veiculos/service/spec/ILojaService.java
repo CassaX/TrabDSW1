@@ -10,9 +10,9 @@ public interface ILojaService {
 
     List<Loja> buscarTodos();
 
-    void salvar(Loja editora);
+    void salvar(Loja loja);
 
     void excluir(Long id);
 
-    boolean editoraTemLivros(Long id);
+    boolean LojaTemVeiculos(Long id);
 }

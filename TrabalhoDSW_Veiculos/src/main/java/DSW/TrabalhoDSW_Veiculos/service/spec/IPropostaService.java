@@ -11,6 +11,6 @@ public interface IPropostaService {
 
     List<Proposta> buscarTodosPorUsuario(Cliente c);
 
-    void salvar(Proposta editora);
+    void salvar(Proposta proposta);
 
 }

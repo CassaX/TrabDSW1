@@ -10,7 +10,7 @@ public interface IVeiculoService {
 
     List<Veiculo> buscarTodos();
 
-    void salvar(Veiculo livro);
+    void salvar(Veiculo veiculo);
 
     void excluir(Long id);
 }

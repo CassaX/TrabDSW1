@@ -7,7 +7,8 @@ import org.springframework.data.repository.CrudRepository;
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
-import DSW.TrabalhoDSW_Veiculos.domain.Veiculo; 
+import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
+
 @SuppressWarnings("unchecked")
 public interface IPropostaDAO extends CrudRepository<Proposta, Long> {
 
@@ -35,5 +36,7 @@ public interface IPropostaDAO extends CrudRepository<Proposta, Long> {
     long countByClienteAndVeiculoAndStatus(Cliente cliente, Veiculo veiculo, String status);
 
     List<Proposta> findByVeiculo(Veiculo veiculo);
+
+    List<Proposta> findAllByCliente(Cliente c);
 
 }
