@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${cliente.id == null} ? #{usuario.cadastrar.label} : #{link.editar.label} + ' ' + #{sidebar.titulo.usuario}"></title>
+</head>
+<body>
+<section class="layout-content" layout:fragment="corpo">
+    <div class="container">
+        <h2 th:text="${cliente.id == null} ? #{usuario.cadastrar.label} : #{link.editar.label} + ' ' + #{sidebar.titulo.usuario}"></h2>
+
+        <div th:replace="~{fragments/alert}"></div>
+        <div th:replace="~{fragments/validacao}"></div><div th:replace="~{fragments/validacao}"></div> </div> <form th:action="${cliente.id == null} ? @{/cliente/salvar} : @{/cliente/editar}" th:object="${cliente}" method="post" class="form-horizontal">
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="form-group row">
+                <label for="name" class="col-sm-2 col-form-label" th:text="#{usuario.name.label}"></label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="name" th:field="*{nome}"
+                           th:placeholder="#{usuario.name.label}"
+                           th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="email" class="col-sm-2 col-form-label">Email</label>
+                <div class="col-sm-10">
+                    <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="Email"
+                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+            </div>
+
+            <div class="form-group row" th:if="${cliente.id == null}">
+                <label for="password" class="col-sm-2 col-form-label" th:text="#{usuario.password.label}"></label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="password" th:field="*{senha}"
+                           th:placeholder="#{usuario.password.label}"
+                           th:classappend="${#fields.hasErrors('senha')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('senha')}" th:errors="*{senha}"></div>
+                </div>
+            </div>
+            
+            <div class="form-group row" th:if="${cliente.id != null}">
+                <label for="novoPassword" class="col-sm-2 col-form-label">Nova Senha (deixe em branco para não alterar)</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="novoPassword" name="novoPassword"
+                           placeholder="Nova Senha">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="cpf" class="col-sm-2 col-form-label" th:text="#{usuario.CPF.label}"></label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="cpf" th:field="*{CPF}"
+                        data-mask="000.000.000-00" th:placeholder="#{usuario.CPF.label}"
+                        th:classappend="${#fields.hasErrors('CPF')} ? 'is-invalid'"
+                        th:attr="readonly=${cliente.id != null ? 'readonly' : null}"> <div class="invalid-feedback" th:if="${#fields.hasErrors('CPF')}" th:errors="*{CPF}"></div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="telefone" class="col-sm-2 col-form-label" th:text="#{cliente.telefone.label}"></label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="telefone" th:field="*{telefone}"
+                           data-mask="(00)00000-0000" th:placeholder="#{cliente.telefone.label}"
+                           th:classappend="${#fields.hasErrors('telefone')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}"></div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="sexo" class="col-sm-2 col-form-label" th:text="#{cliente.sexo.label}"></label>
+                <div class="col-sm-10">
+                    <select id="sexo" class="form-control" th:field="*{sexo}"
+                            th:classappend="${#fields.hasErrors('sexo')} ? 'is-invalid'">
+                        <option value="" th:text="#{select.label}">Selecione...</option>
+                        <option value="MASCULINO">Masculino</option>
+                        <option value="FEMININO">Feminino</option>
+                        <option value="OUTRO">Outro</option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('sexo')}" th:errors="*{sexo}"></div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="dataNascimento" class="col-sm-2 col-form-label" th:text="#{cliente.dataNascimento.label}"></label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="dataNascimento" th:field="*{dataNascimento}"
+                           data-mask="00/00/0000" th:placeholder="#{cliente.dataNascimento.label}"
+                           th:classappend="${#fields.hasErrors('dataNascimento')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('dataNascimento')}" th:errors="*{dataNascimento}"></div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary" th:text="#{button.salvar.label}">Salvar</button>
+                    <a th:href="@{/cliente/listar}" class="btn btn-secondary" th:text="#{button.cancelar.label}">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+</body>
+</html>

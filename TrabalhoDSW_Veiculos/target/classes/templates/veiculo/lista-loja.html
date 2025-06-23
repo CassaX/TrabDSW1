@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{sidebar.link.meusVeiculos}"></title>
+</head>
+<body>
+<section class="layout-content" layout:fragment="corpo">
+
+    <nav class="navbar navbar-expand-md bg-light">
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <i class="oi oi-caret-right"></i>
+                    <span th:text="#{sidebar.link.meusVeiculos}"></span>
+                </li>
+            </ul>
+        </div>
+        <a class="btn btn-primary btn-md" th:href="@{/veiculos/cadastrar}" role="button">
+            <span class="oi oi-plus" th:title="#{veiculo.cadastrar.label}" aria-hidden="true"></span>
+            <span th:text="#{veiculo.cadastrar.label}"></span>
+        </a>
+    </nav>
+
+    <div class="container" id="listagem">
+
+        <div th:replace="~{fragments/alert}"></div>
+
+        <div th:if="${#lists.isEmpty(veiculos)}" class="alert alert-info">
+            Nenhum veículo cadastrado ainda.
+        </div>
+
+        <div th:unless="${#lists.isEmpty(veiculos)}">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-sm">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th th:text="#{veiculo.modelo.label}"></th>
+                        <th th:text="#{veiculo.ano.label}"></th>
+                        <th th:text="#{veiculo.placa.label}"></th>
+                        <th th:text="#{veiculo.valor.label}"></th>
+                        <th th:text="#{acao.label}"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="veiculo : ${veiculos}">
+                        <td th:text="${veiculo.id}"></td>
+                        <td th:text="${veiculo.modelo}"></td>
+                        <td th:text="${veiculo.ano}"></td>
+                        <td th:text="${veiculo.placa}"></td>
+                        <td th:text="|R$ ${#numbers.formatDecimal(veiculo.valor,2,2,'COMMA')}|"></td>
+                        <td>
+                            <a class="btn btn-info btn-sm"
+                               th:href="@{/veiculos/editar/{id} (id=${veiculo.id}) }" role="button">
+                                <span class="oi oi-brush" th:title="#{link.editar.label}" aria-hidden="true"></span>
+                            </a>
+                            <button th:id="${#strings.concat('btn_veiculos/excluir/',veiculo.id)}"
+                                    type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#myModal">
+                                <span class="oi oi-circle-x" th:title="#{link.excluir.label}" aria-hidden="true"></span>
+                            </button>
+                            <a class="btn btn-warning btn-sm" th:href="@{/propostas/loja(idVeiculo=${veiculo.id})}" role="button">
+                                <span class="oi oi-clipboard" title="Gerenciar Propostas" aria-hidden="true"></span> Gerenciar Propostas
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/modal::modal}"></div>
+</section>
+</body>
+</html>

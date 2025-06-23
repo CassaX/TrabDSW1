@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity">
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+	<nav class="sidebar" th:fragment="nav-sidebar">
+		<ul class="nav nav-pills">
+			<li class="nav-item"><a class="nav-link " th:href="@{/}"> <i
+					class="oi oi-home"></i> <span th:text="#{sidebar.link.home}"></span>
+			</a></li>
+		</ul>
+		
+		<div sec:authorize="hasRole('ROLE_ADMIN')">
+			<ul class="nav nav-pills">
+				<li class="nav-item"><span class="nav-link active"
+					th:text="#{sidebar.titulo.usuario}">Clientes</span></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/cliente/cadastrar}"> <i class="oi oi-plus"></i> <span
+						th:text="#{sidebar.link.cadastrar}">Cadastrar</span>
+				</a></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/cliente/listar}"> <i class="oi oi-spreadsheet"></i>
+						<span th:text="#{sidebar.link.listar}">Listar</span>
+				</a></li>
+			</ul>
+		</div>
+
+		<div sec:authorize="hasRole('ROLE_ADMIN')">
+			<ul class="nav nav-pills">
+				<li class="nav-item"><span class="nav-link active"
+					th:text="#{sidebar.titulo.editora}">Lojas</span></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/loja/cadastrar}"> <i class="oi oi-plus"></i> <span
+						th:text="#{sidebar.link.cadastrar}">Cadastrar</span>
+				</a></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/loja/listar}"> <i class="oi oi-spreadsheet"></i>
+						<span th:text="#{sidebar.link.listar}">Listar</span>
+				</a></li>
+			</ul>
+		</div>
+
+		<div sec:authorize="hasRole('ROLE_LOJA')">
+			<ul class="nav nav-pills">
+				<li class="nav-item"><span class="nav-link active"
+					th:text="#{sidebar.titulo.livro}">Veículos</span></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/veiculos/cadastrar}"> <i class="oi oi-plus"></i> <span
+						th:text="#{sidebar.link.cadastrar}">Cadastrar</span>
+				</a></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/veiculos/meus-veiculos}"> <i class="oi oi-spreadsheet"></i>
+						<span th:text="#{sidebar.link.meusVeiculos}">Meus Veículos</span>
+				</a></li>
+			</ul>
+		</div>
+
+		<div sec:authorize="hasRole('ROLE_CLIENTE')">
+			<ul class="nav nav-pills">
+				<li class="nav-item"><span class="nav-link active"
+					th:text="#{sidebar.titulo.compra}">Propostas de Compra</span></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/propostas/minhas-propostas}"> <i class="oi oi-spreadsheet"></i> <span
+						th:text="#{sidebar.link.minhasPropostas}">Minhas Propostas</span>
+				</a></li>
+			</ul>
+		</div>
+
+		<ul class="nav nav-pills">
+			<li class="nav-item">
+				<a class="nav-link active"
+					th:href="@{/veiculos/listar}"><span th:text="#{livro.listar.label}">Listar Veículos</span>
+				</a>
+			</li>
+		</ul>
+	</nav>
+</body>
+</html>

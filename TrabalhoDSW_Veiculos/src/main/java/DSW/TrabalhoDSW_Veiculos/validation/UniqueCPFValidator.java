@@ -1,10 +1,9 @@
 package DSW.TrabalhoDSW_Veiculos.validation;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import DSW.TrabalhoDSW_Veiculos.DAO.IClienteDAO;
+import DSW.TrabalhoDSW_Veiculos.dao.IClienteDAO;
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
