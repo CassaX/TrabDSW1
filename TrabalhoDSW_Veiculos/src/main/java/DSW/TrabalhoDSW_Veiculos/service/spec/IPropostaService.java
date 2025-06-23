@@ -9,7 +9,7 @@ public interface IPropostaService {
 
     Proposta buscarPorId(Long id);
 
-    List<Proposta> buscarTodosPorUsuario(Cliente c);
+    List<Proposta> buscarTodosPorCliente(Cliente c);
 
     void salvar(Proposta proposta);
 
