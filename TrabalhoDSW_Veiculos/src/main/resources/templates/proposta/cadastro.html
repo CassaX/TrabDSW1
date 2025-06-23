@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{proposta.proporCompra.label}"></title>
+</head>
+<body>
+<section class="layout-content" layout:fragment="corpo">
+    <div class="container">
+        <h2 th:text="#{proposta.proporCompra.label} + ' para Veículo: ' + ${proposta.veiculo.modelo} + ' (' + ${proposta.veiculo.ano} + ')'"></h2>
+
+        <div th:replace="~{fragments/alert}"></div>
+        <div th:replace="~{fragments/validacao}"></div><div th:replace="~{fragments/validacao}"></div> 
+
+        <form th:action="@{/propostas/salvar}" th:object="${proposta}" method="post" class="form-horizontal">
+            <input type="hidden" name="idVeiculo" th:value="${proposta.veiculo.id}" />
+
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label" th:text="#{proposta.valorAtual.label}"></label>
+                <div class="col-sm-9">
+                    <p class="form-control-static" th:text="|R$ ${#numbers.formatDecimal(proposta.veiculo.valor,2,2,'COMMA')}|"></p>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="valor" class="col-sm-3 col-form-label" th:text="#{proposta.valor.label}"></label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="valor" th:field="*{valor}"
+                           data-mask="000.000.000.000,00" data-mask-reverse="true" th:placeholder="#{proposta.valor.label}"
+                           th:classappend="${#fields.hasErrors('valor')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="condicoesPagamento" class="col-sm-3 col-form-label" th:text="#{proposta.condicoesPagamento.label}"></label>
+                <div class="col-sm-9">
+                    <textarea class="form-control" id="condicoesPagamento" th:field="*{condicoesPagamento}"
+                              th:placeholder="#{proposta.condicoesPagamento.label}" rows="3"
+                              th:classappend="${#fields.hasErrors('condicoesPagamento')} ? 'is-invalid'"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('condicoesPagamento')}" th:errors="*{condicoesPagamento}"></div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-9 offset-sm-3">
+                    <button type="submit" class="btn btn-primary" th:text="#{button.salvar.label}">Salvar</button>
+                    <a th:href="@{/veiculos/listar}" class="btn btn-secondary" th:text="#{button.cancelar.label}">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+</body>
+</html>

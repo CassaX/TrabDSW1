@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Meu Perfil da Loja</title>
+</head>
+<body>
+<section class="layout-content" layout:fragment="corpo">
+    <div class="container">
+        <h2>Meu Perfil da Loja</h2>
+
+        <div th:replace="~{fragments/alert}"></div>
+
+        <div class="card">
+            <div class="card-header">
+                Detalhes da Loja
+            </div>
+            <div class="card-body">
+                <p><strong>Email:</strong> <span th:text="${loja.email}"></span></p>
+                <p><strong>Nome:</strong> <span th:text="${loja.nome}"></span></p>
+                <p><strong>CNPJ:</strong> <span th:text="${loja.cnpj}"></span></p>
+                <p><strong>Descrição:</strong> <span th:text="${loja.descricao}"></span></p>
+                <p><strong>Papel:</strong> <span th:text="${loja.role}"></span></p>
+            </div>
+            <div class="card-footer">
+                <a class="btn btn-info" th:href="@{/loja/editar/{id} (id=${loja.id}) }">Editar Perfil</a>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
