@@ -18,5 +18,7 @@ public interface ILojaService {
 
     Loja buscarPorEmail(String email);
 
+    Loja buscarPorCNPJ(String cnpj);
+
 
 }

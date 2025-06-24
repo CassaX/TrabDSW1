@@ -39,5 +39,10 @@ public class ClienteService implements IClienteService {
         return dao.findByEmail(email);
     }
 
+    @Transactional(readOnly = true)
+    public Cliente buscarPorCPF(String cpf){
+        return dao.findByCPF(cpf);
+    }
+
     
 }

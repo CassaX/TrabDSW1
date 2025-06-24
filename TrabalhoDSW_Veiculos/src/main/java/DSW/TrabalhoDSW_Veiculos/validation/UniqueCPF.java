@@ -17,4 +17,6 @@ public @interface UniqueCPF {
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    String fieldId() default "";
 }
