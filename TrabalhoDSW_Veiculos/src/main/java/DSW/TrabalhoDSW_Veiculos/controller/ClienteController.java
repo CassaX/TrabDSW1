@@ -82,13 +82,14 @@ public class ClienteController {
         model.addAttribute("clientes", service.buscarTodos());
         return "cliente/lista";
     }
-    
+    /* 
     @GetMapping("/perfil")
     public String perfil(ModelMap model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
-        Cliente cliente = service.buscarPorEmail(email);
+        Cliente cliente = service.findByEmail(email);
         model.addAttribute("cliente", cliente);
         return "cliente/perfil";
     }
+    */
 }
