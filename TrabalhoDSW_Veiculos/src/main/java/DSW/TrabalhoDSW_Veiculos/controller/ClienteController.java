@@ -37,6 +37,8 @@ public class ClienteController {
             return "cliente/cadastro";
         }
         
+        cliente.setRole("CLIENTE");
+        cliente.setEnabled(true);
         System.out.println("password = " + cliente.getSenha());
 		cliente.setSenha(encoder.encode(cliente.getSenha()));
 		service.salvar(cliente);

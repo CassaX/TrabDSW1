@@ -1,11 +1,14 @@
 package DSW.TrabalhoDSW_Veiculos.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -56,6 +59,8 @@ public class Veiculo extends AbstractEntity<Long> {
     @JoinColumn(name = "loja_id", nullable = false)
     private Loja loja;
 
+	@OneToMany(mappedBy = "veiculo")
+	private List<Imagem> fotos = new ArrayList<>();
 
 	public String getPlaca() {
 		return placa;
@@ -120,6 +125,14 @@ public class Veiculo extends AbstractEntity<Long> {
 
 	public void setLoja(Loja loja) {
 		this.loja = loja;
+	}
+
+	public List<Imagem> getFotos() {
+		return fotos;
+	}
+
+	public void setFotos(List<Imagem> fotos) {
+		this.fotos = fotos;
 	}
 
 

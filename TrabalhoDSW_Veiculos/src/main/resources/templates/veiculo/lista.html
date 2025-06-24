@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html layout:decorate="~{layout}">
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity">
 <head>
     <meta charset="UTF-8" />
     <title th:text="#{veiculo.listar.label}">Listar Veículos</title>
@@ -66,21 +66,29 @@
                             <td th:text="|R$ ${#numbers.formatDecimal(veiculo.valor, 2, 'COMMA', 2, 'POINT')}|"></td>
                             <td>
                                 <div sec:authorize="hasRole('ROLE_LOJA')">
-                                    <a class="btn btn-info btn-sm"
-                                        th:href="@{/veiculos/editar/{id} (id=${veiculo.id}) }" role="button">
-                                        <span class="oi oi-brush" th:title="#{link.editar.label}" aria-hidden="true"></span>
-                                    </a>
-                                    <button th:id="${#strings.concat('btn_veiculo/excluir/',veiculo.id)}"
-                                        type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#myModal">
-                                        <span class="oi oi-circle-x" th:title="#{link.excluir.label}" aria-hidden="true"></span>
-                                    </button>
+                                    <div th:if="${#authentication.principal.username == veiculo.loja.email}">
+                                        <a class="btn btn-info btn-sm"
+                                            th:href="@{/veiculos/editar/{id} (id=${veiculo.id}) }" role="button">
+                                            <span class="oi oi-brush" th:title="#{link.editar.label}" aria-hidden="true"> </span>
+                                        </a>
+                                        <button th:id="${'btn_veiculo/excluir/' + veiculo.id}"
+                                            type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#myModal">
+                                            <span class="oi oi-circle-x" th:title="#{link.excluir.label}" aria-hidden="true"></span>
+                                        </button>
+                                    </div>
                                 </div>
+
                                 <div sec:authorize="hasRole('ROLE_CLIENTE')">
-                                    <a class="btn btn-success btn-sm"
-                                        th:href="@{/propostas/cadastrar/{id} (id=${veiculo.id}) }" role="button">
-                                        <span class="oi oi-cart" th:title="#{link.fazerProposta.label}" aria-hidden="true"></span>
-                                        <span th:text="#{link.fazerProposta.label}">Fazer Proposta</span>
-                                    </a>
+                                    <div th:if="${veiculoComPropostaAberta != null and !veiculoComPropostaAberta.containsKey(veiculo.id)}">
+                                        <a class="btn btn-success btn-sm"
+                                            th:href="@{/propostas/cadastrar/{id} (id=${veiculo.id}) }" role="button">
+                                            <span class="oi oi-cart" th:title="#{link.fazerProposta.label}" aria-hidden="true"></span>
+                                            <span th:text="#{link.fazerProposta.label}">Fazer Proposta</span>
+                                        </a>
+                                    </div>
+                                    <div th:if="${veiculoComPropostaAberta != null and veiculoComPropostaAberta.containsKey(veiculo.id)}">
+                                        <span class="badge badge-warning" th:text="#{proposta.emAberto.label}">Proposta em Aberto</span>
+                                    </div>
                                 </div>
                             </td>
                         </tr>

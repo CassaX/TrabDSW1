@@ -2,6 +2,7 @@ package DSW.TrabalhoDSW_Veiculos.service.spec;
 
 import java.util.List;
 
+import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
 
 public interface IVeiculoService {
@@ -13,4 +14,6 @@ public interface IVeiculoService {
     void salvar(Veiculo veiculo);
 
     void excluir(Long id);
+
+    List<Veiculo> buscarPorLoja(Loja lojaLogada);
 }

@@ -34,7 +34,7 @@ public class ClienteDetailsServiceimpl implements UserDetailsService {
 
         Loja loja = lojaDAO.findByEmail(email);
         if (loja != null) {
-            return criarUserDetails(loja.getEmail(), loja.getPassword(), loja.getRole(), loja.isEnabled());
+            return criarUserDetails(loja.getEmail(), loja.getSenha(), loja.getRole(), loja.isEnabled());
         }
 
         throw new UsernameNotFoundException("Usuário não encontrado: " + email);

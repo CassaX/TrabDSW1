@@ -39,7 +39,7 @@
 			</ul>
 		</div>
 
-		<div sec:authorize="hasRole('ROLE_LOJA')">
+		<<div sec:authorize="hasRole('ROLE_LOJA')">
 			<ul class="nav nav-pills">
 				<li class="nav-item"><span class="nav-link active" th:text="#{sidebar.titulo.loja}">Loja</span></li>
 				<li class="nav-item">
@@ -49,8 +49,7 @@
 					</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" th:href="@{/veiculos/listar}">
-						<i class="oi oi-spreadsheet"></i>
+					<a class="nav-link" th:href="@{/veiculos/meus-veiculos}"> <i class="oi oi-spreadsheet"></i>
 						<span th:text="#{sidebar.link.meusVeiculos}">Meus Veículos</span>
 					</a>
 				</li>
@@ -84,12 +83,6 @@
 						<span th:text="#{sidebar.link.gerenciarLojas}">Gerenciar Lojas</span>
 					</a>
 				</li>
-				<li class="nav-item">
-					<a class="nav-link" th:href="@{/cliente/cadastrar}">
-						<i class="oi oi-person-add"></i>
-						<span th:text="#{sidebar.link.cadastrarCliente}">Cadastrar Cliente</span>
-					</a>
-				</li>
 			</ul>
 		</div>
 
@@ -102,11 +95,12 @@
                 </a>
             </li>
             <li class="nav-item" sec:authorize="isAuthenticated()">
-                <a class="nav-link" th:href="@{/logout}">
-                    <i class="oi oi-account-logout"></i>
-                    <span th:text="#{sidebar.link.logout}">Sair</span>
-                </a>
-            </li>
+				<form th:action="@{/logout}" method="post">
+					<button type="submit" class="nav-link btn btn-link text-left"> <i class="oi oi-account-logout"></i>
+						<span th:text="#{sidebar.link.logout}">Sair</span>
+					</button>
+				</form>
+			</li>
         </ul>
 	</nav>
 </body>

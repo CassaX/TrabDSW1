@@ -33,12 +33,9 @@ public class Loja extends AbstractEntity<Long> {
     @Column(nullable = false)
     private boolean enabled;
 
-    @NotBlank(message = "{NotBlank.loja.descricao}") 
     @Size(max = 500, message = "{Size.loja.descricao}") 
     @Column(nullable = true, length = 500) 
     private String descricao;
-
-    
 
     @NotBlank
     @Column(nullable = false, length = 100, unique = true)
@@ -46,7 +43,7 @@ public class Loja extends AbstractEntity<Long> {
 
     @NotBlank
     @Column(nullable = false, length = 64)
-    private String password;
+    private String senha;
 
     public void setCNPJ(String CNPJ) {
         this.CNPJ = CNPJ;
@@ -88,12 +85,12 @@ public class Loja extends AbstractEntity<Long> {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public String getSenha() {
+        return senha;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 
     @OneToMany(mappedBy = "loja")

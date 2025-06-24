@@ -1,6 +1,7 @@
 package DSW.TrabalhoDSW_Veiculos.service.imp;
 
 import DSW.TrabalhoDSW_Veiculos.dao.IVeiculoDAO;
+import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IVeiculoService;
 
@@ -33,5 +34,9 @@ public class VeiculoService implements IVeiculoService {
 
     public void excluir(Long id) {
         dao.deleteById(id);
+    }
+
+    public  List<Veiculo> buscarPorLoja(Loja lojaLogada){
+        return dao.findByLoja(lojaLogada);
     }
 }

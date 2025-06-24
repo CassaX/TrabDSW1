@@ -1,4 +1,4 @@
-package DSW.Veiculos.domain;
+package DSW.TrabalhoDSW_Veiculos.domain;
 
 import jakarta.persistence.*;
 
@@ -12,6 +12,10 @@ public class Imagem extends AbstractEntity<Long> {
     @Column(nullable = false)
     private String tipo;
 
+    @Column(nullable = true)
+    String caminho;
+
+    
     @Lob
     @Column(nullable = false)
     private byte[] dados;
@@ -52,5 +56,13 @@ public class Imagem extends AbstractEntity<Long> {
 
     public void setVeiculo(Veiculo veiculo) {
         this.veiculo = veiculo;
+    }
+
+    public String getCaminho() {
+        return caminho;
+    }
+
+    public void setCaminho(String caminho) {
+        this.caminho = caminho;
     }
 }

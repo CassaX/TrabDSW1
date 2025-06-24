@@ -1,13 +1,10 @@
-package DSW.Veiculos.DAO;
+package DSW.TrabalhoDSW_Veiculos.dao;
+
+import DSW.TrabalhoDSW_Veiculos.domain.Imagem;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
-
-import DSW.Veiculos.domain.Imagem;
-import DSW.Veiculos.domain.Veiculo;
-
-public interface IImagemDAO extends CrudRepository<Imagem, Long> {
-
-    List<Imagem> findByVeiculo(Veiculo veiculo);
+public interface IImagemDAO extends JpaRepository<Imagem, Long> {
+    List<Imagem> findByVeiculoId(Long idVeiculo);
 }
