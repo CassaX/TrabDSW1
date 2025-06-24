@@ -48,7 +48,8 @@
                             <td th:text="${proposta.veiculo.loja.nome}"></td>
                             <td th:text="|R$ ${#numbers.formatDecimal(proposta.valor, 2, 'COMMA', 2, 'POINT')}|"></td>
                             <td th:text="${proposta.condicoesPagamento}"></td>
-                            <td th:text="${proposta.status.descricao}"></td> <td>
+                            <td th:text="${proposta.status.descricao}"></td>
+                            <td>
                                 <div th:if="${proposta.status.name() == 'AGUARDANDO_RESPOSTA_CLIENTE'}">
                                     <a class="btn btn-info btn-sm" th:href="@{/propostas/cliente/responder/{id} (id=${proposta.id})}"
                                        role="button" title="Responder Contraproposta">
@@ -57,7 +58,7 @@
                                 </div>
                                 <div th:if="${proposta.status.name() == 'ACEITO'}">
                                     <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalReuniao"
-                                            th:attr="data-horario=${proposta.horarioReuniao}, data-link=${proposta.linkReuniao}">
+                                            th:attr="data-horario=${proposta.horarioReuniao != null ? #temporals.format(proposta.horarioReuniao, 'yyyy-MM-dd''T''HH:mm:ss') : ''}, data-link=${proposta.linkReuniao}">
                                         <span class="oi oi-calendar"></span> Ver Reunião
                                     </button>
                                 </div>
@@ -65,7 +66,7 @@
                                     <span class="badge badge-primary">Aguardando Resposta da Loja</span>
                                 </div>
                                 <div th:if="${proposta.status.name() == 'RECUSADO_LOJA' or proposta.status.name() == 'RECUSADO_CLIENTE'}">
-                                    <span class="badge badge-danger">Proposta Encerrada</span>
+                                    <span class="badge badge-danger">Proposta Fechada</span>
                                 </div>
                             </td>
                         </tr>
@@ -96,14 +97,68 @@
 
         <script>
             $('#modalReuniao').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget); // Botão que acionou o modal
-                var horario = button.data('horario');
+                var button = $(event.relatedTarget);
+                var horarioIsoString = button.data('horario'); // "yyyy-MM-ddTHH:mm:ss"
                 var link = button.data('link');
 
                 var modal = $(this);
-                // Formata a data/hora para exibição, se for um objeto LocalDateTime
-                modal.find('#horarioReuniaoModal').text(horario ? new Date(horario).toLocaleString('pt-BR') : 'Não definido'); 
-                modal.find('#linkReuniaoModal').attr('href', link).text(link ? 'Clique para a Reunião' : 'Não definido');
+                var horario = null;
+                var displayHorario = 'Não definido'; // Valor padrão se não conseguir exibir
+
+                console.log("DEBUG: String de horário recebida:", horarioIsoString); 
+                console.log("DEBUG: Link recebido:", link);
+
+                if (horarioIsoString) {
+                    try {
+                        // Tenta criar o objeto Date de forma robusta
+                        // Primeiro, com o construtor direto para ISO 8601
+                        horario = new Date(horarioIsoString);
+
+                        // Se o parse direto falhar (horario for 'Invalid Date'), tente o parse manual com regex
+                        if (isNaN(horario.getTime())) {
+                            console.warn("DEBUG: new Date() falhou com ISO string. Tentando parse manual.");
+                            var match = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/.exec(horarioIsoString);
+                            if (match) {
+                                horario = new Date(
+                                    parseInt(match[1]),      // Ano
+                                    parseInt(match[2]) - 1,   // Mês (0-11)
+                                    parseInt(match[3]),      // Dia
+                                    parseInt(match[4]),      // Hora
+                                    parseInt(match[5]),      // Minuto
+                                    parseInt(match[6])       // Segundo
+                                );
+                            } else {
+                                console.warn("DEBUG: String não corresponde ao formato esperado para parse manual.");
+                            }
+                        }
+
+                        // Se o objeto Date for válido após qualquer tentativa, formata para exibição
+                        if (horario && !isNaN(horario.getTime())) { 
+                            var ano = horario.getFullYear();
+                            var mes = ('0' + (horario.getMonth() + 1)).slice(-2); 
+                            var dia = ('0' + horario.getDate()).slice(-2);
+                            var horas = ('0' + horario.getHours()).slice(-2);
+                            var minutos = ('0' + horario.getMinutes()).slice(-2);
+                            var segundos = ('0' + horario.getSeconds()).slice(-2);
+
+                            displayHorario = `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
+                            console.log("DEBUG: Horário formatado para exibição:", displayHorario);
+                        } else {
+                            console.warn("DEBUG: Objeto Date ainda inválido após todas as tentativas de parse.");
+                        }
+
+                    } catch (error) {
+                        console.error("DEBUG: Erro fatal durante o processamento da data:", error); 
+                    }
+                } else {
+                    console.log("DEBUG: horarioIsoString é vazia ou nula.");
+                }
+                
+                // Atribui o texto final à modal
+                modal.find('#horarioReuniaoModal').text(displayHorario);
+                
+                // Link funciona como antes
+                modal.find('#linkReuniaoModal').attr('href', link).text(link ? 'Acessar Reunião' : 'Não definido');
             });
         </script>
 
