@@ -38,4 +38,9 @@ public class LojaService implements ILojaService {
     public boolean LojaTemVeiculos(Long id) {
         return !dao.findById(id.longValue()).getVeiculos().isEmpty();
     }
+
+    @Transactional(readOnly = true)
+    public Loja buscarPorEmail(String email){
+        return dao.findByEmail(email);
+    }
 }

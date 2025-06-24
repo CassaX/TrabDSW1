@@ -3,7 +3,6 @@ package DSW.TrabalhoDSW_Veiculos.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.security.core.Authentication;
 
 @Controller
 public class HomeController {
@@ -17,9 +16,6 @@ public class HomeController {
     public String home() {
         return "home";
     }
-    
-
-    
     
     @GetMapping("/login")
     public String login() {

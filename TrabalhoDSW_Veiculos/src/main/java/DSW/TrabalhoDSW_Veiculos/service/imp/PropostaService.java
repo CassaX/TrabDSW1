@@ -2,6 +2,7 @@ package DSW.TrabalhoDSW_Veiculos.service.imp;
 
 import DSW.TrabalhoDSW_Veiculos.dao.IPropostaDAO;
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
+import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IPropostaService;
 
@@ -31,4 +32,18 @@ public class PropostaService implements IPropostaService {
     public void salvar(Proposta proposta) {
         dao.save(proposta);
     }
+
+    public boolean existePropostaAberta(Long idCliente, Long idVeiculo){
+        return dao.existsByClienteIdAndVeiculoIdAndStatus( idCliente, idVeiculo, "ABERTO");
+    }
+    
+
+   public Object buscarPorCliente(Cliente cliente){
+        return dao.findByCliente(cliente);
+    }
+
+    @Transactional(readOnly = true)
+public List<Proposta> buscarTodosPorLoja(Loja loja) {
+    return dao.findAllByVeiculo_Loja(loja); 
+}
 }

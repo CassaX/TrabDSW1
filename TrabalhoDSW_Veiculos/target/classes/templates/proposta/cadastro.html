@@ -1,54 +1,80 @@
 <!DOCTYPE html>
 <html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="#{proposta.proporCompra.label}"></title>
+    <meta charset="UTF-8" />
+    <title th:text="#{proposta.cadastrar.label}">Fazer Proposta</title>
 </head>
 <body>
-<section class="layout-content" layout:fragment="corpo">
-    <div class="container">
-        <h2 th:text="#{proposta.proporCompra.label} + ' para Veículo: ' + ${proposta.veiculo.modelo} + ' (' + ${proposta.veiculo.ano} + ')'"></h2>
+    <section class="layout-content" layout:fragment="corpo">
 
-        <div th:replace="~{fragments/alert}"></div>
-        <div th:replace="~{fragments/validacao}"></div><div th:replace="~{fragments/validacao}"></div> 
-
-        <form th:action="@{/propostas/salvar}" th:object="${proposta}" method="post" class="form-horizontal">
-            <input type="hidden" name="idVeiculo" th:value="${proposta.veiculo.id}" />
-
-            <div class="form-group row">
-                <label class="col-sm-3 col-form-label" th:text="#{proposta.valorAtual.label}"></label>
-                <div class="col-sm-9">
-                    <p class="form-control-static" th:text="|R$ ${#numbers.formatDecimal(proposta.veiculo.valor,2,2,'COMMA')}|"></p>
-                </div>
+        <nav class="navbar navbar-expand-md bg-light">
+            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active"><i class="oi oi-caret-right"></i>
+                        <span th:text="#{proposta.cadastrar.label}">Fazer Proposta</span></li>
+                </ul>
+                <a class="btn btn-primary btn-md" th:href="@{/propostas/listar}"
+                    role="button"> <span class="oi oi-spreadsheet" title="Listar"
+                    aria-hidden="true"></span> <span th:text="#{proposta.listar.label}">Minhas Propostas</span>
+                </a>
             </div>
+        </nav>
 
-            <div class="form-group row">
-                <label for="valor" class="col-sm-3 col-form-label" th:text="#{proposta.valor.label}"></label>
-                <div class="col-sm-9">
-                    <input type="text" class="form-control" id="valor" th:field="*{valor}"
-                           data-mask="000.000.000.000,00" data-mask-reverse="true" th:placeholder="#{proposta.valor.label}"
-                           th:classappend="${#fields.hasErrors('valor')} ? 'is-invalid'">
-                    <div class="invalid-feedback" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></div>
-                </div>
-            </div>
+        <div class="container" id="cadastro">
 
-            <div class="form-group row">
-                <label for="condicoesPagamento" class="col-sm-3 col-form-label" th:text="#{proposta.condicoesPagamento.label}"></label>
-                <div class="col-sm-9">
-                    <textarea class="form-control" id="condicoesPagamento" th:field="*{condicoesPagamento}"
-                              th:placeholder="#{proposta.condicoesPagamento.label}" rows="3"
-                              th:classappend="${#fields.hasErrors('condicoesPagamento')} ? 'is-invalid'"></textarea>
-                    <div class="invalid-feedback" th:if="${#fields.hasErrors('condicoesPagamento')}" th:errors="*{condicoesPagamento}"></div>
-                </div>
-            </div>
+            <div th:replace="~{fragments/alert}"></div>
 
-            <div class="form-group row">
-                <div class="col-sm-9 offset-sm-3">
-                    <button type="submit" class="btn btn-primary" th:text="#{button.salvar.label}">Salvar</button>
-                    <a th:href="@{/veiculos/listar}" class="btn btn-secondary" th:text="#{button.cancelar.label}">Cancelar</a>
+            <form th:action="@{/propostas/salvar}" th:object="${proposta}"
+                method="POST">
+
+                <div th:replace="~{fragments/validacao::validacao}"></div>
+
+                <h4 th:text="#{proposta.veiculo.details}">Detalhes do Veículo:</h4>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${veiculo.modelo}">Modelo do Veículo</h5>
+                        <p class="card-text">
+                            <span th:text="#{veiculo.placa.label}">Placa</span>: <strong th:text="${veiculo.placa}"></strong><br/>
+                            <span th:text="#{veiculo.chassi.label}">Chassi</span>: <strong th:text="${veiculo.chassi}"></strong><br/>
+                            <span th:text="#{veiculo.ano.label}">Ano</span>: <strong th:text="${veiculo.ano}"></strong><br/>
+                            <span th:text="#{veiculo.quilometragem.label}">Quilometragem</span>: <strong th:text="${#numbers.formatDecimal(veiculo.quilometragem, 0, 'POINT', 0, 'COMMA')}"></strong> km<br/>
+                            <span th:text="#{veiculo.valor.label}">Valor Sugerido</span>: <strong th:text="|R$ ${#numbers.formatDecimal(veiculo.valor, 2, 'COMMA', 2, 'POINT')}|"></strong><br/>
+                            <span th:text="#{veiculo.loja.label}">Loja</span>: <strong th:text="${veiculo.loja.nome}"></strong>
+                        </p>
+                    </div>
                 </div>
-            </div>
-        </form>
-    </div>
-</section>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label th:text="#{proposta.valor.label}" for="valor">Valor da Proposta</label>
+                        <input type="text" class="form-control" id="valor" placeholder="Ex: 95000,00"
+                            data-mask="000.000.000.000,00" data-mask-reverse="true" th:field="*{valor}"
+                            th:classappend="${#fields.hasErrors('valor')} ? is-invalid" />
+                        <div class="invalid-feedback">
+                            <span th:errors="*{valor}"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label th:text="#{proposta.condicoesPagamento.label}" for="condicoesPagamento">Condições de Pagamento</label>
+                        <select id="condicoesPagamento" class="form-control" th:field="*{condicoesPagamento}"
+                            th:classappend="${#fields.hasErrors('condicoesPagamento')} ? is-invalid">
+                            <option value="">Selecione as condições</option>
+                            <option th:each="condicao : ${condicoesPagamento}" th:value="${condicao}" th:text="${condicao}"></option>
+                        </select>
+                        <div class="invalid-feedback">
+                            <span th:errors="*{condicoesPagamento}"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" th:field="*{cliente}" id="cliente">
+                <input type="hidden" th:field="*{veiculo}" id="veiculo">
+                <input type="hidden" th:field="*{data}" id="data">
+                <input type="hidden" th:field="*{status}" id="status"> <button type="submit" th:text="#{button.enviarProposta.label}"
+                    class="btn btn-primary btn-sm">Enviar Proposta</button>
+            </form>
+        </div>
+    </section>
 </body>
 </html>

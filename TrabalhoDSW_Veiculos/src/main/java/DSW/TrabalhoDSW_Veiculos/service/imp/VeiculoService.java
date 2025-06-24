@@ -24,7 +24,7 @@ public class VeiculoService implements IVeiculoService {
 
     @Transactional(readOnly = true)
     public List<Veiculo> buscarTodos() {
-        return dao.findByAll();
+        return dao.findAll();
     }
 
     public void salvar(Veiculo veiculo) {

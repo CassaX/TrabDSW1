@@ -31,9 +31,9 @@ public class SecurityConfig {
 
                         // Admin (AGORA O ADMIN PODE ACESSAR TUDO RELACIONADO A CLIENTE E LOJA)
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/cliente/**").hasAnyRole("ADMIN", "CLIENTE") // ADMIN também pode gerenciar
+                        .requestMatchers("/cliente/**").hasRole("ADMIN") // ADMIN também pode gerenciar
                                                                                        // clientes
-                        .requestMatchers("/loja/**").hasAnyRole("ADMIN", "LOJA") // ADMIN também pode gerenciar lojas
+                        .requestMatchers("/loja/**").hasRole("ADMIN") // ADMIN também pode gerenciar lojas
 
                         // Cliente (acesso restrito aos CLIENTES, exceto se for ADMIN)
                         // Se um CLIENTE comum tentar acessar /cliente/listar, ele precisa ter a role

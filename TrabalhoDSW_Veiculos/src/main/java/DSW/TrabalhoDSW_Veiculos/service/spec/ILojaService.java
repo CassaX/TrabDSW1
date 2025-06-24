@@ -15,4 +15,8 @@ public interface ILojaService {
     void excluir(Long id);
 
     boolean LojaTemVeiculos(Long id);
+
+    Loja buscarPorEmail(String email);
+
+
 }

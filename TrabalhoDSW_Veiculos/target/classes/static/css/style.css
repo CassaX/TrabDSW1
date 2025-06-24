@@ -1,133 +1,120 @@
-/* src/main/resources/static/css/style.css */
-
-/* 1. Estilos para o BODY para layout "sticky footer" e header fixo */
+/*
+ * Base structure
+ */
 html, body {
-    height: 100%; /* Garante que HTML e BODY ocupem a altura total da viewport */
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box; /* Garante que padding e border são incluídos na largura/altura total */
+	height: 100%;
 }
 
 body {
-    padding-top: var(--header-height, 100px); /* Usar variável CSS para altura do header (ajustar abaixo) */
-    font-family: 'Open Sans', sans-serif;
-    display: flex; /* Habilita flexbox para o layout principal */
-    flex-direction: column; /* Organiza os filhos (header, main-content-wrapper, footer) em coluna */
-    min-height: 100vh; /* Garante que o corpo tenha pelo menos a altura da viewport */
-    position: relative; 
-    overflow-x: hidden; /* Evita rolagem horizontal indesejada */
-}
+	padding-top: 56px;
+	padding-left: 0;
+} 
 
-/* Defina a altura do seu cabeçalho em uma variável CSS customizada */
-:root {
-    --header-height: 100px; /* VALOR A SER AJUSTADO (Ex: altura real do seu navbar) */
-}
-
-
-/* 2. Estilos do Header (navbar) */
-header { /* Estilo a tag header que contém o navbar */
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1030; /* Garante que o navbar fique acima de tudo */
-    background-color: #343a40; /* Cor de fundo para garantir que não haja transparência */
-}
-
-.navbar {
-    min-height: var(--header-height, 80px); /* Usa a variável para a altura mínima do navbar */
-    box-shadow: 0 2px 4px rgba(0,0,0,.1);
-    padding: .5rem 1rem; /* Padding padrão do bootstrap navbar */
-}
-
-/* Ajustes para o navbar-toggler (botão hambúrguer) no header */
-.navbar-toggler {
-    border: none;
-}
-
-.navbar-toggler-icon {
-    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-}
-
-/* Ajustar o espaçamento do navbar-brand para o botão hambúrguer */
-.navbar-brand {
-    margin-left: 1rem;
-}
-
-/* Estilos para as bandeiras de idioma no header */
-.language-flags {
-    display: flex;
-    align-items: center;
-    margin-left: auto; 
-    padding-right: 15px;
-}
-.language-flags img {
-    margin-left: 5px;
-}
-
-
-/* 3. Estilos do Layout Principal (contém sidebar e corpo do conteúdo) */
+/*
+ * main layout
+ */
 .layout-main {
     display: flex;
-    flex-grow: 1; /* IMPORANTE: Faz com que esta div ocupe todo o espaço vertical restante */
-    width: 100%;
-}
-
-/* 4. Estilos do Sidebar */
-.sidebar {
-    padding-top: 20px; /* Padding interno do conteúdo da sidebar */
-    width: 250px; /* Largura padrão do sidebar */
-    position: fixed; /* Fixa o sidebar na tela */
-    top: var(--header-height, 80px); /* AQUI ESTÁ A CHAVE: Começa abaixo do header */
-    bottom: 0; /* Estende o sidebar até o final da viewport */
-    left: 0;
-    z-index: 1020; /* Fica abaixo do navbar (1030) mas acima do conteúdo principal */
-    background-color: #f8f9fa;
-    overflow-y: auto; /* Permite rolagem vertical se o conteúdo do sidebar for longo */
-    overflow-x: hidden;
-    transition: width 0.3s, margin-left 0.3s;
-    box-shadow: 2px 0 5px rgba(0,0,0,.1);
-}
-
-/* Esconder o sidebar quando não está "open" */
-.sidebar:not(.sidebar-open) {
-    width: 0;
+    min-height: calc(80vh - 52px);
     overflow: hidden;
 }
 
-/* 5. Estilos da Seção de Conteúdo Principal (fragment="corpo") */
+/*
+ * Content
+ */
 .layout-content {
-    flex-grow: 1; /* Ocupa o espaço horizontal restante ao lado do sidebar */
-    padding: 15px;
-    transition: margin-left 0.3s;
-    margin-left: 0; /* Garante que não haja margin-left quando sidebar está fechado */
-    min-height: calc(100vh - var(--header-height, 80px) - 50px); /* Garante altura mínima do conteúdo */
-}
-
-/* 6. Deslocamento do Conteúdo Principal quando o Sidebar está aberto */
-body.sidebar-open .layout-main .layout-content {
-    margin-left: 250px; /* Desloca o conteúdo principal para a direita */
-}
-
-/* 7. Estilos do Footer */
-.layout-footer {
-    background-color: #343a40;
-    color: #ffffff;
-    padding: 15px 0;
-    text-align: center;
-    margin-top: auto; /* Empurra o footer para o final */
-    flex-shrink: 0; /* Garante que o footer não encolha */
     width: 100%;
+    padding-top: 0px;
 }
 
-/* Outros estilos gerais */
-.form-horizontal .form-group {
-    margin-bottom: 1rem;
+.container {
+	width: 100%;
+	padding-top: 20px;
 }
 
-.table-responsive {
-    margin-top: 1rem;
+/*
+ * Sidebar
+ */
+.sidebar {
+    width: 0px;
+    height: 80vh;
+    border-top: 1px solid #eee;
+    border-right: 1px solid #eee;    
+    background-color: #f8f9fa;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width .5s;
 }
 
-.alert {
-    margin-top: 1rem;
+.sidebar .nav {
+	margin-bottom: 0px;
+}
+
+.sidebar .nav-item {
+	width: 100%;
+}
+
+.sidebar .nav-item {
+	margin-left: 0;
+}
+
+.sidebar .nav-link {
+	border-radius: 0;
+} 
+
+.sidebar ul li:hover a, .menu ul li.active a{
+    color: #777777;
+}
+
+.sidebar ul{
+    list-style: none;
+    padding: 10px 0px;
+}
+
+.sidebar ul li a{
+    display: block;
+    color:#1a1a1a;
+    padding: 10px 15px;
+    white-space: nowrap;
+}
+
+.sidebar.sidebar-open {
+    width: 300px;
+}
+
+/*
+ * nav-pills home
+ */
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+	color: #fff;
+	background-color: #1e94d2;
+}
+
+/*
+ * toogle do navbar do menu
+ */ 
+
+.navbar-toggle {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+/*
+ * Footer
+ */
+.layout-footer {
+	position: relative;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: 0;
+	height: 50px;
+	border-top: 1px solid #eeeeee;
+}
+
+.footer-copy {
+	font-size: 92%;
+	display: block;
+	color: #777777;
+	text-align: center;
 }

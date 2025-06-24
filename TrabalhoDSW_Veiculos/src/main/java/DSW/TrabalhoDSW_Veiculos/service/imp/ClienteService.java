@@ -34,5 +34,10 @@ public class ClienteService implements IClienteService {
         return dao.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public Cliente buscarPorEmail(String email) {
+        return dao.findByEmail(email);
+    }
+
     
 }

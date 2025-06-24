@@ -3,8 +3,9 @@
 <meta charset="UTF-8">
 </head>
 <body>
-	<div th:fragment="validacao (bindingResult)"> <div th:if="${bindingResult != null and bindingResult.hasErrors()}" class="alert alert-danger alert-dismissible fade show" role="alert">
-			<div th:each="error : ${bindingResult.detailedErrors()}">
+	<div th:if="${#fields.hasAnyErrors()}" th:fragment="validacao">
+		<div class="alert alert-danger alert-dismissible fade show" role="alert">
+			<div th:each="error : ${#fields.detailedErrors()}">
 				<i class="oi oi-warning"></i> 
 				<span th:text="${error.message}"></span>
 			</div>

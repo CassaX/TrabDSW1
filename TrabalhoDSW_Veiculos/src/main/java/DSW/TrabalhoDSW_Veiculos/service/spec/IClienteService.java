@@ -13,4 +13,6 @@ public interface IClienteService {
     void salvar(Cliente editora);
 
     void excluir(Long id);
+
+    Cliente buscarPorEmail(String email);
 }
