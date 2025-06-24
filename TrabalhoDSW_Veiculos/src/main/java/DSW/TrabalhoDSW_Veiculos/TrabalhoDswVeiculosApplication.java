@@ -1,6 +1,5 @@
 package DSW.TrabalhoDSW_Veiculos;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.boot.CommandLineRunner;

@@ -1,6 +1,12 @@
 package DSW.TrabalhoDSW_Veiculos.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Imagem")
@@ -12,15 +18,11 @@ public class Imagem extends AbstractEntity<Long> {
     @Column(nullable = false)
     private String tipo;
 
-    @Column(nullable = true)
-    String caminho;
-
-    
-    @Lob
-    @Column(nullable = false)
+    @Lob // Usado para grandes objetos binários
+    @Column(nullable = false, columnDefinition = "LONGBLOB") // Adicionado columnDefinition para garantir tipo adequado no DB
     private byte[] dados;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // Usar LAZY para evitar carregar todas as imagens com o Veículo
     @JoinColumn(name = "veiculo_id", nullable = false)
     private Veiculo veiculo;
 
@@ -58,11 +60,4 @@ public class Imagem extends AbstractEntity<Long> {
         this.veiculo = veiculo;
     }
 
-    public String getCaminho() {
-        return caminho;
-    }
-
-    public void setCaminho(String caminho) {
-        this.caminho = caminho;
-    }
 }

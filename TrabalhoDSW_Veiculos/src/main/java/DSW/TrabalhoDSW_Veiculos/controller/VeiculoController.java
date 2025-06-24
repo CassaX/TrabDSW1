@@ -1,16 +1,16 @@
 package DSW.TrabalhoDSW_Veiculos.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -30,6 +30,7 @@ import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
 import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IClienteService;
+import DSW.TrabalhoDSW_Veiculos.service.spec.IImagemService;
 import DSW.TrabalhoDSW_Veiculos.service.spec.ILojaService;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IPropostaService;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IVeiculoService;
@@ -52,7 +53,11 @@ public class VeiculoController {
     @Autowired
     private IClienteService clienteService;
 
-    private static String UPLOAD_DIR = "src/main/resources/static/images/uploads/";
+    @Autowired
+    private IImagemService imagemService;
+
+    // A constante UPLOAD_DIR não é mais necessária, pois não estamos salvando em arquivos.
+    // private static String UPLOAD_DIR = "src/main/resources/static/images/uploads/";
 
     // Método auxiliar para obter a loja logada
     private Loja getLojaLogada() {
@@ -104,35 +109,27 @@ public class VeiculoController {
         List<Imagem> imagensPersistidas = new ArrayList<>();
         if (fotosUpload != null && !fotosUpload.isEmpty()) {
             try {
-                Path uploadPath = Paths.get(UPLOAD_DIR);
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
-
                 for (MultipartFile file : fotosUpload) {
                     if (!file.isEmpty()) {
-                        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-                        Path filePath = uploadPath.resolve(fileName);
-                        Files.copy(file.getInputStream(), filePath);
-
                         Imagem imagem = new Imagem();
-                        imagem.setCaminho("/images/uploads/" + fileName);
-                        imagem.setVeiculo(veiculo);
+                        imagem.setNome(file.getOriginalFilename()); // Nome original do arquivo
+                        imagem.setTipo(file.getContentType());    // Tipo do conteúdo (e.g., image/jpeg)
+                        imagem.setDados(file.getBytes());         // Dados da imagem em byte[]
+                        imagem.setVeiculo(veiculo);               // Associa a imagem ao veículo
                         imagensPersistidas.add(imagem);
                     }
                 }
             } catch (IOException e) {
-                System.err.println("Error uploading files: " + e.getMessage());
-                attr.addFlashAttribute("fail", "Erro ao fazer upload das imagens.");
+                System.err.println("Error processing image files: " + e.getMessage());
+                attr.addFlashAttribute("fail", "Erro ao processar as imagens.");
                 return "veiculo/cadastro";
             }
         }
 
-        veiculo.setFotos(imagensPersistidas);
-
-        veiculoService.salvar(veiculo);
+        veiculo.setFotos(imagensPersistidas); // Define a lista de imagens para o veículo
+        veiculoService.salvar(veiculo); // Salva o veículo e suas imagens associadas
         attr.addFlashAttribute("success", "veiculo.create.sucess");
-        return "redirect:/veiculos/meus-veiculos"; // REDIRECIONAR PARA A NOVA LISTAGEM DE LOJA
+        return "redirect:/veiculos/meus-veiculos";
     }
 
     @GetMapping("/editar/{id}")
@@ -164,53 +161,49 @@ public class VeiculoController {
             return "redirect:/login";
         }
 
+        // Busca o veículo existente para não perder as imagens que já estão no banco
         Veiculo existingVeiculo = veiculoService.buscarPorId(veiculo.getId());
         if (existingVeiculo == null || !existingVeiculo.getLoja().getId().equals(lojaLogada.getId())) {
             attr.addFlashAttribute("fail", "Veículo não encontrado ou você não tem permissão para editá-lo.");
             return "redirect:/veiculos/listar";
         }
 
-        veiculo.setLoja(lojaLogada);
+        veiculo.setLoja(lojaLogada); // Garante que o veículo a ser salvo tem a loja correta
 
         if (result.hasErrors()) {
             result.getAllErrors().forEach(error -> System.err.println("Validation Error (Edit): " + error.getDefaultMessage()));
+            // Para edição, você pode querer recarregar o veículo original com as imagens existentes
+            // se houver erros de validação, para que o usuário não perca as imagens carregadas anteriormente.
+            // model.addAttribute("veiculo", existingVeiculo); // Adicione isso se você redirecionar para a mesma página
             return "veiculo/cadastro";
         }
 
-        List<Imagem> imagensAtuais = existingVeiculo.getFotos();
-        if (imagensAtuais == null) {
-            imagensAtuais = new ArrayList<>();
-        }
-
+        // Se novas fotos foram enviadas, limpamos as antigas e adicionamos as novas.
+        // Se nenhuma nova foto for enviada, as fotos existentes serão mantidas pelo JPA.
         if (fotosUpload != null && !fotosUpload.isEmpty() && !fotosUpload.get(0).isEmpty()) {
             try {
-                Path uploadPath = Paths.get(UPLOAD_DIR);
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
-
-                imagensAtuais.clear();
+                // Limpa as imagens existentes para este veículo.
+                // É importante que o service/DAO gerencie a remoção dessas imagens do banco de dados
+                // para evitar imagens órfãs se o Veiculo for salvo com uma nova lista de fotos.
+                existingVeiculo.getFotos().clear(); // Limpa a coleção gerenciada pelo Hibernate
 
                 for (MultipartFile file : fotosUpload) {
                     if (!file.isEmpty()) {
-                        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-                        Path filePath = uploadPath.resolve(fileName);
-                        Files.copy(file.getInputStream(), filePath);
-
-                        Imagem imagem = new Imagem();
-                        imagem.setCaminho("/images/uploads/" + fileName);
-                        imagem.setVeiculo(existingVeiculo);
-                        imagensAtuais.add(imagem);
+                        Imagem novaImagem = new Imagem();
+                        novaImagem.setNome(file.getOriginalFilename());
+                        novaImagem.setTipo(file.getContentType());
+                        novaImagem.setDados(file.getBytes());
+                        novaImagem.setVeiculo(existingVeiculo); // Associa à instância gerenciada
+                        existingVeiculo.getFotos().add(novaImagem); // Adiciona à coleção gerenciada
                     }
                 }
             } catch (IOException e) {
-                System.err.println("Error uploading files during edit: " + e.getMessage());
-                attr.addFlashAttribute("fail", "Erro ao fazer upload das novas imagens.");
+                System.err.println("Error processing new image files during edit: " + e.getMessage());
+                attr.addFlashAttribute("fail", "Erro ao processar as novas imagens.");
                 return "veiculo/cadastro";
             }
         }
-        existingVeiculo.setFotos(imagensAtuais);
-
+        // Atualiza os outros campos do veículo
         existingVeiculo.setPlaca(veiculo.getPlaca());
         existingVeiculo.setModelo(veiculo.getModelo());
         existingVeiculo.setChassi(veiculo.getChassi());
@@ -219,23 +212,17 @@ public class VeiculoController {
         existingVeiculo.setDescricao(veiculo.getDescricao());
         existingVeiculo.setValor(veiculo.getValor());
 
-        veiculoService.salvar(existingVeiculo);
+        veiculoService.salvar(existingVeiculo); // Salva o veículo com as imagens atualizadas
         attr.addFlashAttribute("success", "veiculo.edit.sucess");
-        return "redirect:/veiculos/meus-veiculos"; // REDIRECIONAR PARA A NOVA LISTAGEM DE LOJA
+        return "redirect:/veiculos/meus-veiculos";
     }
 
     @GetMapping("/excluir/{id}")
     public String excluir(@PathVariable("id") Long id, RedirectAttributes attr) {
-        Veiculo veiculo = veiculoService.buscarPorId(id);
-        Loja lojaLogada = getLojaLogada();
-        if (veiculo == null || lojaLogada == null || !veiculo.getLoja().getId().equals(lojaLogada.getId())) {
-            attr.addFlashAttribute("fail", "Você não tem permissão para excluir este veículo.");
-            return "redirect:/veiculos/listar";
-        }
-
         veiculoService.excluir(id);
         attr.addFlashAttribute("success", "veiculo.delete.sucess");
-        return "redirect:/veiculos/meus-veiculos"; // REDIRECIONAR PARA A NOVA LISTAGEM DE LOJA
+        return "redirect:/veiculo/meus-veiculos";
+
     }
 
 
@@ -246,8 +233,8 @@ public class VeiculoController {
 
         if (modelo != null && !modelo.trim().isEmpty()) {
             veiculos = veiculoService.buscarTodos().stream()
-                                  .filter(v -> v.getModelo().toLowerCase().contains(modelo.toLowerCase()))
-                                  .collect(Collectors.toList());
+                                     .filter(v -> v.getModelo().toLowerCase().contains(modelo.toLowerCase()))
+                                     .collect(Collectors.toList());
         } else {
             veiculos = veiculoService.buscarTodos();
         }
@@ -268,9 +255,26 @@ public class VeiculoController {
             model.addAttribute("veiculoComPropostaAberta", veiculoComPropostaAberta);
         }
 
-        return "veiculo/lista"; // Continua apontando para veiculo/lista
+        return "veiculo/lista";
     }
 
+
+    @GetMapping("/imagens/{id}")
+    public ResponseEntity<byte[]> getImagem(@PathVariable Long id) {
+        // Implemente a busca da imagem por ID no seu serviço/repositório de Imagem
+        // Supondo que você tenha um ImagemService ou possa buscar diretamente
+        Imagem imagem = imagemService.buscarPorId(id);
+
+        if (imagem != null && imagem.getDados() != null) {
+            HttpHeaders headers = new HttpHeaders();
+            // Define o tipo de conteúdo da imagem (ex: image/jpeg, image/png)
+            headers.setContentType(MediaType.parseMediaType(imagem.getTipo()));
+            headers.setContentLength(imagem.getDados().length);
+            return new ResponseEntity<>(imagem.getDados(), headers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
     // NOVO MÉTODO: Listagem de veículos APENAS da loja logada
     @GetMapping("/meus-veiculos")
     public String listarMeusVeiculos(ModelMap model) {
@@ -279,9 +283,8 @@ public class VeiculoController {
             model.addAttribute("fail", "Não foi possível identificar a loja logada.");
             return "redirect:/login"; // Ou página de erro/home
         }
-        // Assumindo que você tem um método para buscar veículos por loja no VeiculoService ou DAO
-        // Se não tiver, precisará criar: List<Veiculo> findByLoja(Loja loja);
         model.addAttribute("veiculos", veiculoService.buscarPorLoja(lojaLogada));
-        return "veiculo/meus-veiculos"; // Aponta para o novo arquivo HTML
+        return "veiculo/meus-veiculos";
     }
+
 }

@@ -62,7 +62,8 @@
 
                     <div class="form-group col-md-6">
                         <label th:text="#{veiculo.ano.label}" for="ano">Ano</label>
-                        <input type="number" class="form-control" id="ano" placeholder="Ano de Fabricação"
+                        <input type="text" class="form-control" id="ano" placeholder="Ano de Fabricação"
+                            data-mask="0000"              
                             th:field="*{ano}"
                             th:classappend="${#fields.hasErrors('ano')} ? is-invalid" />
                         <div class="invalid-feedback">
@@ -70,10 +71,11 @@
                         </div>
                     </div>
 
+
                     <div class="form-group col-md-6">
                         <label th:text="#{veiculo.quilometragem.label}" for="quilometragem">Quilometragem</label>
                         <input type="text" class="form-control" id="quilometragem" placeholder="Ex: 50000"
-                            data-mask="0#.##0" data-mask-reverse="true" th:field="*{quilometragem}"
+                            data-mask="00000000" data-mask-reverse="true" th:field="*{quilometragem}"
                             th:classappend="${#fields.hasErrors('quilometragem')} ? is-invalid" />
                         <div class="invalid-feedback">
                             <span th:errors="*{quilometragem}"></span>
@@ -109,12 +111,14 @@
                         </div>
                     </div>
 
+                    <!-- Alteração aqui: para exibir as imagens do banco de dados -->
                     <div th:if="${veiculo.id != null and not #lists.isEmpty(veiculo.fotos)}" class="form-group col-md-12">
                         <label th:text="#{veiculo.fotosExistentes.label}">Fotos Existentes:</label>
                         <div class="row">
                             <div class="col-md-3 mb-2" th:each="foto : ${veiculo.fotos}">
-                                <img th:src="@{${foto.caminho}}" class="img-thumbnail" alt="Foto do Veículo" style="max-height: 150px;" />
-                                </div>
+                                <!-- O caminho da imagem agora é um endpoint que serve a imagem pelo ID -->
+                                <img th:src="@{/veiculos/imagens/{id}(id=${foto.id})}" class="img-thumbnail" alt="Foto do Veículo" style="max-height: 150px;" />
+                            </div>
                         </div>
                     </div>
 

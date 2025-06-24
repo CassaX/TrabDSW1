@@ -3,6 +3,22 @@
 <head>
     <meta charset="UTF-8" />
     <title th:text="#{veiculo.listar.label}">Listar Veículos</title>
+    <style>
+        /* Estilo básico para as miniaturas das fotos na lista */
+        .img-thumbnail-list {
+            max-width: 60px; /* Tamanho da miniatura */
+            max-height: 60px;
+            width: auto;
+            height: auto;
+            border-radius: 5px;
+            margin-right: 5px; /* Espaço entre as fotos */
+            object-fit: cover; /* Garante que a imagem cubra o espaço sem distorção */
+        }
+        /* Para ajustar o alinhamento vertical das células da tabela */
+        .table td {
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
     <section class="layout-content" layout:fragment="corpo">
@@ -51,6 +67,7 @@
                             <th th:text="#{veiculo.ano.label}">Ano</th>
                             <th th:text="#{veiculo.quilometragem.label}">KM</th>
                             <th th:text="#{veiculo.valor.label}">Valor</th>
+                            <th>Fotos</th> <!-- Nova coluna para as fotos -->
                             <th th:text="#{acao.label}">Ações</th>
                         </tr>
                     </thead>
@@ -65,6 +82,17 @@
                             <td th:text="${#numbers.formatDecimal(veiculo.quilometragem, 0, 'POINT', 0, 'COMMA')}"></td>
                             <td th:text="|R$ ${#numbers.formatDecimal(veiculo.valor, 2, 'COMMA', 2, 'POINT')}|"></td>
                             <td>
+                                <!-- Nova célula para exibir as fotos -->
+                                <div th:if="${not #lists.isEmpty(veiculo.fotos)}">
+                                    <span th:each="foto : ${veiculo.fotos}">
+                                        <img th:src="@{/veiculos/imagens/{id}(id=${foto.id})}" class="img-thumbnail-list" alt="Foto do Veículo"/>
+                                    </span>
+                                </div>
+                                <div th:if="${#lists.isEmpty(veiculo.fotos)}">
+                                    Nenhuma foto
+                                </div>
+                            </td>
+                            <td>
                                 <div sec:authorize="hasRole('ROLE_LOJA')">
                                     <div th:if="${#authentication.principal.username == veiculo.loja.email}">
                                         <a class="btn btn-info btn-sm"
@@ -72,7 +100,8 @@
                                             <span class="oi oi-brush" th:title="#{link.editar.label}" aria-hidden="true"> </span>
                                         </a>
                                         <button th:id="${'btn_veiculo/excluir/' + veiculo.id}"
-                                            type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#myModal">
+                                            type="button" class="btn btn-danger btn-sm"
+                                             data-toggle="modal" data-target="#myModal">
                                             <span class="oi oi-circle-x" th:title="#{link.excluir.label}" aria-hidden="true"></span>
                                         </button>
                                     </div>

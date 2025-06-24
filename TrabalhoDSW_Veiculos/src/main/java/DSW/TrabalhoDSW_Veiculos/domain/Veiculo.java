@@ -22,7 +22,7 @@ public class Veiculo extends AbstractEntity<Long> {
 
 
 	@NotBlank(message = "{NotBlank.veiculo.placa}")
-    @Column(nullable = false, unique = true, length = 7)
+    @Column(nullable = false, unique = true, length = 10)
     private String placa;
 
     @NotBlank(message = "{NotBlank.veiculo.modelo}")

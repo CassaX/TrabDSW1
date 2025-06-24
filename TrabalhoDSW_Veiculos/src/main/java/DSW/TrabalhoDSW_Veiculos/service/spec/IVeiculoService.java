@@ -16,4 +16,10 @@ public interface IVeiculoService {
     void excluir(Long id);
 
     List<Veiculo> buscarPorLoja(Loja lojaLogada);
+
+    Veiculo buscarPorIdComFotos(Long id);
+
+    List<Veiculo> buscarTodosComFotos();
+
+    Object buscarPorLojaComFotos(Loja lojaLogada);
 }
