@@ -2,10 +2,9 @@ package DSW.TrabalhoDSW_Veiculos.domain;
 
 public enum StatusProposta {
     ABERTO("Aguardando Resposta da Loja"),
-    ACEITO("Aceito"),
-    NAO_ACEITO("Não Aceito"), // Adicionando esta opção ao enum
     AGUARDANDO_RESPOSTA_CLIENTE("Aguardando Resposta do Cliente"),
-    RECUSADO_LOJA("Recusado pela Loja"),
+    ACEITO("Aceito"),
+    RECUSADO_LOJA("Recusado pela Loja"), 
     RECUSADO_CLIENTE("Recusado pelo Cliente");
 
     private String descricao;

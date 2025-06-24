@@ -15,4 +15,6 @@ public interface IClienteService {
     void excluir(Long id);
 
     Cliente buscarPorEmail(String email);
+
+    Cliente buscarPorCPF(String cpf);
 }

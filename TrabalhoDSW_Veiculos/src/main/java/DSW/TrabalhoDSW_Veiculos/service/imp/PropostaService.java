@@ -5,11 +5,11 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Importar o enum
+import org.springframework.transaction.annotation.Transactional; 
 
 import DSW.TrabalhoDSW_Veiculos.dao.IPropostaDAO;
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
-import DSW.TrabalhoDSW_Veiculos.domain.Loja; // Adicionar para findById
+import DSW.TrabalhoDSW_Veiculos.domain.Loja; 
 import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
 import DSW.TrabalhoDSW_Veiculos.domain.StatusProposta;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IPropostaService;
@@ -23,7 +23,7 @@ public class PropostaService implements IPropostaService {
 
     @Transactional(readOnly = true)
     public Proposta buscarPorId(Long id) {
-        return dao.findById(id).orElse(null); // Usar .orElse(null) para lidar com Optional
+        return dao.findById(id).orElse(null); 
     }
 
     @Transactional(readOnly = true)
@@ -35,14 +35,12 @@ public class PropostaService implements IPropostaService {
         dao.save(proposta);
     }
 
-    // AQUI: Modificado para incluir AGUARDANDO_RESPOSTA_CLIENTE na verificação de "proposta em aberto"
     @Transactional(readOnly = true)
     public boolean existePropostaAberta(Long idCliente, Long idVeiculo){
         return dao.existsByClienteIdAndVeiculoIdAndStatusIn( idCliente, idVeiculo,
             List.of(StatusProposta.ABERTO, StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE));
     }
     
-    // Este método, se você realmente precisa dele, deve retornar Optional
     @Transactional(readOnly = true)
     public Optional<Proposta> buscarPorCliente(Cliente cliente){
         return dao.findByCliente(cliente);

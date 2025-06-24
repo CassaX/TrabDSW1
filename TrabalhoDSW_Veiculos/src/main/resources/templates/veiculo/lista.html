@@ -67,7 +67,7 @@
                             <th th:text="#{veiculo.ano.label}">Ano</th>
                             <th th:text="#{veiculo.quilometragem.label}">KM</th>
                             <th th:text="#{veiculo.valor.label}">Valor</th>
-                            <th>Fotos</th> <!-- Nova coluna para as fotos -->
+                            <th>Fotos</th>
                             <th th:text="#{acao.label}">Ações</th>
                         </tr>
                     </thead>
@@ -82,7 +82,6 @@
                             <td th:text="${#numbers.formatDecimal(veiculo.quilometragem, 0, 'POINT', 0, 'COMMA')}"></td>
                             <td th:text="|R$ ${#numbers.formatDecimal(veiculo.valor, 2, 'COMMA', 2, 'POINT')}|"></td>
                             <td>
-                                <!-- Nova célula para exibir as fotos -->
                                 <div th:if="${not #lists.isEmpty(veiculo.fotos)}">
                                     <span th:each="foto : ${veiculo.fotos}">
                                         <img th:src="@{/veiculos/imagens/{id}(id=${foto.id})}" class="img-thumbnail-list" alt="Foto do Veículo"/>
@@ -101,23 +100,28 @@
                                         </a>
                                         <button th:id="${'btn_veiculo/excluir/' + veiculo.id}"
                                             type="button" class="btn btn-danger btn-sm"
-                                             data-toggle="modal" data-target="#myModal">
+                                            data-toggle="modal" data-target="#myModal">
                                             <span class="oi oi-circle-x" th:title="#{link.excluir.label}" aria-hidden="true"></span>
                                         </button>
                                     </div>
                                 </div>
 
                                 <div sec:authorize="hasRole('ROLE_CLIENTE')">
-                                    <div th:if="${veiculoComPropostaAberta != null and !veiculoComPropostaAberta.containsKey(veiculo.id)}">
+                                    <th:block th:if="${veiculoComPropostaAberta != null and veiculoComPropostaAberta.containsKey(veiculo.id)}">
+                                        <span class="badge badge-info" 
+                                              th:text="${'Proposta: ' + veiculoComPropostaAberta.get(veiculo.id).status.descricao}"></span>
+                                        <a class="btn btn-sm btn-outline-info ml-2" 
+                                           th:href="@{/propostas/listar}" title="Ver Minhas Propostas">
+                                           Ver Proposta
+                                        </a>
+                                    </th:block>
+                                    <th:block th:unless="${veiculoComPropostaAberta != null and veiculoComPropostaAberta.containsKey(veiculo.id)}">
                                         <a class="btn btn-success btn-sm"
                                             th:href="@{/propostas/cadastrar/{id} (id=${veiculo.id}) }" role="button">
                                             <span class="oi oi-cart" th:title="#{link.fazerProposta.label}" aria-hidden="true"></span>
                                             <span th:text="#{link.fazerProposta.label}">Fazer Proposta</span>
                                         </a>
-                                    </div>
-                                    <div th:if="${veiculoComPropostaAberta != null and veiculoComPropostaAberta.containsKey(veiculo.id)}">
-                                        <span class="badge badge-warning" th:text="#{proposta.emAberto.label}">Proposta em Aberto</span>
-                                    </div>
+                                    </th:block>
                                 </div>
                             </td>
                         </tr>

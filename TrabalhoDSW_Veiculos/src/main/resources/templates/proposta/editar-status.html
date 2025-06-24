@@ -5,6 +5,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <style>
+        /* Estilos existentes */
         .img-thumbnail-details {
             max-width: 100px;
             max-height: 100px;
@@ -30,9 +31,6 @@
             <input type="hidden" th:field="*{cliente.id}" />
             <input type="hidden" th:field="*{veiculo.id}" />
             <input type="hidden" th:field="*{data}" />
-            <input type="hidden" th:field="*{valor}" /> 
-            <input type="hidden" th:field="*{condicoesPagamento}" />
-
             <div class="card mb-4">
                 <div class="card-header">
                     Detalhes da Proposta do Cliente
@@ -66,15 +64,15 @@
             </div>
 
             <div class="form-group row">
-                <label for="status" class="col-sm-3 col-form-label">Status da Resposta:</label>
+                <label for="status" class="col-sm-3 col-form-label">Ação com a Proposta:</label>
                 <div class="col-sm-9">
                     <select class="form-control" id="status" th:field="*{status}" onchange="toggleFieldsLoja()">
-                        <option value="">Selecione um status</option>
+                        <option value="">Selecione uma ação</option>
                         <option th:value="${T(DSW.TrabalhoDSW_Veiculos.domain.StatusProposta).ACEITO}" 
-                                th:selected="${proposta.status != null and proposta.status.name() == 'ACEITO'}">ACEITAR PROPOSTA ORIGINAL</option>
-                        <option th:value="${T(DSW.TrabalhoDSW_Veiculos.domain.StatusProposta).NAO_ACEITO}" 
-                                th:selected="${proposta.status != null and (proposta.status.name() == 'AGUARDANDO_RESPOSTA_CLIENTE' or proposta.status.name() == 'RECUSADO_LOJA')}">NÃO ACEITAR</option>
-                        </select>
+                                th:selected="${proposta.status != null and proposta.status.name() == 'ACEITO'}">ACEITAR PROPOSTA</option>
+                        <option th:value="${T(DSW.TrabalhoDSW_Veiculos.domain.StatusProposta).AGUARDANDO_RESPOSTA_CLIENTE}" 
+                                th:selected="${proposta.status != null and (proposta.status.name() == 'AGUARDANDO_RESPOSTA_CLIENTE' || proposta.status.name() == 'RECUSADO_LOJA')}">RESPONDER PROPOSTA</option>
+                    </select>
                     <div class="invalid-feedback" th:errors="*{status}"></div>
                 </div>
             </div>
@@ -96,29 +94,30 @@
                 </div>
             </div>
 
-            <div id="naoAceitoFields" style="display:none;">
-                <p class="mt-3">Se a proposta não for aceita, você pode:</p>
+            <div id="responderPropostaFields" style="display:none;">
+                <p class="mt-3">Você pode:</p>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="acaoLojista" id="comContraproposta" value="contraproposta" onclick="toggleContrapropostaFields()"
+                    <input class="form-check-input" type="radio" name="acaoLojista" id="comContraproposta" value="contraproposta" onclick="toggleSubFieldsLoja()"
                            th:checked="${proposta.status != null and proposta.status.name() == 'AGUARDANDO_RESPOSTA_CLIENTE'}">
                     <label class="form-check-label" for="comContraproposta">
                         Oferecer Contraproposta
                     </label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="acaoLojista" id="fecharProposta" value="fechar" onclick="toggleContrapropostaFields()"
+                    <input class="form-check-input" type="radio" name="acaoLojista" id="recusarProposta" value="recusar" onclick="toggleSubFieldsLoja()"
                            th:checked="${proposta.status != null and proposta.status.name() == 'RECUSADO_LOJA'}">
-                    <label class="form-check-label" for="fecharProposta">
-                        Recusar e Fechar Proposta
+                    <label class="form-check-label" for="recusarProposta">
+                        Recusar Proposta (e Fechar)
                     </label>
                 </div>
 
                 <div id="contrapropostaInputs" style="display:none;" class="mt-3">
+                    <h5 class="mt-3">Detalhes da Sua Contra Proposta:</h5>
                     <div class="form-group row">
                         <label for="contrapropostaValor" class="col-sm-3 col-form-label">Valor da Contraproposta:</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="contrapropostaValor" th:field="*{contrapropostaValor}">
-                            <div class="invalid-feedback" th:errors="*{contrapropostaValor}"></div>
+                            <input type="text" class="form-control" id="contrapropostaValor" th:field="*{contrapropostaValor}"
+                                   data-mask="#########0.00" data-mask-reverse="true"> <div class="invalid-feedback" th:errors="*{contrapropostaValor}"></div>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -128,21 +127,7 @@
                             <div class="invalid-feedback" th:errors="*{contrapropostaCondicoes}"></div>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label for="horarioReuniaoContra" class="col-sm-3 col-form-label">Horário Sugerido para Reunião:</label>
-                        <div class="col-sm-9">
-                            <input type="datetime-local" class="form-control" id="horarioReuniaoContra" th:field="*{horarioReuniao}">
-                            <div class="invalid-feedback" th:errors="*{horarioReuniao}"></div>
-                        </div>
                     </div>
-                    <div class="form-group row">
-                        <label for="linkReuniaoContra" class="col-sm-3 col-form-label">Link da Reunião Sugerido:</label>
-                        <div class="col-sm-9">
-                            <input type="url" class="form-control" id="linkReuniaoContra" th:field="*{linkReuniao}">
-                            <div class="invalid-feedback" th:errors="*{linkReuniao}"></div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="form-group row mt-4">
@@ -158,25 +143,17 @@
         /*<![CDATA[*/
         function toggleFieldsLoja() {
             var status = document.getElementById('status').value;
-            var naoAceitoFields = document.getElementById('naoAceitoFields');
+            var responderPropostaFields = document.getElementById('responderPropostaFields'); 
             var aceitoFields = document.getElementById('aceitoFields');
 
-            // Limpa o estado dos rádios e esconde os campos de contraproposta/reunião
-            $('input[name="acaoLojista"]').prop('checked', false);
+            // Limpa todos os campos dinâmicos ao mudar de opção
+            $('input[name="acaoLojista"]').prop('checked', false); 
             $('#contrapropostaInputs').hide();
-            
-            // Limpa campos de aceitação para re-preenchimento
-            // É importante fazer isso antes de possibly preencher com os valores da proposta
             $('#horarioReuniao').val('');
             $('#linkReuniao').val('');
-
-            // Limpa campos de contraproposta para re-preenchimento
             $('#contrapropostaValor').val('');
             $('#contrapropostaCondicoes').val('');
-            $('#horarioReuniaoContra').val('');
-            $('#linkReuniaoContra').val('');
 
-            // Pega os valores da proposta para preenchimento inicial
             var proposta = [[${proposta}]];
             var currentHorarioReuniao = proposta.horarioReuniao;
             var currentLinkReuniao = proposta.linkReuniao;
@@ -184,64 +161,66 @@
             var currentContrapropostaCondicoes = proposta.contrapropostaCondicoes;
 
 
-            if (status === 'NAO_ACEITO') {
-                naoAceitoFields.style.display = 'block';
+            if (status === 'AGUARDANDO_RESPOSTA_CLIENTE') { 
+                responderPropostaFields.style.display = 'block';
                 aceitoFields.style.display = 'none';
 
-                // Preenche os rádios e campos se já houver dados de contraproposta
-                if (currentContrapropostaValor != null || (currentContrapropostaCondicoes != null && currentContrapropostaCondicoes.trim() !== '')) {
+                // Pré-seleciona rádio button e exibe sub-campos com base no status original da proposta
+                if (proposta.status && proposta.status.name === 'AGUARDANDO_RESPOSTA_CLIENTE') { 
                     $('#comContraproposta').prop('checked', true);
-                    $('#contrapropostaInputs').show();
-                    $('#contrapropostaValor').val(currentContrapropostaValor ? currentContrapropostaValor.toFixed(2).replace('.', ',') : '');
-                    $('#contrapropostaCondicoes').val(currentContrapropostaCondicoes || '');
-                    // Também preenche os campos de reunião da contraproposta
-                    $('#horarioReuniaoContra').val(currentHorarioReuniao ? new Date(currentHorarioReuniao).toISOString().slice(0, 16) : '');
-                    $('#linkReuniaoContra').val(currentLinkReuniao || '');
+                    toggleSubFieldsLoja(); 
                 } else if (proposta.status && proposta.status.name === 'RECUSADO_LOJA') {
-                    $('#fecharProposta').prop('checked', true);
-                    toggleContrapropostaFields(); // Para garantir que os campos estejam ocultos
+                    $('#recusarProposta').prop('checked', true);
+                    toggleSubFieldsLoja(); 
                 }
 
             } else if (status === 'ACEITO') {
-                naoAceitoFields.style.display = 'none';
+                responderPropostaFields.style.display = 'none';
                 aceitoFields.style.display = 'block';
+
                 // Preenche os campos de reunião se já houver (útil ao editar uma proposta já aceita)
                 $('#horarioReuniao').val(currentHorarioReuniao ? new Date(currentHorarioReuniao).toISOString().slice(0, 16) : '');
                 $('#linkReuniao').val(currentLinkReuniao || '');
 
-            } else { // Nenhum status selecionado ou ABERTO
-                naoAceitoFields.style.display = 'none';
+            } else { 
+                responderPropostaFields.style.display = 'none';
                 aceitoFields.style.display = 'none';
             }
         }
 
-        function toggleContrapropostaFields() {
+        function toggleSubFieldsLoja() { 
             var acaoLojista = $('input[name="acaoLojista"]:checked').val();
+            var contrapropostaInputs = document.getElementById('contrapropostaInputs');
+
+            var proposta = [[${proposta}]];
+            var currentContrapropostaValor = proposta.contrapropostaValor;
+            var currentContrapropostaCondicoes = proposta.contrapropostaCondicoes;
+
             if (acaoLojista === 'contraproposta') {
-                $('#contrapropostaInputs').show();
-            } else {
-                $('#contrapropostaInputs').hide();
-                // Limpar campos de contraproposta se a opção "Fechar" for selecionada
+                contrapropostaInputs.style.display = 'block';
+
+                $('#contrapropostaValor').val(currentContrapropostaValor ? currentContrapropostaValor.toFixed(2).replace('.', ',') : ''); 
+                $('#contrapropostaCondicoes').val(currentContrapropostaCondicoes || '');
+
+            } else { // 'recusar'
+                contrapropostaInputs.style.display = 'none';
                 $('#contrapropostaValor').val('');
                 $('#contrapropostaCondicoes').val('');
-                $('#horarioReuniaoContra').val('');
-                $('#linkReuniaoContra').val('');
             }
         }
 
         $(document).ready(function() {
-            // Define o status inicial no select ao carregar a página
             var initialStatusName = [[${proposta.status != null ? proposta.status.name() : ''}]];
             if (initialStatusName === 'ACEITO') {
                 document.getElementById('status').value = 'ACEITO';
             } else if (initialStatusName === 'AGUARDANDO_RESPOSTA_CLIENTE' || initialStatusName === 'RECUSADO_LOJA') {
-                document.getElementById('status').value = 'NAO_ACEITO';
+                document.getElementById('status').value = 'AGUARDANDO_RESPOSTA_CLIENTE'; 
             } else {
-                document.getElementById('status').value = ''; // Define para a opção "Selecione"
+                document.getElementById('status').value = ''; 
             }
 
-            toggleFieldsLoja(); // Chama para configurar a visibilidade inicial dos campos
-            $('#contrapropostaValor').mask('###.###.##0,00', {reverse: true});
+            toggleFieldsLoja(); 
+            $('#contrapropostaValor').mask('##########0.00', {reverse: true});
         });
         /*]]>*/
     </script>

@@ -48,11 +48,20 @@
                             <td th:text="${proposta.cliente.nome} + ' (' + ${proposta.cliente.email} + ')'"></td>
                             <td th:text="|R$ ${#numbers.formatDecimal(proposta.valor, 2, 'COMMA', 2, 'POINT')}|"></td>
                             <td th:text="${proposta.condicoesPagamento}"></td>
-                            <td th:text="${proposta.status.descricao}"></td> <td>
-                                <a class="btn btn-info btn-sm" th:href="@{/propostas/loja/gerenciar/{id} (id=${proposta.id})}"
-                                   role="button" th:title="#{proposta.gerenciar.label}">
-                                    <span class="oi oi-pencil"></span> Gerenciar
-                                </a>
+                            <td th:text="${proposta.status.descricao}"></td> 
+                            <td>
+                                <div th:if="${proposta.status.name() == 'ABERTO' or proposta.status.name() == 'AGUARDANDO_RESPOSTA_CLIENTE'}">
+                                    <a class="btn btn-info btn-sm" th:href="@{/propostas/loja/gerenciar/{id} (id=${proposta.id})}"
+                                       role="button" th:title="#{proposta.gerenciar.label}">
+                                        <span class="oi oi-pencil"></span> Gerenciar
+                                    </a>
+                                </div>
+                                <div th:if="${proposta.status.name() == 'RECUSADO_LOJA' or proposta.status.name() == 'RECUSADO_CLIENTE'}">
+                                    <span class="badge badge-danger">Proposta Fechada</span>
+                                </div>
+                                <div th:if="${proposta.status.name() == 'ACEITO'}">
+                                    <span class="badge badge-success">Proposta Concluída</span>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
