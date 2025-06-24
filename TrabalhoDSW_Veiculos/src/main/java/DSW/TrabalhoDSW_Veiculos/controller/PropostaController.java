@@ -73,7 +73,7 @@ public class PropostaController {
     public String cadastrar(@PathVariable("id") Long idVeiculo, Proposta proposta, ModelMap model) {
         Veiculo veiculo = veiculoService.buscarPorIdComFotos(idVeiculo);
         if (veiculo == null) {
-            model.addAttribute("fail", "Veículo não encontrado.");
+            model.addAttribute("fail", "proposta.notfound"); 
             return "redirect:/veiculos/listar";
         }
         proposta.setData(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
@@ -99,20 +99,19 @@ public class PropostaController {
                 veiculo = veiculoService.buscarPorIdComFotos(proposta.getVeiculo().getId());
                 model.addAttribute("veiculo", veiculo);
             }
-            attr.addFlashAttribute("fail", "Erro no preenchimento da proposta. Verifique os campos.");
+            attr.addFlashAttribute("fail", "proposta.create.fail"); 
             return "proposta/cadastro";
         }
 
-        if(propostaService.existePropostaAberta(proposta.getCliente().getId(), proposta.getVeiculo().getId())) {
-            attr.addFlashAttribute("fail", "Você já tem uma proposta ativa para este veículo. Aguarde a resposta da loja ou verifique suas propostas.");
+        if(propostaService.existePropostaAberta(proposta.getCliente().getId(), proposta.getVeiculo().getId())) { // Corrigido para existePropostaEmAberto
+            attr.addFlashAttribute("fail", "proposta.alreadyOpen"); 
             return "redirect:/veiculos/listar";
         }
 
         propostaService.salvar(proposta);
-
-        notificacaoPropostaService.notificarProposta(proposta, false); // false para notificar a loja
+        notificacaoPropostaService.notificarProposta(proposta, false); 
         
-        attr.addFlashAttribute("success", "Proposta enviada com sucesso! Aguarde a resposta da loja.");
+        attr.addFlashAttribute("success", "proposta.create.success"); 
         return "redirect:/propostas/listar";
     }
 
@@ -121,7 +120,7 @@ public class PropostaController {
     public String listarPropostasCliente(ModelMap model) {
         Cliente cliente = getClienteLogado();
         if (cliente == null) {
-            model.addAttribute("fail", "Cliente não logado.");
+            model.addAttribute("fail", "cliente.notloggedin"); 
             return "redirect:/login";
         }
         model.addAttribute("propostas", propostaService.buscarTodosPorCliente(cliente));
@@ -133,7 +132,7 @@ public class PropostaController {
     public String listarPropostasLoja(ModelMap model) {
         Loja loja = getLojaLogada();
         if (loja == null) {
-            model.addAttribute("fail", "Loja não encontrada ou não logada.");
+            model.addAttribute("fail", "loja.notfound.or.notloggedin"); 
             return "redirect:/login";
         }
         model.addAttribute("propostas", propostaService.buscarTodosPorLoja(loja));
@@ -145,13 +144,13 @@ public class PropostaController {
     public String gerenciarPropostaLoja(@PathVariable("id") Long idProposta, ModelMap model) {
         Proposta proposta = propostaService.buscarPorId(idProposta);
         if (proposta == null) {
-            model.addAttribute("fail", "Proposta não encontrada.");
+            model.addAttribute("fail", "proposta.notfound"); 
             return "redirect:/propostas/loja/listar";
         }
 
         Loja lojaLogada = getLojaLogada();
         if (lojaLogada == null || proposta.getVeiculo() == null || !proposta.getVeiculo().getLoja().getId().equals(lojaLogada.getId())) {
-            model.addAttribute("fail", "Você não tem permissão para gerenciar esta proposta.");
+            model.addAttribute("fail", "proposta.permission.denied"); 
             return "redirect:/propostas/loja/listar";
         }
         
@@ -162,123 +161,148 @@ public class PropostaController {
 
     @PostMapping("/loja/atualizar-status")
     public String atualizarStatusPropostaLoja(
-        @RequestParam("id") Long id,
+        @Valid @ModelAttribute("proposta") Proposta propostaForm,
+        BindingResult result,
         @RequestParam(value = "acaoLojista", required = false) String acaoLojista,
-        @RequestParam(value = "contrapropostaValor", required = false) BigDecimal contrapropostaValor,
-        @RequestParam(value = "contrapropostaCondicoes", required = false) String contrapropostaCondicoes,
-        @RequestParam(value = "horarioReuniao", required = false) String horarioReuniao,
-        @RequestParam(value = "linkReuniao", required = false) String linkReuniao,
         RedirectAttributes attr) {
-
-        Proposta proposta = propostaService.buscarPorId(id);
-        if (acaoLojista == null || acaoLojista.isEmpty()) {
-            attr.addFlashAttribute("fail", "Selecione uma ação (Aceitar, Contraproposta ou Recusar).");
-            return "redirect:/propostas/loja/gerenciar/" + id;
-        }
-        if (proposta == null) {
-            attr.addFlashAttribute("fail", "Proposta não encontrada.");
+        
+        // Obter a proposta original do banco de dados
+        Proposta propostaOriginal = propostaService.buscarPorId(propostaForm.getId());
+        if (propostaOriginal == null) {
+            attr.addFlashAttribute("fail", "proposta.notfound.update"); 
             return "redirect:/propostas/loja/listar";
         }
 
+        // Verificar permissão
         Loja lojaLogada = getLojaLogada();
-        if (lojaLogada == null || proposta.getVeiculo() == null || 
-            !proposta.getVeiculo().getLoja().getId().equals(lojaLogada.getId())) {
-            attr.addFlashAttribute("fail", "Permissão negada.");
+        if (lojaLogada == null || propostaOriginal.getVeiculo() == null || 
+            !propostaOriginal.getVeiculo().getLoja().getId().equals(lojaLogada.getId())) {
+            attr.addFlashAttribute("fail", "proposta.permission.denied"); 
             return "redirect:/propostas/loja/listar";
         }
 
-        // Verificar se a proposta está em estado válido para ação
-        /*if (proposta.getStatus() != StatusProposta.AGUARDANDO_RESPOSTA_LOJA) {
-            attr.addFlashAttribute("fail", "A proposta não está aguardando resposta da loja.");
-            return "redirect:/propostas/loja/listar";
+        // --- Preparar propostaForm para validação e re-exibição ---
+        propostaForm.setCliente(propostaOriginal.getCliente());
+        propostaForm.setVeiculo(propostaOriginal.getVeiculo());
+        propostaForm.setData(propostaOriginal.getData());
+        propostaForm.setValor(propostaOriginal.getValor()); // Manter valor original para exibição em caso de erro
+        propostaForm.setCondicoesPagamento(propostaOriginal.getCondicoesPagamento()); // Manter condições originais para exibição
+
+        // --- Limpeza Condicional para Validação ---
+        if (propostaForm.getStatus() != StatusProposta.ACEITO) {
+            propostaForm.setHorarioReuniao(null); 
+            propostaForm.setLinkReuniao(null);   
         }
-            */
-        // Verificar status correto (ABERTO)
-        if (proposta.getStatus() != StatusProposta.ABERTO) {
-            attr.addFlashAttribute("fail", "A proposta não está aberta para ação.");
-            return "redirect:/propostas/loja/listar";
+
+        if (propostaForm.getStatus() != StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
+            propostaForm.setContrapropostaValor(null);
+            propostaForm.setContrapropostaCondicoes(null);
         }
-
-        try {
-            switch (acaoLojista) {
-                case "aceitar":
-                    // Validação para aceitar proposta
-                    if (horarioReuniao == null || horarioReuniao.trim().isEmpty()) {
-                        attr.addFlashAttribute("fail", "Horário da reunião é obrigatório.");
-                        return "redirect:/propostas/loja/gerenciar/" + id;
-                    }
-                    if (linkReuniao == null || linkReuniao.trim().isEmpty() || !isValidUrl(linkReuniao)) {
-                        attr.addFlashAttribute("fail", "Link de reunião inválido.");
-                        return "redirect:/propostas/loja/gerenciar/" + id;
-                    }
-                    
-                    proposta.setStatus(StatusProposta.ACEITO);
-                    proposta.setHorarioReuniao(LocalDateTime.parse(horarioReuniao, DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
-                    proposta.setLinkReuniao(linkReuniao);
-                    proposta.setContrapropostaValor(null);
-                    proposta.setContrapropostaCondicoes(null);
-                    
-                    propostaService.salvar(proposta);
-                    notificacaoPropostaService.notificarProposta(proposta, true);
-                    attr.addFlashAttribute("success", "Proposta aceita! Cliente notificado.");
-                    break;
-
-                case "contraproposta":
-                    // Validação para contraproposta
-                    if (contrapropostaValor == null || contrapropostaValor.compareTo(BigDecimal.ZERO) <= 0) {
-                        attr.addFlashAttribute("fail", "Valor inválido para contraproposta.");
-                        return "redirect:/propostas/loja/gerenciar/" + id;
-                    }
-                    if (contrapropostaCondicoes == null || contrapropostaCondicoes.trim().isEmpty()) {
-                        attr.addFlashAttribute("fail", "Condições de pagamento são obrigatórias.");
-                        return "redirect:/propostas/loja/gerenciar/" + id;
-                    }
-                    
-                    proposta.setStatus(StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE);
-                    proposta.setContrapropostaValor(contrapropostaValor);
-                    proposta.setContrapropostaCondicoes(contrapropostaCondicoes);
-                    proposta.setHorarioReuniao(null);
-                    proposta.setLinkReuniao(null);
-                    
-                    propostaService.salvar(proposta);
-                    notificacaoPropostaService.notificarProposta(proposta, true);
-                    attr.addFlashAttribute("success", "Contraproposta enviada! Cliente notificado.");
-                    break;
-
-                case "recusar":
-                    proposta.setStatus(StatusProposta.RECUSADO_LOJA);
-                    proposta.setContrapropostaValor(null);
-                    proposta.setContrapropostaCondicoes(null);
-                    proposta.setHorarioReuniao(null);
-                    proposta.setLinkReuniao(null);
-                    
-                    propostaService.salvar(proposta);
-                    notificacaoPropostaService.notificarProposta(proposta, true);
-                    attr.addFlashAttribute("success", "Proposta recusada com sucesso.");
-                    break;
-
-                default:
-                    attr.addFlashAttribute("fail", "Ação inválida.");
-                    return "redirect:/propostas/loja/gerenciar/" + id;
+        
+        // --- VALIDAÇÕES MANUAIS ---
+        if (propostaForm.getStatus() == null) {
+            result.addError(new FieldError("proposta", "status", "proposta.status.selectAction")); 
+        } else if (propostaForm.getStatus() == StatusProposta.ACEITO) {
+            if (propostaForm.getHorarioReuniao() == null) {
+                result.addError(new FieldError("proposta", "horarioReuniao", "proposta.horarioReuniao.required"));
             }
-            
-            return "redirect:/propostas/loja/listar";
+            if (propostaForm.getLinkReuniao() == null || propostaForm.getLinkReuniao().trim().isEmpty()) {
+                result.addError(new FieldError("proposta", "linkReuniao", "proposta.linkReuniao.required"));
+            }
+            if (propostaForm.getLinkReuniao() != null && !propostaForm.getLinkReuniao().trim().isEmpty()) {
+                if (!isValidUrl(propostaForm.getLinkReuniao())) {
+                    result.addError(new FieldError("proposta", "linkReuniao", "proposta.linkReuniao.invalidFormat"));
+                }
+            }
 
-        } catch (Exception e) {
-            attr.addFlashAttribute("fail", "Erro ao processar ação: " + e.getMessage());
-            return "redirect:/propostas/loja/gerenciar/" + id;
+        } else if (propostaForm.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
+            // AQUI: AÇÃO DE RÁDIO BUTTON É OBRIGATÓRIA QUANDO O STATUS É RESPONDER PROPOSTA
+            if (acaoLojista == null || (!"contraproposta".equals(acaoLojista) && !"recusar".equals(acaoLojista))) {
+                result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.selectAction")); // Usar esta chave se nada for selecionado OU o valor for inválido
+            } else if ("contraproposta".equals(acaoLojista)) {
+                if (propostaForm.getContrapropostaValor() == null || propostaForm.getContrapropostaValor().compareTo(BigDecimal.ZERO) <= 0) {
+                    result.addError(new FieldError("proposta", "contrapropostaValor", "proposta.contrapropostaValor.invalid"));
+                }
+                if (propostaForm.getContrapropostaCondicoes() == null || propostaForm.getContrapropostaCondicoes().trim().isEmpty()) {
+                    result.addError(new FieldError("proposta", "contrapropostaCondicoes", "proposta.contrapropostaCondicoes.required"));
+                }
+            } else if ("recusar".equals(acaoLojista)) {
+                // Nenhuma validação extra para recusar, acaoLojista já é 'recusar'.
+            } 
+        } else {
+            result.addError(new FieldError("proposta", "status", "proposta.status.invalidOrUnexpected")); 
         }
+        
+        // SE HOUVER ERROS, RETORNA PARA A MESMA PÁGINA COM OS DADOS DO FORM
+        if (result.hasErrors()) {
+            ModelMap model = new ModelMap(); // Cria um novo ModelMap para o retorno
+            model.addAttribute("proposta", propostaForm); 
+            model.addAttribute("veiculo", propostaOriginal.getVeiculo()); 
+            attr.addFlashAttribute("fail", "proposta.update.fail"); 
+            return "proposta/editar-status"; 
+        }
+
+        // --- Lógica de Atualização da Proposta (se não houver erros de validação) ---
+        if (propostaForm.getStatus() == StatusProposta.ACEITO) {
+            propostaOriginal.setStatus(StatusProposta.ACEITO);
+            propostaOriginal.setHorarioReuniao(propostaForm.getHorarioReuniao());
+            propostaOriginal.setLinkReuniao(propostaForm.getLinkReuniao());
+            propostaOriginal.setContrapropostaValor(null);
+            propostaOriginal.setContrapropostaCondicoes(null);
+            
+            propostaService.salvar(propostaOriginal);
+            notificacaoPropostaService.notificarProposta(propostaOriginal, true);
+            
+            attr.addFlashAttribute("success", "proposta.accept.success");
+
+        } else if (propostaForm.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
+            if ("contraproposta".equals(acaoLojista)) {
+                propostaOriginal.setStatus(StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE);
+                propostaOriginal.setValor(propostaForm.getContrapropostaValor());
+                propostaOriginal.setCondicoesPagamento(propostaForm.getContrapropostaCondicoes());
+                propostaOriginal.setContrapropostaValor(propostaForm.getContrapropostaValor());
+                propostaOriginal.setContrapropostaCondicoes(propostaForm.getContrapropostaCondicoes());
+                propostaOriginal.setHorarioReuniao(null);
+                propostaOriginal.setLinkReuniao(null);
+                
+                propostaService.salvar(propostaOriginal);
+                notificacaoPropostaService.notificarProposta(propostaOriginal, true);
+                
+                attr.addFlashAttribute("success", "proposta.counterproposal.sent");
+
+            } else if ("recusar".equals(acaoLojista)) {
+                propostaOriginal.setStatus(StatusProposta.RECUSADO_LOJA);
+                propostaOriginal.setContrapropostaValor(null);
+                propostaOriginal.setContrapropostaCondicoes(null);
+                propostaOriginal.setHorarioReuniao(null);
+                propostaOriginal.setLinkReuniao(null);
+                
+                propostaService.salvar(propostaOriginal);
+                notificacaoPropostaService.notificarProposta(propostaOriginal, true);
+                
+                attr.addFlashAttribute("success", "proposta.decline.success");
+            } else { // Este 'else' captura se acaoLojista não é 'contraproposta' nem 'recusar', após a seleção principal de status
+                // Este bloco não deveria ser atingido se a validação acima estiver correta,
+                // mas é uma salvaguarda.
+                attr.addFlashAttribute("fail", "proposta.acaoLojista.invalid"); // Usar chave genérica de ação inválida
+            }
+        } else {
+            attr.addFlashAttribute("fail", "proposta.status.invalidOrUnexpected"); // Status inválido do select
+        }
+        
+        return "redirect:/propostas/loja/listar"; 
     }
 
+    // --- Cliente: Responder Contraproposta ---
     @GetMapping("/cliente/responder/{id}")
     public String responderContrapropostaCliente(@PathVariable("id") Long idProposta, ModelMap model) {
         Proposta proposta = propostaService.buscarPorId(idProposta);
         if (proposta == null || getClienteLogado() == null || !proposta.getCliente().getId().equals(getClienteLogado().getId())) {
-            model.addAttribute("fail", "Proposta não encontrada ou você não tem permissão para acessá-la.");
+            model.addAttribute("fail", "proposta.notfound.or.permission.denied"); 
             return "redirect:/propostas/listar";
         }
         if (proposta.getStatus() != StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
-            model.addAttribute("fail", "Esta proposta não está aguardando sua resposta ou já foi finalizada.");
+            model.addAttribute("fail", "proposta.notAwaitingResponse"); 
             return "redirect:/propostas/listar";
         }
         model.addAttribute("proposta", proposta);
@@ -292,29 +316,28 @@ public class PropostaController {
                                                   RedirectAttributes attr) {
         Proposta propostaOriginal = propostaService.buscarPorId(propostaForm.getId());
         if (propostaOriginal == null || getClienteLogado() == null || !propostaOriginal.getCliente().getId().equals(getClienteLogado().getId())) {
-            attr.addFlashAttribute("fail", "Proposta não encontrada ou você não tem permissão.");
+            attr.addFlashAttribute("fail", "proposta.notfound.or.permission.denied"); 
             return "redirect:/propostas/listar";
         }
         if (propostaOriginal.getStatus() != StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
-            attr.addFlashAttribute("fail", "Esta proposta não está aguardando sua resposta ou já foi finalizada.");
+            attr.addFlashAttribute("fail", "proposta.notAwaitingResponse"); 
             return "redirect:/propostas/listar";
         }
         
         if ("nova".equals(acaoCliente)) {
             if (propostaForm.getValor() == null || propostaForm.getValor().compareTo(BigDecimal.ZERO) <= 0) {
-                 result.addError(new FieldError("proposta", "valor", "O valor da nova proposta deve ser maior que zero."));
+                 result.addError(new FieldError("proposta", "valor", "proposta.newValue.invalid")); 
             }
             if (propostaForm.getCondicoesPagamento() == null || propostaForm.getCondicoesPagamento().trim().isEmpty()) {
-                 result.addError(new FieldError("proposta", "condicoesPagamento", "As condições da nova proposta são obrigatórias."));
+                 result.addError(new FieldError("proposta", "condicoesPagamento", "proposta.newConditions.required")); 
             }
-
             if (propostaForm.getLinkReuniao() != null && !propostaForm.getLinkReuniao().trim().isEmpty()) {
                 if (!isValidUrl(propostaForm.getLinkReuniao())) {
-                    result.addError(new FieldError("proposta", "linkReuniao", "Formato de URL inválido para o link da reunião."));
+                    result.addError(new FieldError("proposta", "linkReuniao", "proposta.linkReuniao.invalidFormat")); 
                 }
             }
             if (result.hasErrors()) {
-                attr.addFlashAttribute("fail", "Erro na validação da nova proposta. Verifique os campos.");
+                attr.addFlashAttribute("fail", "proposta.newProposal.fail"); 
                 return "redirect:/propostas/cliente/responder/" + propostaForm.getId();
             }
         }
@@ -331,9 +354,9 @@ public class PropostaController {
             propostaOriginal.setContrapropostaCondicoes(null);
             
             propostaService.salvar(propostaOriginal);
-            notificacaoPropostaService.notificarProposta(propostaOriginal, false); // Notificar a loja
+            notificacaoPropostaService.notificarProposta(propostaOriginal, false); 
             
-            attr.addFlashAttribute("success", "Contraproposta da loja aceita com sucesso! Verifique os detalhes da reunião.");
+            attr.addFlashAttribute("success", "proposta.clientAccept.success"); 
 
         } else if ("recusar".equals(acaoCliente)) {
             propostaOriginal.setStatus(StatusProposta.RECUSADO_CLIENTE);
@@ -343,9 +366,9 @@ public class PropostaController {
             propostaOriginal.setLinkReuniao(null);
             
             propostaService.salvar(propostaOriginal);
-            notificacaoPropostaService.notificarProposta(propostaOriginal, false); // Notificar a loja
+            notificacaoPropostaService.notificarProposta(propostaOriginal, false); 
             
-            attr.addFlashAttribute("success", "Contraproposta recusada. Proposta fechada.");
+            attr.addFlashAttribute("success", "proposta.clientDecline.success"); 
 
         } else if ("nova".equals(acaoCliente)) {
             propostaOriginal.setStatus(StatusProposta.RECUSADO_CLIENTE);
@@ -353,7 +376,7 @@ public class PropostaController {
             propostaOriginal.setContrapropostaCondicoes(null);
             propostaOriginal.setHorarioReuniao(null);
             propostaOriginal.setLinkReuniao(null);
-            propostaService.salvar(propostaOriginal); // Salva a proposta antiga
+            propostaService.salvar(propostaOriginal); 
 
             Proposta novaProposta = new Proposta();
             novaProposta.setCliente(getClienteLogado());
@@ -364,15 +387,14 @@ public class PropostaController {
             novaProposta.setStatus(StatusProposta.ABERTO);
             
             propostaService.salvar(novaProposta);
-            notificacaoPropostaService.notificarProposta(novaProposta, false); // Notificar a loja sobre a nova proposta
+            notificacaoPropostaService.notificarProposta(novaProposta, false); 
             
-            attr.addFlashAttribute("success", "Sua nova proposta foi enviada com sucesso para a loja!");
+            attr.addFlashAttribute("success", "proposta.newProposal.sent"); 
             return "redirect:/propostas/listar";
         } else {
-            attr.addFlashAttribute("fail", "Ação inválida para a contraproposta.");
+            attr.addFlashAttribute("fail", "proposta.action.invalid"); 
             return "redirect:/propostas/listar";
         }
-        propostaService.salvar(propostaOriginal);
         return "redirect:/propostas/listar";
     }
 

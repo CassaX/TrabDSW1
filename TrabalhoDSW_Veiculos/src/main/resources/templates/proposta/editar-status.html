@@ -33,9 +33,6 @@
                 <input type="hidden" th:field="*{cliente.id}" />
                 <input type="hidden" th:field="*{veiculo.id}" />
                 <input type="hidden" th:field="*{data}" />
-                <!-- Campo oculto para acaoLojista -->
-                <input type="hidden" name="acaoLojista" id="hiddenAcaoLojista" value="">
-
                 <div class="card mb-4">
                     <div class="card-header">
                         Detalhes da Proposta do Cliente
@@ -62,8 +59,8 @@
                             <p><strong>Condições:</strong> <span
                                     th:text="${proposta.contrapropostaCondicoes != null and not #strings.isEmpty(proposta.contrapropostaCondicoes) ? proposta.contrapropostaCondicoes : 'Não informadas'}"></span>
                             </p>
-                            <p th:if="${proposta.horarioReuniao}"><strong>Horário Sugerido para Reunião:</strong> <span
-                                    th:text="${#temporals.format(proposta.horarioReuniao, 'dd/MM/yyyy HH:mm')}"></span>
+                            <p th:if="${proposta.horarioReuniao}"><strong>Horário Sugerido para Reunião:</strong>
+                                <span th:text="${#temporals.format(proposta.horarioReuniao, 'dd/MM/yyyy HH:mm')}"></span>
                             </p>
                             <p th:if="${proposta.linkReuniao}"><strong>Link da Reunião Sugerido:</strong> <a
                                     th:href="${proposta.linkReuniao}" target="_blank">Acessar Reunião</a></p>
@@ -85,7 +82,8 @@
                 <div class="form-group row">
                     <label for="status" class="col-sm-3 col-form-label">Ação com a Proposta:</label>
                     <div class="col-sm-9">
-                        <select class="form-control" id="status" th:field="*{status}" onchange="toggleFieldsLoja()">
+                        <select class="form-control" id="status" th:field="*{status}"
+                            onchange="toggleFieldsLoja()">
                             <option value="">Selecione uma ação</option>
                             <option th:value="${T(DSW.TrabalhoDSW_Veiculos.domain.StatusProposta).ACEITO}"
                                 th:selected="${proposta.status != null and proposta.status.name() == 'ACEITO'}">ACEITAR
@@ -171,35 +169,50 @@
 
         <script th:inline="javascript">
             /*<![CDATA[*/
-            // Função nova para atualizar o campo oculto
-            function updateHiddenAcaoLojista() {
-                const acaoSelecionada = document.querySelector('input[name="acaoLojista"]:checked');
-                if (acaoSelecionada) {
-                    document.getElementById('hiddenAcaoLojista').value = acaoSelecionada.value;
-                } else {
-                    document.getElementById('hiddenAcaoLojista').value = '';
-                }
-            }
+            // ATENÇÃO: updateHiddenAcaoLojista e o campo oculto hiddenAcaoLojista foram removidos para simplificar o binding.
+            // O @RequestParam('acaoLojista') agora pega direto do rádio button selecionado.
 
             function toggleFieldsLoja() {
                 var status = document.getElementById('status').value;
                 var responderPropostaFields = document.getElementById('responderPropostaFields');
                 var aceitoFields = document.getElementById('aceitoFields');
 
+                // Limpa todos os campos dinâmicos ao mudar de opção
                 $('input[name="acaoLojista"]').prop('checked', false);
                 $('#contrapropostaInputs').hide();
                 $('#horarioReuniao').val('');
                 $('#linkReuniao').val('');
                 $('#contrapropostaValor').val('');
                 $('#contrapropostaCondicoes').val('');
-                updateHiddenAcaoLojista(); // Atualiza o campo oculto ao limpar
+                
+                // Pega os valores da proposta para preenchimento inicial (se houver)
+                var proposta = /*[[${proposta}]]*/ {}; // Pega o objeto proposta do modelo Thymeleaf
+                var currentHorarioReuniao = proposta.horarioReuniao;
+                var currentLinkReuniao = proposta.linkReuniao;
+                var currentContrapropostaValor = proposta.contrapropostaValor;
+                var currentContrapropostaCondicoes = proposta.contrapropostaCondicoes;
+
 
                 if (status === 'AGUARDANDO_RESPOSTA_CLIENTE') {
                     responderPropostaFields.style.display = 'block';
                     aceitoFields.style.display = 'none';
+
+                    // Pré-seleciona rádio button e exibe sub-campos com base no status original da proposta
+                    if (proposta.status && proposta.status.name === 'AGUARDANDO_RESPOSTA_CLIENTE') {
+                        $('#comContraproposta').prop('checked', true);
+                        toggleSubFieldsLoja(); // Chama para exibir/preencher os campos de contraproposta
+                    } else if (proposta.status && proposta.status.name === 'RECUSADO_LOJA') {
+                        $('#recusarProposta').prop('checked', true);
+                        toggleSubFieldsLoja(); // Chama para esconder os campos de contraproposta
+                    }
+
                 } else if (status === 'ACEITO') {
                     responderPropostaFields.style.display = 'none';
                     aceitoFields.style.display = 'block';
+
+                    $('#horarioReuniao').val(currentHorarioReuniao ? new Date(currentHorarioReuniao).toISOString().slice(0, 16) : '');
+                    $('#linkReuniao').val(currentLinkReuniao || '');
+
                 } else {
                     responderPropostaFields.style.display = 'none';
                     aceitoFields.style.display = 'none';
@@ -212,14 +225,17 @@
 
                 if (acaoLojista === 'contraproposta') {
                     contrapropostaInputs.style.display = 'block';
-                } else {
+                    var proposta = /*[[${proposta}]]*/ {};
+                    $('#contrapropostaValor').val(proposta.contrapropostaValor ? proposta.contrapropostaValor.toFixed(2).replace('.', ',') : '');
+                    $('#contrapropostaCondicoes').val(proposta.contrapropostaCondicoes || '');
+                } else { // 'recusar'
                     contrapropostaInputs.style.display = 'none';
+                    $('#contrapropostaValor').val('');
+                    $('#contrapropostaCondicoes').val('');
                 }
-                updateHiddenAcaoLojista(); // Atualiza o campo oculto ao mudar a seleção
             }
 
             $(document).ready(function () {
-                // Obter o status inicial de forma segura
                 var initialStatusName = /*[[${proposta.status != null ? proposta.status.name() : ''}]]*/ '';
 
                 if (initialStatusName === 'ACEITO') {
@@ -233,27 +249,9 @@
                 toggleFieldsLoja();
                 $('#contrapropostaValor').mask('##########0.00', { reverse: true });
 
-                // Atualizar campo oculto quando radio for selecionado
-                $('input[name="acaoLojista"]').change(function () {
-                    updateHiddenAcaoLojista();
-                });
+                // Removido: updateHiddenAcaoLojista() em $(document).ready e nos .change() de radio
+                // Removido: $('form').submit(function (e) { ... }); // Validação JavaScript já no controller
 
-                // Inicializa o campo oculto com o valor inicial (se houver algum radio selecionado)
-                updateHiddenAcaoLojista();
-
-                // Validação ao enviar formulário
-                $('form').submit(function (e) {
-                    const status = document.getElementById('status').value;
-                    if (status === 'AGUARDANDO_RESPOSTA_CLIENTE') {
-                        const acaoSelecionada = document.querySelector('input[name="acaoLojista"]:checked');
-                        if (!acaoSelecionada) {
-                            e.preventDefault();
-                            alert('Por favor, selecione uma ação (Contraproposta ou Recusar)');
-                            return false;
-                        }
-                    }
-                    return true;
-                });
             });
             /*]]>*/
         </script>

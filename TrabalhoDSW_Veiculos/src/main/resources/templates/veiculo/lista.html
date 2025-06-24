@@ -1,30 +1,8 @@
 <!DOCTYPE html>
-<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org" 
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity">
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity">
 <head>
     <meta charset="UTF-8" />
     <title th:text="#{veiculo.listar.label}">Listar Veículos</title>
-    <style>
-        .img-thumbnail-list {
-            max-width: 60px;
-            max-height: 60px;
-            width: auto;
-            height: auto;
-            border-radius: 5px;
-            margin-right: 5px;
-            object-fit: cover;
-        }
-        .table td {
-            vertical-align: middle;
-        }
-        .acoes-cell {
-            min-width: 200px;
-        }
-        .badge-proposta {
-            font-size: 0.9em;
-            padding: 5px 8px;
-        }
-    </style>
 </head>
 <body>
     <section class="layout-content" layout:fragment="corpo">
@@ -38,8 +16,7 @@
                     </li>
                 </ul>
             </div>
-            <a class="btn btn-primary btn-md" th:href="@{/veiculos/cadastrar}" role="button" 
-               sec:authorize="hasRole('ROLE_LOJA')">
+            <a class="btn btn-primary btn-md" th:href="@{/veiculos/cadastrar}" role="button" sec:authorize="hasRole('ROLE_LOJA')">
                 <span class="oi oi-plus" title="Cadastro" aria-hidden="true"></span>
                 <span th:text="#{veiculo.cadastrar.label}">Cadastrar Veículo</span>
             </a>
@@ -53,12 +30,9 @@
                 <div class="col-md-6">
                     <form th:action="@{/veiculos/listar}" method="get">
                         <div class="input-group">
-                            <input type="text" class="form-control" name="modelo" 
-                                   th:placeholder="#{veiculo.filtro.modelo.placeholder}" 
-                                   th:value="${param.modelo}" />
+                            <input type="text" class="form-control" name="modelo" th:placeholder="#{veiculo.filtro.modelo.placeholder}" />
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="submit" 
-                                        th:text="#{button.buscar.label}">Buscar</button>
+                                <button class="btn btn-outline-secondary" type="submit" th:text="#{button.buscar.label}">Buscar</button>
                             </div>
                         </div>
                     </form>
@@ -77,73 +51,43 @@
                             <th th:text="#{veiculo.ano.label}">Ano</th>
                             <th th:text="#{veiculo.quilometragem.label}">KM</th>
                             <th th:text="#{veiculo.valor.label}">Valor</th>
-                            <th>Fotos</th>
-                            <th class="acoes-cell" th:text="#{acao.label}">Ações</th>
+                            <th th:text="#{acao.label}">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="veiculo : ${veiculos}">
                             <td th:text="${veiculo.id}"></td>
-                            <!-- Navegação segura para evitar NullPointerException -->
-                            <td th:text="${veiculo.loja?.nome} ?: 'Sem loja'"></td>
+                            <td th:text="${veiculo.loja.nome}"></td>
                             <td th:text="${veiculo.placa}"></td>
                             <td th:text="${veiculo.modelo}"></td>
                             <td th:text="${veiculo.chassi}"></td>
                             <td th:text="${veiculo.ano}"></td>
-                            <td th:text="${veiculo.quilometragem != null} ? 
-                                  ${#numbers.formatDecimal(veiculo.quilometragem, 0, 'POINT', 0, 'COMMA')} : ''">
-                            </td>
-                            <td th:text="${veiculo.valor != null} ? 
-                                  'R$ ' + ${#numbers.formatDecimal(veiculo.valor, 2, 'COMMA', 2, 'POINT')} : ''">
-                            </td>
+                            <td th:text="${#numbers.formatDecimal(veiculo.quilometragem, 0, 'POINT', 0, 'COMMA')}"></td>
+                            <td th:text="|R$ ${#numbers.formatDecimal(veiculo.valor, 2, 'COMMA', 2, 'POINT')}|"></td>
                             <td>
-                                <!-- Verificação segura para lista de fotos -->
-                                <div th:if="${veiculo.fotos != null and not #lists.isEmpty(veiculo.fotos)}">
-                                    <span th:each="foto : ${veiculo.fotos}">
-                                        <img th:src="@{/veiculos/imagens/{id}(id=${foto.id})}" 
-                                             class="img-thumbnail-list" alt="Foto do Veículo"
-                                             onerror="this.onerror=null; this.style.display='none'"/>
-                                    </span>
-                                </div>
-                                <div th:if="${veiculo.fotos == null or #lists.isEmpty(veiculo.fotos)}">
-                                    Nenhuma foto
-                                </div>
-                            </td>
-                            <td class="acoes-cell">
-                                <!-- Ações para LOJA com verificação segura de e-mail -->
-                                <div sec:authorize="hasRole('ROLE_LOJA')"
-                                     th:if="${veiculo.loja != null and 
-                                             #authentication.principal.username == veiculo.loja.email}">
-                                    <a class="btn btn-info btn-sm"
-                                       th:href="@{/veiculos/editar/{id} (id=${veiculo.id})}" role="button">
-                                        <span class="oi oi-brush" th:title="#{link.editar.label}" aria-hidden="true"></span>
-                                    </a>
-                                    <button th:id="${'btn_veiculo/excluir/' + veiculo.id}"
-                                            type="button" class="btn btn-danger btn-sm"
-                                            data-toggle="modal" data-target="#myModal">
-                                        <span class="oi oi-circle-x" th:title="#{link.excluir.label}" aria-hidden="true"></span>
-                                    </button>
-                                </div>
-                                
-                                <!-- Ações para CLIENTE com verificação segura de propostas -->
-                                <div sec:authorize="hasRole('ROLE_CLIENTE')">
-                                    <div th:if="${veiculoComPropostaAberta != null and 
-                                                  veiculoComPropostaAberta[veiculo.id] != null}">
-                                        <span class="badge badge-info badge-proposta" 
-                                              th:text="'Proposta: ' + ${veiculoComPropostaAberta[veiculo.id].status.descricao}">
-                                        </span>
-                                        <a class="btn btn-sm btn-outline-info ml-2" 
-                                           th:href="@{/propostas/listar}" title="Ver Minhas Propostas">
-                                           Ver Proposta
+                                <div sec:authorize="hasRole('ROLE_LOJA')">
+                                    <div th:if="${#authentication.principal.username == veiculo.loja.email}">
+                                        <a class="btn btn-info btn-sm"
+                                            th:href="@{/veiculos/editar/{id} (id=${veiculo.id}) }" role="button">
+                                            <span class="oi oi-brush" th:title="#{link.editar.label}" aria-hidden="true"> </span>
                                         </a>
+                                        <button th:id="${'btn_veiculo/excluir/' + veiculo.id}"
+                                            type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#myModal">
+                                            <span class="oi oi-circle-x" th:title="#{link.excluir.label}" aria-hidden="true"></span>
+                                        </button>
                                     </div>
-                                    <div th:unless="${veiculoComPropostaAberta != null and 
-                                                      veiculoComPropostaAberta[veiculo.id] != null}">
+                                </div>
+
+                                <div sec:authorize="hasRole('ROLE_CLIENTE')">
+                                    <div th:if="${veiculoComPropostaAberta != null and !veiculoComPropostaAberta.containsKey(veiculo.id)}">
                                         <a class="btn btn-success btn-sm"
-                                           th:href="@{/propostas/cadastrar/{id} (id=${veiculo.id})}" role="button">
+                                            th:href="@{/propostas/cadastrar/{id} (id=${veiculo.id}) }" role="button">
                                             <span class="oi oi-cart" th:title="#{link.fazerProposta.label}" aria-hidden="true"></span>
                                             <span th:text="#{link.fazerProposta.label}">Fazer Proposta</span>
                                         </a>
+                                    </div>
+                                    <div th:if="${veiculoComPropostaAberta != null and veiculoComPropostaAberta.containsKey(veiculo.id)}">
+                                        <span class="badge badge-warning" th:text="#{proposta.emAberto.label}">Proposta em Aberto</span>
                                     </div>
                                 </div>
                             </td>
@@ -151,28 +95,9 @@
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Mensagem quando não há veículos -->
-            <div th:if="${#lists.isEmpty(veiculos)}" class="alert alert-info mt-4">
-                Nenhum veículo encontrado
-                <th:block th:if="${param.modelo != null}">
-                    para o modelo '<span th:text="${param.modelo}"></span>'
-                </th:block>
-            </div>
         </div>
 
         <div th:replace="~{fragments/modal::modal}"></div>
-        
-        <!-- DEBUG: Informações para depuração (remover em produção) -->
-        <div style="display:none;">
-            <p>Total de veículos: [[${veiculos.size()}]]</p>
-            <p>Usuário autenticado: [[${#authentication.principal.username}]]</p>
-            <p>Perfil: 
-                <th:block sec:authorize="hasRole('ROLE_LOJA')">Loja</th:block>
-                <th:block sec:authorize="hasRole('ROLE_CLIENTE')">Cliente</th:block>
-            </p>
-            <p>Propostas: [[${veiculoComPropostaAberta}]]</p>
-        </div>
     </section>
 </body>
 </html>
