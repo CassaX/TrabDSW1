@@ -48,7 +48,7 @@
                     <div class="form-group col-md-6">
                         <label th:text="#{proposta.valor.label}" for="valor">Valor da Proposta</label>
                         <input type="text" class="form-control" id="valor" placeholder="Ex: 95000,00"
-                            data-mask="000.000.000.000,00" data-mask-reverse="true" th:field="*{valor}"
+                            data-mask="000000000000.00" data-mask-reverse="true" th:field="*{valor}"
                             th:classappend="${#fields.hasErrors('valor')} ? is-invalid" />
                         <div class="invalid-feedback">
                             <span th:errors="*{valor}"></span>
@@ -57,11 +57,10 @@
 
                     <div class="form-group col-md-6">
                         <label th:text="#{proposta.condicoesPagamento.label}" for="condicoesPagamento">Condições de Pagamento</label>
-                        <select id="condicoesPagamento" class="form-control" th:field="*{condicoesPagamento}"
-                            th:classappend="${#fields.hasErrors('condicoesPagamento')} ? is-invalid">
-                            <option value="">Selecione as condições</option>
-                            <option th:each="condicao : ${condicoesPagamento}" th:value="${condicao}" th:text="${condicao}"></option>
-                        </select>
+                        <input type="text" class="form-control" id="condicoesPagamento"
+                            placeholder="Ex: Pagamento à vista, 10x no cartão, etc."
+                            th:field="*{condicoesPagamento}"
+                            th:classappend="${#fields.hasErrors('condicoesPagamento')} ? is-invalid" />
                         <div class="invalid-feedback">
                             <span th:errors="*{condicoesPagamento}"></span>
                         </div>

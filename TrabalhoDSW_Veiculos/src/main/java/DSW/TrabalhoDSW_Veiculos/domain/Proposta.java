@@ -17,21 +17,21 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "Proposta")
 public class Proposta extends AbstractEntity<Long> {
 
-	@NotNull
-	@Column(nullable = false, length = 19)
-	private String data;
+    @NotNull
+    @Column(nullable = false, length = 19)
+    private String data;
     
-	@NotNull(message = "{NotNull.proposta.valor}")
+    @NotNull(message = "{NotNull.proposta.valor}")
     @Min(value = 0, message = "{Min.proposta.valor}")
     @Column(columnDefinition = "DECIMAL(8,2) DEFAULT 0.0")
-    private BigDecimal valor;
+    private BigDecimal valor; // Valor da proposta original
     
-	@NotNull(message = "{NotNull.proposta.veiculo}")
+    @NotNull(message = "{NotNull.proposta.veiculo}")
     @ManyToOne
     @JoinColumn(name = "veiculo_id", nullable = false)
     private Veiculo veiculo;
 
-	@NotNull(message = "{NotNull.proposta.cliente}")
+    @NotNull(message = "{NotNull.proposta.cliente}")
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
@@ -39,68 +39,68 @@ public class Proposta extends AbstractEntity<Long> {
     @Column(length = 20, nullable=false)
     private String status;
 
-	@NotBlank(message = "{NotBlank.proposta.condicoesPagamento}")
+    @NotBlank(message = "{NotBlank.proposta.condicoesPagamento}")
     @Column(columnDefinition = "TEXT")
     private String condicoesPagamento;
 
-	@Column(columnDefinition = "DECIMAL(8,2) DEFAULT 0.0")
-    private BigDecimal contrapropostaValor;
-
+    @Column(columnDefinition = "DECIMAL(8,2) DEFAULT 0.0")
+    private BigDecimal contrapropostaValor; // Valor da contraproposta
+    
     @Column(columnDefinition = "TEXT")
-    private String contrapropostaCondicoes;
+    private String contrapropostaCondicoes; // Condições da contraproposta
 
-    private LocalDateTime horarioReuniao; // Ou String para manter o formato atual
-    private String linkReuniao;
+    private LocalDateTime horarioReuniao; // Horário e data da reunião
+    
+    private String linkReuniao; // Link da reunião
 
-	
+    // Getters e Setters para todos os campos
+    public BigDecimal getContrapropostaValor() {
+        return contrapropostaValor;
+    }
 
-	public BigDecimal getContrapropostaValor() {
-		return contrapropostaValor;
-	}
+    public void setContrapropostaValor(BigDecimal contrapropostaValor) {
+        this.contrapropostaValor = contrapropostaValor;
+    }
 
-	public void setContrapropostaValor(BigDecimal contrapropostaValor) {
-		this.contrapropostaValor = contrapropostaValor;
-	}
+    public String getContrapropostaCondicoes() {
+        return contrapropostaCondicoes;
+    }
 
-	public String getContrapropostaCondicoes() {
-		return contrapropostaCondicoes;
-	}
+    public void setContrapropostaCondicoes(String contrapropostaCondicoes) {
+        this.contrapropostaCondicoes = contrapropostaCondicoes;
+    }
 
-	public void setContrapropostaCondicoes(String contrapropostaCondicoes) {
-		this.contrapropostaCondicoes = contrapropostaCondicoes;
-	}
+    public LocalDateTime getHorarioReuniao() {
+        return horarioReuniao;
+    }
 
-	public LocalDateTime getHorarioReuniao() {
-		return horarioReuniao;
-	}
+    public void setHorarioReuniao(LocalDateTime horarioReuniao) {
+        this.horarioReuniao = horarioReuniao;
+    }
 
-	public void setHorarioReuniao(LocalDateTime horarioReuniao) {
-		this.horarioReuniao = horarioReuniao;
-	}
+    public String getLinkReuniao() {
+        return linkReuniao;
+    }
 
-	public String getLinkReuniao() {
-		return linkReuniao;
-	}
+    public void setLinkReuniao(String linkReuniao) {
+        this.linkReuniao = linkReuniao;
+    }
 
-	public void setLinkReuniao(String linkReuniao) {
-		this.linkReuniao = linkReuniao;
-	}
+    public String getData() {
+        return data;
+    }
 
-	public String getData() {
-		return data;
-	}
+    public void setData(String data) {
+        this.data = data;
+    }
 
-	public void setData(String data) {
-		this.data = data;
-	}
+    public BigDecimal getValor() {
+        return valor;
+    }
 
-	public BigDecimal getValor() {
-		return valor;
-	}
-
-	public void setValor(BigDecimal valor) {
-		this.valor = valor;
-	}
+    public void setValor(BigDecimal valor) {
+        this.valor = valor;
+    }
 
     public String getStatus() {
         return status;
@@ -118,20 +118,20 @@ public class Proposta extends AbstractEntity<Long> {
         this.condicoesPagamento = condicoesPagamento;
     }
 
-	public Veiculo getVeiculo() {
-		return veiculo;
-	}
+    public Veiculo getVeiculo() {
+        return veiculo;
+    }
 
-	public void setVeiculo(Veiculo veiculo) {
-		this.veiculo = veiculo;
-		setValor(veiculo.getValor());
-	}
+    public void setVeiculo(Veiculo veiculo) {
+        this.veiculo = veiculo;
+        // setValor(veiculo.getValor()); // CUIDADO: Esta linha sobrescreve o valor da proposta com o do veículo. Remova se o valor da proposta pode ser diferente do valor sugerido do veículo.
+    }
 
-	public Cliente getCliente() {
-		return cliente;
-	}
+    public Cliente getCliente() {
+        return cliente;
+    }
 
-	public void setCliente(Cliente cliente) {
-		this.cliente = cliente;
-	}
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
 }

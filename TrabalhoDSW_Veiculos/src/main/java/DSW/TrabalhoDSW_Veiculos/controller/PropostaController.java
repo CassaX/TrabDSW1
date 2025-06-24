@@ -2,7 +2,6 @@ package DSW.TrabalhoDSW_Veiculos.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
@@ -43,75 +43,75 @@ public class PropostaController {
     @Autowired
     private ILojaService lojaService;
 
-    // Método auxiliar para obter o cliente logado
     private Cliente getClienteLogado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         return clienteService.buscarPorEmail(email);
     }
 
-    // Método auxiliar para obter a loja logada
     private Loja getLojaLogada() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         return lojaService.buscarPorEmail(email);
     }
 
-    // Cadastro de nova proposta para um veículo específico
     @GetMapping("/cadastrar/{id}")
     public String cadastrar(@PathVariable("id") Long idVeiculo,
-                            Proposta proposta, // Spring implicitamente adiciona isso ao modelo
+                            Proposta proposta,
                             ModelMap model) {
 
-        // Buscar o veículo com suas fotos, se necessário para exibição no formulário
         Veiculo veiculo = veiculoService.buscarPorIdComFotos(idVeiculo);
         if(veiculo == null) {
             model.addAttribute("fail", "Veículo não encontrado.");
             return "redirect:/veiculos/listar";
         }
 
-        // Preenche dados iniciais da proposta
         proposta.setData(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
-        proposta.setVeiculo(veiculo); // Associa o veículo à proposta
-        proposta.setCliente(getClienteLogado()); // Associa o cliente logado à proposta
+        proposta.setVeiculo(veiculo);
+        proposta.setCliente(getClienteLogado());
 
-        // Explicitamente adicionar 'proposta' e 'veiculo' ao model.
-        // O 'proposta' é fundamental para o th:object.
-        // O 'veiculo' é útil para acessar as propriedades do veículo diretamente no HTML,
-        // como modelo, placa, etc., sem precisar passar por proposta.veiculo.
         model.addAttribute("proposta", proposta);
         model.addAttribute("veiculo", veiculo);
 
         return "proposta/cadastro";
     }
 
-    // Salvar proposta com validações
     @PostMapping("/salvar")
     public String salvar(@Valid Proposta proposta,
                          BindingResult result,
                          RedirectAttributes attr,
-                         ModelMap model) { // Adicionado ModelMap para re-renderizar o formulário em caso de erros
+                         ModelMap model) {
 
-        // Se houver erros de validação, precisamos re-adicionar o objeto 'veiculo' ao modelo.
-        // O objeto 'proposta' que vem da submissão do formulário pode não ter sua propriedade 'veiculo'
-        // totalmente preenchida, especialmente após a validação.
         if(result.hasErrors()) {
-            // Se o ID do veículo foi passado corretamente (via campo hidden no form)
+            Veiculo veiculo = null;
+            Cliente cliente = null;
+
             if (proposta.getVeiculo() != null && proposta.getVeiculo().getId() != null) {
-                // Busca o veículo novamente para ter certeza de que todas as suas propriedades
-                // (como modelo, etc.) estão disponíveis para o Thymeleaf.
-                Veiculo veiculo = veiculoService.buscarPorIdComFotos(proposta.getVeiculo().getId());
-                model.addAttribute("veiculo", veiculo); // Adiciona o veículo ao modelo novamente
+                veiculo = veiculoService.buscarPorIdComFotos(proposta.getVeiculo().getId());
+                model.addAttribute("veiculo", veiculo);
             } else {
-                // Caso o ID do veículo não esteja disponível, pode ser um erro mais grave
                 System.err.println("Erro: ID do veículo não encontrado na proposta submetida durante erro de validação.");
-                attr.addFlashAttribute("fail", "Erro ao processar a proposta. Veículo não identificado.");
-                return "redirect:/veiculos/listar"; // Redireciona para evitar mais erros
             }
-            return "proposta/cadastro"; // Retorna para o formulário de cadastro com os erros
+
+            if (proposta.getCliente() != null && proposta.getCliente().getId() != null) {
+                cliente = clienteService.buscarPorId(proposta.getCliente().getId());
+            } else {
+                 System.err.println("Erro: ID do cliente não encontrado na proposta submetida durante erro de validação.");
+            }
+
+            if (veiculo == null || cliente == null) {
+                attr.addFlashAttribute("fail", "Erro ao processar a proposta. Cliente ou Veículo não identificado.");
+                return "redirect:/veiculos/listar";
+            }
+            return "proposta/cadastro";
         }
 
-        // Verifica se já existe proposta aberta para este veículo+cliente (R5)
+        Cliente clienteLogado = getClienteLogado();
+        Veiculo veiculoDaProposta = veiculoService.buscarPorId(proposta.getVeiculo().getId());
+
+        proposta.setCliente(clienteLogado);
+        proposta.setVeiculo(veiculoDaProposta);
+
         if(propostaService.existePropostaAberta(
             proposta.getCliente().getId(),
             proposta.getVeiculo().getId())) {
@@ -120,7 +120,6 @@ public class PropostaController {
             return "redirect:/veiculos/listar";
         }
 
-        // Força status inicial ABERTO (R7)
         proposta.setStatus("ABERTO");
 
         propostaService.salvar(proposta);
@@ -128,26 +127,37 @@ public class PropostaController {
         return "redirect:/propostas/listar";
     }
 
-    // Listar propostas do cliente logado
     @GetMapping("/listar")
-    public String listar(ModelMap model) {
+    public String listarPropostasCliente(ModelMap model) {
         Cliente cliente = getClienteLogado();
-        model.addAttribute("propostas", propostaService.buscarPorCliente(cliente));
-        return "proposta/lista";
+        model.addAttribute("propostas", propostaService.buscarTodosPorCliente(cliente));
+        return "proposta/lista-cliente";
     }
 
-    // --- Métodos auxiliares ---
-    @ModelAttribute("condicoesPagamento")
-    public List<String> getCondicoesPagamento() {
-        return List.of(
-            "À vista",
-            "Parcelado em 12x",
-            "Parcelado em 24x",
-            "Parcelado em 36x"
-        );
+    @GetMapping("/detalhes/{id}")
+    public String exibirDetalhesProposta(@PathVariable("id") Long idProposta,
+                                         @RequestParam(value = "statusInicial", required = false) String statusInicial,
+                                         ModelMap model) {
+        Proposta proposta = propostaService.buscarPorId(idProposta);
+        if (proposta == null) {
+            model.addAttribute("fail", "Proposta não encontrada.");
+            return "redirect:/propostas/loja/listar";
+        }
+
+        Loja lojaLogada = getLojaLogada();
+        if (lojaLogada == null || proposta.getVeiculo() == null || !proposta.getVeiculo().getLoja().getId().equals(lojaLogada.getId())) {
+            model.addAttribute("fail", "Você não tem permissão para acessar os detalhes desta proposta.");
+            return "redirect:/propostas/loja/listar";
+        }
+
+        if (statusInicial != null && !statusInicial.isEmpty()) {
+            proposta.setStatus(statusInicial);
+        }
+
+        model.addAttribute("proposta", proposta);
+        return "proposta/editar-status";
     }
 
-    // Listar propostas recebidas pela loja logada (R8)
     @GetMapping("/loja/listar")
     public String listarPropostasLoja(ModelMap model) {
         Loja loja = getLojaLogada();
@@ -159,33 +169,95 @@ public class PropostaController {
         return "proposta/lista-loja";
     }
 
-    // Aceitar Proposta (R8)
-    @GetMapping("/aceitar/{id}")
-    public String aceitarProposta(@PathVariable("id") Long idProposta, RedirectAttributes attr) {
-        Proposta proposta = propostaService.buscarPorId(idProposta);
-        if (proposta != null && proposta.getVeiculo().getLoja().getId().equals(getLojaLogada().getId())) {
-            proposta.setStatus("ACEITO");
-            propostaService.salvar(proposta);
-            attr.addFlashAttribute("success", "Proposta aceita com sucesso! Prossiga para informar os detalhes da reunião.");
-            // Corrigido para passar o ID da proposta, não o do veículo
-            return "redirect:/propostas/detalhes/" + idProposta;
+    @PostMapping("/editar-status")
+    public String editarStatus(@Valid @ModelAttribute("proposta") Proposta propostaForm,
+                               BindingResult result,
+                               RedirectAttributes attr,
+                               ModelMap model) {
+
+        Proposta propostaOriginal = propostaService.buscarPorId(propostaForm.getId());
+        if (propostaOriginal == null) {
+            attr.addFlashAttribute("fail", "Proposta não encontrada para atualização de status.");
+            return "redirect:/propostas/loja/listar";
         }
-        attr.addFlashAttribute("fail", "Não foi possível aceitar a proposta.");
+
+        propostaForm.setData(propostaOriginal.getData());
+        propostaForm.setCliente(propostaOriginal.getCliente());
+        propostaForm.setVeiculo(propostaOriginal.getVeiculo());
+        // propostaForm.setCondicoesPagamento(propostaOriginal.getCondicoesPagamento()); // Será tratado abaixo
+
+        Loja lojaLogada = getLojaLogada();
+        if (lojaLogada == null || propostaOriginal.getVeiculo() == null || !propostaOriginal.getVeiculo().getLoja().getId().equals(lojaLogada.getId())) {
+            attr.addFlashAttribute("fail", "Você não tem permissão para editar esta proposta.");
+            return "redirect:/propostas/loja/listar";
+        }
+
+        if (result.hasErrors()) {
+            propostaForm.setVeiculo(propostaOriginal.getVeiculo());
+            propostaForm.setCliente(propostaOriginal.getCliente());
+            
+            model.addAttribute("proposta", propostaForm);
+            if (propostaForm.getVeiculo() != null) {
+                 model.addAttribute("veiculo", veiculoService.buscarPorIdComFotos(propostaForm.getVeiculo().getId()));
+            }
+            return "proposta/editar-status";
+        }
+
+        // --- LÓGICA PARA ATUALIZAR O VALOR PRINCIPAL E AS CONDIÇÕES DE PAGAMENTO ---
+        // Se o status for "NÃO ACEITO" E um contrapropostaValor foi fornecido,
+        // então o valor principal da proposta é atualizado para o valor da contraproposta.
+        if ("NÃO ACEITO".equals(propostaForm.getStatus())) { // Se o status foi alterado para NÃO ACEITO
+            // Atualiza o valor principal SE a contraproposta foi fornecida
+            if (propostaForm.getContrapropostaValor() != null) {
+                propostaOriginal.setValor(propostaForm.getContrapropostaValor());
+            }
+            // Atualiza as condições de pagamento principal SE a contrapropostaCondicoes foi fornecida
+            if (propostaForm.getContrapropostaCondicoes() != null && !propostaForm.getContrapropostaCondicoes().trim().isEmpty()) {
+                propostaOriginal.setCondicoesPagamento(propostaForm.getContrapropostaCondicoes());
+            }
+        }
+        // --- FIM DA LÓGICA DE ATUALIZAÇÃO CONDICIONAL ---
+
+
+        // COPIAR DADOS DO FORMULÁRIO PARA O OBJETO ORIGINAL GERENCIADO PELO JPA
+        propostaOriginal.setStatus(propostaForm.getStatus());
+        propostaOriginal.setContrapropostaCondicoes(propostaForm.getContrapropostaCondicoes());
+        propostaOriginal.setContrapropostaValor(propostaForm.getContrapropostaValor());
+        propostaOriginal.setHorarioReuniao(propostaForm.getHorarioReuniao());
+        propostaOriginal.setLinkReuniao(propostaForm.getLinkReuniao());
+
+        // Lógica para limpar campos que não são relevantes para o status atual
+        if ("ACEITO".equals(propostaOriginal.getStatus())) {
+            // Se aceito, zera os campos de contraproposta (já que o valor principal já foi decidido)
+            propostaOriginal.setContrapropostaCondicoes(null);
+            propostaOriginal.setContrapropostaValor(null);
+        } else if ("NÃO ACEITO".equals(propostaOriginal.getStatus())) {
+            // Se não aceito, zera os campos de aceitação
+            propostaOriginal.setHorarioReuniao(null);
+            propostaOriginal.setLinkReuniao(null);
+        } else { // Status ABERTO ou outros
+             // Se voltar para ABERTO, ou um status genérico, zera tudo que não é principal
+             propostaOriginal.setContrapropostaCondicoes(null);
+             propostaOriginal.setContrapropostaValor(null);
+             propostaOriginal.setHorarioReuniao(null);
+             propostaOriginal.setLinkReuniao(null);
+        }
+
+        propostaService.salvar(propostaOriginal);
+
+        attr.addFlashAttribute("success", "Status da proposta atualizado com sucesso!");
         return "redirect:/propostas/loja/listar";
     }
 
-    // Não Aceitar Proposta (R8)
+    @GetMapping("/aceitar/{id}")
+    public String aceitarProposta(@PathVariable("id") Long idProposta, RedirectAttributes attr) {
+        attr.addAttribute("statusInicial", "ACEITO");
+        return "redirect:/propostas/detalhes/" + idProposta;
+    }
+
     @GetMapping("/naoaceitar/{id}")
     public String naoAceitarProposta(@PathVariable("id") Long idProposta, RedirectAttributes attr) {
-        Proposta proposta = propostaService.buscarPorId(idProposta);
-        if (proposta != null && proposta.getVeiculo().getLoja().getId().equals(getLojaLogada().getId())) {
-            proposta.setStatus("NÃO ACEITO");
-            propostaService.salvar(proposta);
-            attr.addFlashAttribute("success", "Proposta marcada como Não Aceita. Prossiga para informar uma contraproposta opcional.");
-            // Corrigido para passar o ID da proposta, não o do veículo
-            return "redirect:/propostas/detalhes/" + idProposta;
-        }
-        attr.addFlashAttribute("fail", "Não foi possível recusar a proposta.");
-        return "redirect:/propostas/loja/listar";
+        attr.addAttribute("statusInicial", "NÃO ACEITO");
+        return "redirect:/propostas/detalhes/" + idProposta;
     }
 }

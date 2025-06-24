@@ -4,6 +4,18 @@
     <title>Atualizar Status da Proposta</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <style>
+        /* Estilos para as miniaturas de fotos, se houver na entidade Veiculo */
+        .img-thumbnail-details {
+            max-width: 100px;
+            max-height: 100px;
+            width: auto;
+            height: auto;
+            border-radius: 5px;
+            margin-right: 5px;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body>
 <section class="layout-content" layout:fragment="corpo">
@@ -11,10 +23,18 @@
         <h2>Atualizar Status da Proposta #<span th:text="${proposta.id}"></span></h2>
 
         <div th:replace="~{fragments/alert}"></div>
-        <div th:replace="~{fragments/validacao}"></div>
-
+        
         <form th:action="@{/propostas/editar-status}" th:object="${proposta}" method="post" class="form-horizontal">
+            <div th:replace="~{fragments/validacao::validacao}"></div>
+
             <input type="hidden" th:field="*{id}" />
+            <input type="hidden" th:field="*{cliente.id}" />
+            <input type="hidden" th:field="*{veiculo.id}" />
+            <input type="hidden" th:field="*{data}" />
+            
+            <input type="hidden" th:field="*{valor}" />
+            
+            <input type="hidden" th:field="*{condicoesPagamento}" />
 
             <div class="card mb-4">
                 <div class="card-header">
@@ -27,6 +47,16 @@
                     <p><strong>Condições de Pagamento:</strong> <span th:text="${proposta.condicoesPagamento}"></span></p>
                     <p><strong>Data da Proposta:</strong> <span th:text="${proposta.data}"></span></p>
                     <p><strong>Status Atual:</strong> <span th:text="${proposta.status}"></span></p>
+
+                    <div th:if="${proposta.veiculo != null and not #lists.isEmpty(proposta.veiculo.fotos)}" class="mt-3">
+                        <strong>Fotos do Veículo:</strong>
+                        <div class="d-flex flex-wrap mt-2">
+                            <span th:each="foto : ${proposta.veiculo.fotos}" class="mr-2 mb-2">
+                                <img th:src="@{/veiculos/imagens/{id}(id=${foto.id})}" class="img-thumbnail-details" alt="Foto do Veículo"/>
+                            </span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -34,28 +64,33 @@
                 <label for="status" class="col-sm-3 col-form-label" th:text="#{atualizarStatus.label}"></label>
                 <div class="col-sm-9">
                     <select class="form-control" id="status" th:field="*{status}" onchange="toggleFields()">
-                        <option value="ABERTO" th:selected="${proposta.status == 'ABERTO'}">ABERTO</option>
-                        <option value="ACEITO" th:selected="${proposta.status == 'ACEITO'}">ACEITO</option>
-                        <option value="NÃO ACEITO" th:selected="${proposta.status == 'NÃO ACEITO'}">NÃO ACEITO</option>
+                        <option value="ABERTO">ABERTO</option>
+                        <option value="ACEITO">ACEITO</option>
+                        <option value="NÃO ACEITO">NÃO ACEITO</option>
                     </select>
                 </div>
             </div>
 
             <div id="naoAceitoFields" style="display:none;">
                 <div class="form-group row">
-                    <label for="contraproposta" class="col-sm-3 col-form-label" th:text="#{contraProposta.valor.label}"></label>
+                    <label for="contrapropostaValor" class="col-sm-3 col-form-label" th:text="#{contraProposta.valor.label}"></label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="contraproposta" name="contraproposta"
-                               data-mask="000.000.000.000,00" data-mask-reverse="true"
-                               th:value="${proposta.status == 'NÃO ACEITO' ? proposta.condicoesPagamento : ''}"
+                        <input type="text" class="form-control" id="contrapropostaValor" th:field="*{contrapropostaValor}"
+                               data-mask="999999,99" data-mask-reverse="true"
                                th:placeholder="#{contraProposta.valor.label}">
+                         <div class="invalid-feedback">
+                            <span th:errors="*{contrapropostaValor}"></span>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group row">
                     <label for="contrapropostaCondicoes" class="col-sm-3 col-form-label" th:text="#{contraProposta.condicoes.label}"></label>
                     <div class="col-sm-9">
-                        <textarea class="form-control" id="contrapropostaCondicoes" name="contrapropostaCondicoes" rows="3"
-                                  th:placeholder="#{contraProposta.condicoes.label}">[[${proposta.contrapropostaCondicoes}]]</textarea>
+                        <textarea class="form-control" id="contrapropostaCondicoes" th:field="*{contrapropostaCondicoes}" rows="3"
+                                  th:placeholder="#{contraProposta.condicoes.label}"></textarea>
+                         <div class="invalid-feedback">
+                            <span th:errors="*{contrapropostaCondicoes}"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -64,16 +99,21 @@
                 <div class="form-group row">
                     <label for="horarioReuniao" class="col-sm-3 col-form-label" th:text="#{horarioReuniao.label}"></label>
                     <div class="col-sm-9">
-                        <input type="datetime-local" class="form-control" id="horarioReuniao" name="horarioReuniao"
-                               th:value="${proposta.horarioReuniao}">
+                        <input type="datetime-local" class="form-control" id="horarioReuniao" th:field="*{horarioReuniao}"
+                               th:placeholder="#{horarioReuniao.label}">
+                        <div class="invalid-feedback">
+                            <span th:errors="*{horarioReuniao}"></span>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group row">
                     <label for="linkReuniao" class="col-sm-3 col-form-label" th:text="#{linkReuniao.label}"></label>
                     <div class="col-sm-9">
-                        <input type="url" class="form-control" id="linkReuniao" name="linkReuniao"
-                               th:value="${proposta.status == 'ACEITO' ? proposta.condicoesPagamento.replace('Link da reunião: ', '') : ''}"
+                        <input type="url" class="form-control" id="linkReuniao" th:field="*{linkReuniao}"
                                th:placeholder="#{linkReuniao.label}">
+                        <div class="invalid-feedback">
+                            <span th:errors="*{linkReuniao}"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -81,7 +121,7 @@
             <div class="form-group row">
                 <div class="col-sm-9 offset-sm-3">
                     <button type="submit" class="btn btn-primary" th:text="#{atualizarProposta.label}">Atualizar Proposta</button>
-                    <a th:href="@{/propostas/loja}" class="btn btn-secondary" th:text="#{button.cancelar.label}">Cancelar</a>
+                    <a th:href="@{/propostas/loja/listar}" class="btn btn-secondary" th:text="#{button.cancelar.label}">Cancelar</a>
                 </div>
             </div>
         </form>
@@ -106,131 +146,9 @@
             }
         }
 
-        // Chamar a função ao carregar a página para definir o estado inicial
-        document.addEventListener('DOMContentLoaded', toggleFields);
-
-        // Aplicar máscaras de input após o carregamento do DOM
         $(document).ready(function() {
-            $('#contraproposta').mask('000.000.000.000,00', {reverse: true});
-        });
-        /*]]>*/
-    </script>
-</section>
-</body>
-</html><!DOCTYPE html>
-<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Atualizar Status da Proposta</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-</head>
-<body>
-<section class="layout-content" layout:fragment="corpo">
-    <div class="container">
-        <h2>Atualizar Status da Proposta #<span th:text="${proposta.id}"></span></h2>
-
-        <div th:replace="~{fragments/alert}"></div>
-        <div th:replace="~{fragments/validacao}"></div>
-
-        <form th:action="@{/propostas/editar-status}" th:object="${proposta}" method="post" class="form-horizontal">
-            <input type="hidden" th:field="*{id}" />
-
-            <div class="card mb-4">
-                <div class="card-header">
-                    Detalhes da Proposta Original
-                </div>
-                <div class="card-body">
-                    <p><strong>Veículo:</strong> <span th:text="${proposta.veiculo.modelo} + ' (' + ${proposta.veiculo.ano} + ')'"></span></p>
-                    <p><strong>Cliente:</strong> <span th:text="${proposta.cliente.nome}"></span> (<span th:text="${proposta.cliente.email}"></span>)</p>
-                    <p><strong>Valor Proposto:</strong> <span th:text="|R$ ${#numbers.formatDecimal(proposta.valor,2,2,'COMMA')}|"></span></p>
-                    <p><strong>Condições de Pagamento:</strong> <span th:text="${proposta.condicoesPagamento}"></span></p>
-                    <p><strong>Data da Proposta:</strong> <span th:text="${proposta.data}"></span></p>
-                    <p><strong>Status Atual:</strong> <span th:text="${proposta.status}"></span></p>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label for="status" class="col-sm-3 col-form-label" th:text="#{atualizarStatus.label}"></label>
-                <div class="col-sm-9">
-                    <select class="form-control" id="status" th:field="*{status}" onchange="toggleFields()">
-                        <option value="ABERTO" th:selected="${proposta.status == 'ABERTO'}">ABERTO</option>
-                        <option value="ACEITO" th:selected="${proposta.status == 'ACEITO'}">ACEITO</option>
-                        <option value="NÃO ACEITO" th:selected="${proposta.status == 'NÃO ACEITO'}">NÃO ACEITO</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="naoAceitoFields" style="display:none;">
-                <div class="form-group row">
-                    <label for="contraproposta" class="col-sm-3 col-form-label" th:text="#{contraProposta.valor.label}"></label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" id="contraproposta" name="contraproposta"
-                               data-mask="000.000.000.000,00" data-mask-reverse="true"
-                               th:value="${proposta.status == 'NÃO ACEITO' ? proposta.condicoesPagamento : ''}"
-                               th:placeholder="#{contraProposta.valor.label}">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="contrapropostaCondicoes" class="col-sm-3 col-form-label" th:text="#{contraProposta.condicoes.label}"></label>
-                    <div class="col-sm-9">
-                        <textarea class="form-control" id="contrapropostaCondicoes" name="contrapropostaCondicoes" rows="3"
-                                  th:placeholder="#{contraProposta.condicoes.label}">[[${proposta.contrapropostaCondicoes}]]</textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div id="aceitoFields" style="display:none;">
-                <div class="form-group row">
-                    <label for="horarioReuniao" class="col-sm-3 col-form-label" th:text="#{horarioReuniao.label}"></label>
-                    <div class="col-sm-9">
-                        <input type="datetime-local" class="form-control" id="horarioReuniao" name="horarioReuniao"
-                               th:value="${proposta.horarioReuniao}">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="linkReuniao" class="col-sm-3 col-form-label" th:text="#{linkReuniao.label}"></label>
-                    <div class="col-sm-9">
-                        <input type="url" class="form-control" id="linkReuniao" name="linkReuniao"
-                               th:value="${proposta.status == 'ACEITO' ? proposta.condicoesPagamento.replace('Link da reunião: ', '') : ''}"
-                               th:placeholder="#{linkReuniao.label}">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <div class="col-sm-9 offset-sm-3">
-                    <button type="submit" class="btn btn-primary" th:text="#{atualizarProposta.label}">Atualizar Proposta</button>
-                    <a th:href="@{/propostas/loja}" class="btn btn-secondary" th:text="#{button.cancelar.label}">Cancelar</a>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        function toggleFields() {
-            var status = document.getElementById('status').value;
-            var naoAceitoFields = document.getElementById('naoAceitoFields');
-            var aceitoFields = document.getElementById('aceitoFields');
-
-            if (status === 'NÃO ACEITO') {
-                naoAceitoFields.style.display = 'block';
-                aceitoFields.style.display = 'none';
-            } else if (status === 'ACEITO') {
-                naoAceitoFields.style.display = 'none';
-                aceitoFields.style.display = 'block';
-            } else {
-                naoAceitoFields.style.display = 'none';
-                aceitoFields.style.display = 'none';
-            }
-        }
-
-        // Chamar a função ao carregar a página para definir o estado inicial
-        document.addEventListener('DOMContentLoaded', toggleFields);
-
-        // Aplicar máscaras de input após o carregamento do DOM
-        $(document).ready(function() {
-            $('#contraproposta').mask('000.000.000.000,00', {reverse: true});
+            toggleFields();
+            $('#contrapropostaValor').mask('999999.99', {reverse: true});
         });
         /*]]>*/
     </script>
