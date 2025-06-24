@@ -68,6 +68,7 @@ public class LojaController {
         return "loja/lista";
     }
     
+    /* 
     @GetMapping("/perfil")
     public String perfil(ModelMap model, RedirectAttributes attr) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -89,4 +90,5 @@ public class LojaController {
         model.addAttribute("loja", loja);
         return "loja/perfil";
     }
+    */
 }

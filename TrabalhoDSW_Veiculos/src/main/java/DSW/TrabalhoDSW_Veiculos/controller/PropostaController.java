@@ -26,7 +26,6 @@ import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
 import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
-import DSW.TrabalhoDSW_Veiculos.service.impl.NotificacaoPropostaService;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IClienteService;
 import DSW.TrabalhoDSW_Veiculos.service.spec.ILojaService;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IPropostaService;
