@@ -1,6 +1,13 @@
 package DSW.TrabalhoDSW_Veiculos.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Imagem")
@@ -14,7 +21,7 @@ public class Imagem extends AbstractEntity<Long> {
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(nullable = false)
+    @Column(length=10485760)
     private byte[] dados;
 
     @ManyToOne(optional = false)
@@ -54,6 +61,12 @@ public class Imagem extends AbstractEntity<Long> {
     public void setVeiculo(Veiculo veiculo) {
         this.veiculo = veiculo;
     }
+
+	public Imagem(String nome, String tipo, byte[] dados) {
+		this.nome = nome;
+		this.tipo = tipo;
+		this.dados = dados;
+	}
 
     public boolean isImagem() {
         return tipo != null && tipo.startsWith("image");

@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -91,53 +92,41 @@ public class VeiculoController {
 
     @PostMapping("/salvar")
     public String salvar(@Valid Veiculo veiculo, BindingResult result,
-                         @RequestParam("fotosUpload") List<MultipartFile> fotosUpload,
+                         @RequestParam("fotosUpload") MultipartFile fotosUpload,
                          RedirectAttributes attr) {
-
+    
         Loja loja = getLojaLogada();
         if (loja == null) {
             attr.addFlashAttribute("fail", "Sessão expirada. Por favor, faça login novamente.");
             return "redirect:/login";
         }
         veiculo.setLoja(loja);
-
+    
         if (result.hasErrors()) {
             return "veiculo/cadastro";
         }
-
-        if (fotosUpload.isEmpty() || fotosUpload.stream().allMatch(MultipartFile::isEmpty)) {
-            result.rejectValue("fotos", "size", "Pelo menos uma foto é obrigatória.");
-            return "veiculo/cadastro";
-        }
-        
-        if (fotosUpload.size() > 10) {
-            attr.addFlashAttribute("fail", "Você pode enviar no máximo 10 imagens.");
-            return "veiculo/cadastro";
-        }
-
-        List<Imagem> imagens = new ArrayList<>();
-        try {
-            for (MultipartFile file : fotosUpload) {
-                if (!file.isEmpty()) {
-                    Imagem imagem = new Imagem();
-                    imagem.setNome(file.getOriginalFilename());
-                    imagem.setTipo(file.getContentType());
-                    imagem.setDados(file.getBytes());
-                    imagem.setVeiculo(veiculo);
-                    imagens.add(imagem);
-                }
+    
+        // Salvar o veículo primeiro (sem imagens)
+        veiculo.setFotos(new ArrayList<>());
+        veiculoService.salvar(veiculo); // Agora ele tem ID
+    
+        if (!fotosUpload.isEmpty()) {
+            try {
+                String fileName = StringUtils.cleanPath(fotosUpload.getOriginalFilename());
+                Imagem imagem = new Imagem(fileName, fotosUpload.getContentType(), fotosUpload.getBytes());
+                imagem.setVeiculo(veiculo); // Aqui é essencial
+                imagemService.salvar(imagem);
+            } catch (IOException e) {
+                e.printStackTrace();
+                attr.addFlashAttribute("fail", "Erro ao processar a imagem.");
+                return "veiculo/cadastro";
             }
-        } catch (IOException e) {
-            attr.addFlashAttribute("fail", "Erro ao processar imagens: " + e.getMessage());
-            return "veiculo/cadastro";
         }
-
-        veiculo.setFotos(imagens);
-        veiculoService.salvar(veiculo);
+    
         attr.addFlashAttribute("success", "Veículo cadastrado com sucesso!");
         return "redirect:/veiculos/meus-veiculos";
     }
-
+    
 
     @GetMapping("/editar/{id}")
     public String preEditar(@PathVariable("id") Long id, ModelMap model) {
@@ -198,7 +187,7 @@ public class VeiculoController {
                 }
 
                 for (MultipartFile file : fotosUpload) {
-                    Imagem img = new Imagem();
+                    Imagem img = new Imagem(null, null, null);
                     img.setNome(file.getOriginalFilename());
                     img.setTipo(file.getContentType());
                     img.setDados(file.getBytes());

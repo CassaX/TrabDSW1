@@ -105,7 +105,7 @@
                     <div class="form-group col-md-6">
                         <label th:text="#{veiculo.fotos.label}" for="fotos">Fotos (até 10)</label>
                         <div class="row">
-                                <input type="file" class="form-control-file mb-2" name="fotosUpload" accept="image/*" />
+                            <input type="file" class="form-control-file mb-2" name="fotosUpload" accept="image/*" />
                         </div>
                         <div class="invalid-feedback">
                             <span th:errors="*{fotos}"></span>
@@ -114,12 +114,13 @@
                     
 
                     <!-- Alteração aqui: para exibir as imagens do banco de dados -->
-                    <div th:if="${veiculo.id != null and not #lists.isEmpty(veiculo.fotos)}" class="form-group col-md-12">
+                    <div th:if="${veiculo != null and veiculo.id != null and veiculo.fotos != null and !veiculo.fotos.isEmpty()}" class="form-group col-md-12">
+
                         <label th:text="#{veiculo.fotosExistentes.label}">Fotos Existentes:</label>
                         <div class="row">
                             <div class="col-md-3 mb-2" th:each="foto : ${veiculo.fotos}">
                                 <!-- O caminho da imagem agora é um endpoint que serve a imagem pelo ID -->
-                                <img th:src="@{/veiculos/imagens/{id}(id=${foto.id})}" class="img-thumbnail" alt="Foto do Veículo" style="max-height: 150px;" />
+                                <img th:src="@{/veiculos/imagens    /{id}(id=${foto.id})}" class="img-thumbnail" alt="Foto do Veículo" style="max-height: 150px;" />
                             </div>
                         </div>
                     </div>
