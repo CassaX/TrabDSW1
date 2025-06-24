@@ -105,9 +105,7 @@
                     <div class="form-group col-md-6">
                         <label th:text="#{veiculo.fotos.label}" for="fotos">Fotos (até 10)</label>
                         <div class="row">
-                            <div class="col-md-12" th:each="i : ${#numbers.sequence(1,10)}">
                                 <input type="file" class="form-control-file mb-2" name="fotosUpload" accept="image/*" />
-                            </div>
                         </div>
                         <div class="invalid-feedback">
                             <span th:errors="*{fotos}"></span>
