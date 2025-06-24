@@ -1,29 +1,24 @@
 package DSW.TrabalhoDSW_Veiculos.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Imagem")
 public class Imagem extends AbstractEntity<Long> {
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String nome;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String tipo;
 
-    @Lob // Usado para grandes objetos binários
-    @Column(nullable = false, columnDefinition = "LONGBLOB") // Adicionado columnDefinition para garantir tipo adequado no DB
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(nullable = false)
     private byte[] dados;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Usar LAZY para evitar carregar todas as imagens com o Veículo
-    @JoinColumn(name = "veiculo_id", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "veiculo_id")
     private Veiculo veiculo;
 
     // Getters e Setters
@@ -60,4 +55,7 @@ public class Imagem extends AbstractEntity<Long> {
         this.veiculo = veiculo;
     }
 
+    public boolean isImagem() {
+        return tipo != null && tipo.startsWith("image");
+    }
 }
