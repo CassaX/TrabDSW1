@@ -43,4 +43,9 @@ public class LojaService implements ILojaService {
     public Loja buscarPorEmail(String email){
         return dao.findByEmail(email);
     }
+
+    @Transactional(readOnly = true)
+    public Loja buscarPorCNPJ(String cnpj){
+        return dao.findByCNPJ(cnpj);
+    }
 }
