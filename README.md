@@ -7,7 +7,7 @@
 
 ## Requisitos Implementados
 ### Cadastros Básicos
--  **R1**: CRUD de clientes (admin only)(Nathalia)
+-  **R1**: CRUD de clientes (admin only) (Nathalia)
 -  **R2**: CRUD de lojas (admin only) (Nathalia)
 -  Cadastro de clientes: email, senha, CPF, nome, telefone, sexo, data nascimento (Nathalia)
 -  Cadastro de lojas: email, senha, CNPJ, nome, descrição (Nathalia)
@@ -35,6 +35,7 @@ Para executar o sistema:
 3. Acesse o sistema em: `http://localhost:8080`
 
 **Credencial de administrador pré-cadastrada:** (Ou altere com suas credenciais de banco de dados e e-mail no `application.properties`)
+
 Email: `admin@veiculos.com`  
 Senha: `admin123`
 
