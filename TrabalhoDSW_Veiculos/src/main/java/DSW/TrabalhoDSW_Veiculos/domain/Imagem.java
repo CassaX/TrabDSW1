@@ -28,6 +28,16 @@ public class Imagem extends AbstractEntity<Long> {
     @JoinColumn(name = "veiculo_id")
     private Veiculo veiculo;
 
+    public Imagem() {
+    }
+
+    public Imagem(String nome, String tipo, byte[] dados, Veiculo veiculo) {
+        this.nome = nome;
+        this.tipo = tipo;
+        this.dados = dados;
+        this.veiculo = veiculo;
+    }    
+
     // Getters e Setters
 
     public String getNome() {

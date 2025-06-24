@@ -5,7 +5,8 @@ public enum StatusProposta {
     AGUARDANDO_RESPOSTA_CLIENTE("Aguardando Resposta do Cliente"),
     ACEITO("Aceito"),
     RECUSADO_LOJA("Recusado pela Loja"), 
-    RECUSADO_CLIENTE("Recusado pelo Cliente");
+    RECUSADO_CLIENTE("Recusado pelo Cliente"),
+    AGUARDANDO_RESPOSTA_LOJA("Aguardando Resposta do Cliente");
 
     private String descricao;
 

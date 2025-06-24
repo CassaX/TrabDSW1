@@ -1,6 +1,7 @@
 package DSW.TrabalhoDSW_Veiculos.service.spec;
 
 import java.util.List;
+import java.util.Optional;
 
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
@@ -16,7 +17,8 @@ public interface IPropostaService {
 
     boolean existePropostaAberta(Long idCliente, Long idVeiculo);
 
-    Object buscarPorCliente(Cliente cliente);
+    //Object buscarPorCliente(Cliente cliente);
+    Optional<Proposta> buscarPorCliente(Cliente cliente);
 
     List<Proposta> buscarTodosPorLoja(Loja loja);
 

@@ -138,6 +138,15 @@ public class Veiculo extends AbstractEntity<Long> {
 		this.fotos = fotos;
 	}
 
+	public void addFoto(Imagem foto) {
+        fotos.add(foto);
+        foto.setVeiculo(this);
+    }
+
+    public void removeFoto(Imagem foto) {
+        fotos.remove(foto);
+        foto.setVeiculo(null);
+    }
 
 	
 }

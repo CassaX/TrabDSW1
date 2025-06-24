@@ -55,4 +55,16 @@ public class VeiculoService implements IVeiculoService {
     public List<Veiculo> buscarPorLojaComFotos(Loja loja) {
         return dao.findByLojaWithFotos(loja);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Veiculo> buscarTodosCompleto() {
+        return dao.findAllWithLojaAndFotos();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Veiculo> buscarPorModeloCompleto(String modelo) {
+        return dao.findByModeloContainingIgnoreCaseWithLojaAndFotos(modelo);
+    }
 }

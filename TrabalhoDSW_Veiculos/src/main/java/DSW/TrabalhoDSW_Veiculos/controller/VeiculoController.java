@@ -187,10 +187,11 @@ public class VeiculoController {
                 }
 
                 for (MultipartFile file : fotosUpload) {
-                    Imagem img = new Imagem(null, null, null);
-                    img.setNome(file.getOriginalFilename());
-                    img.setTipo(file.getContentType());
-                    img.setDados(file.getBytes());
+                    Imagem img = new Imagem(
+                        file.getOriginalFilename(),
+                        file.getContentType(),
+                        file.getBytes()
+                    );
                     img.setVeiculo(existente);
                     existente.getFotos().add(img);
                 }
@@ -244,17 +245,23 @@ public class VeiculoController {
 
     @GetMapping("/listar")
     public String listar(ModelMap model, @RequestParam(required = false) String modelo) {
-        List<Veiculo> veiculos = (modelo != null && !modelo.trim().isEmpty())
-                ? veiculoService.buscarTodos().stream()
-                .filter(v -> v.getModelo().toLowerCase().contains(modelo.toLowerCase()))
-                .collect(Collectors.toList())
-                : veiculoService.buscarTodos();
+        List<Veiculo> veiculos;
+        
+        if (modelo != null && !modelo.trim().isEmpty()) {
+            // Usa a nova consulta que carrega relações
+            veiculos = veiculoService.buscarPorModeloCompleto(modelo.toLowerCase());
+        } else {
+            // Usa a nova consulta que carrega relações
+            veiculos = veiculoService.buscarTodosCompleto();
+        }
 
         model.addAttribute("veiculos", veiculos);
 
+        // Inicializa o mapa mesmo para não-clientes
+        Map<Long, Proposta> propostasAtivasDoClientePorVeiculo = new HashMap<>();
+        
         Cliente cliente = getClienteLogado();
         if (cliente != null) {
-            Map<Long, Proposta> propostasAtivasDoClientePorVeiculo = new HashMap<>();
             List<Proposta> propostasDoCliente = propostaService.buscarTodosPorCliente(cliente);
             
             for (Proposta proposta : propostasDoCliente) {
@@ -263,8 +270,9 @@ public class VeiculoController {
                     propostasAtivasDoClientePorVeiculo.put(proposta.getVeiculo().getId(), proposta);
                 }
             }
-            model.addAttribute("veiculoComPropostaAberta", propostasAtivasDoClientePorVeiculo); 
         }
+        
+        model.addAttribute("veiculoComPropostaAberta", propostasAtivasDoClientePorVeiculo); 
 
         return "veiculo/lista";
     }

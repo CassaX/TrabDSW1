@@ -22,4 +22,7 @@ public interface IVeiculoService {
     List<Veiculo> buscarTodosComFotos();
 
     Object buscarPorLojaComFotos(Loja lojaLogada);
+
+    List<Veiculo> buscarTodosCompleto();
+    List<Veiculo> buscarPorModeloCompleto(String modelo);
 }
