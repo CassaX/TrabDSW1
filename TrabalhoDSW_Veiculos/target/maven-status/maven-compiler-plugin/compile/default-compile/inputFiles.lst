@@ -23,8 +23,10 @@ C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\D
 C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\security\ClienteDetails.java
 C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\security\ClienteDetailsServiceimpl.java
 C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\service\imp\ClienteService.java
+C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\service\imp\EmailService.java
 C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\service\imp\ImagemService.java
 C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\service\imp\LojaService.java
+C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\service\imp\NotificacaoPropostaService.java
 C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\service\imp\PropostaService.java
 C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\service\imp\VeiculoService.java
 C:\Users\mathe\OneDrive\Documentos\TrabDSW1\TrabalhoDSW_Veiculos\src\main\java\DSW\TrabalhoDSW_Veiculos\service\spec\IClienteService.java
