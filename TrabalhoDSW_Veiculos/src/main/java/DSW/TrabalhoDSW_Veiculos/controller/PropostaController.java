@@ -103,7 +103,7 @@ public class PropostaController {
             return "proposta/cadastro";
         }
 
-        if(propostaService.existePropostaAberta(proposta.getCliente().getId(), proposta.getVeiculo().getId())) { // Corrigido para existePropostaEmAberto
+        if(propostaService.existePropostaAberta(proposta.getCliente().getId(), proposta.getVeiculo().getId())) { 
             attr.addFlashAttribute("fail", "proposta.alreadyOpen"); 
             return "redirect:/veiculos/listar";
         }
@@ -154,6 +154,18 @@ public class PropostaController {
             return "redirect:/propostas/loja/listar";
         }
         
+        // NOVO: Se o status é AGUARDANDO_FINALIZACAO_LOJA, pré-seleciona a opção de ACEITO no HTML.
+        // Isso fará com que os campos de horário e link da reunião apareçam para edição/confirmação.
+        if (proposta.getStatus() == StatusProposta.AGUARDANDO_FINALIZACAO_LOJA) {
+            // No ModelMap, defina o status do formulário como ACEITO para que o select seja pré-selecionado.
+            // O objeto 'proposta' no modelo ainda mantém o status real 'AGUARDANDO_FINALIZACAO_LOJA'.
+            // O JavaScript no HTML vai pegar 'preSelectedStatus' para setar o select.
+            model.addAttribute("preSelectedStatus", StatusProposta.ACEITO.name()); 
+        } else {
+            // Para todos os outros status, o preSelectedStatus é o status atual da proposta.
+            model.addAttribute("preSelectedStatus", proposta.getStatus() != null ? proposta.getStatus().name() : "");
+        }
+
         model.addAttribute("veiculo", proposta.getVeiculo()); 
         model.addAttribute("proposta", proposta); 
         return "proposta/editar-status";
@@ -166,14 +178,12 @@ public class PropostaController {
         @RequestParam(value = "acaoLojista", required = false) String acaoLojista,
         RedirectAttributes attr) {
         
-        // Obter a proposta original do banco de dados
         Proposta propostaOriginal = propostaService.buscarPorId(propostaForm.getId());
         if (propostaOriginal == null) {
             attr.addFlashAttribute("fail", "proposta.notfound.update"); 
             return "redirect:/propostas/loja/listar";
         }
 
-        // Verificar permissão
         Loja lojaLogada = getLojaLogada();
         if (lojaLogada == null || propostaOriginal.getVeiculo() == null || 
             !propostaOriginal.getVeiculo().getLoja().getId().equals(lojaLogada.getId())) {
@@ -185,15 +195,16 @@ public class PropostaController {
         propostaForm.setCliente(propostaOriginal.getCliente());
         propostaForm.setVeiculo(propostaOriginal.getVeiculo());
         propostaForm.setData(propostaOriginal.getData());
-        propostaForm.setValor(propostaOriginal.getValor()); // Manter valor original para exibição em caso de erro
-        propostaForm.setCondicoesPagamento(propostaOriginal.getCondicoesPagamento()); // Manter condições originais para exibição
+        propostaForm.setValor(propostaOriginal.getValor()); 
+        propostaForm.setCondicoesPagamento(propostaOriginal.getCondicoesPagamento()); 
 
         // --- Limpeza Condicional para Validação ---
-        if (propostaForm.getStatus() != StatusProposta.ACEITO) {
+        // Se o status NÃO for ACEITO (vindo do form), zera campos de reunião.
+        if (propostaForm.getStatus() != StatusProposta.ACEITO) { 
             propostaForm.setHorarioReuniao(null); 
             propostaForm.setLinkReuniao(null);   
         }
-
+        // Se o status NÃO for AGUARDANDO_RESPOSTA_CLIENTE, zera campos de contraproposta.
         if (propostaForm.getStatus() != StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
             propostaForm.setContrapropostaValor(null);
             propostaForm.setContrapropostaCondicoes(null);
@@ -202,7 +213,8 @@ public class PropostaController {
         // --- VALIDAÇÕES MANUAIS ---
         if (propostaForm.getStatus() == null) {
             result.addError(new FieldError("proposta", "status", "proposta.status.selectAction")); 
-        } else if (propostaForm.getStatus() == StatusProposta.ACEITO) {
+        } else if (propostaForm.getStatus() == StatusProposta.ACEITO) { 
+            // Este bloco agora serve para ACEITAR proposta inicial E para FINALIZAR o agendamento
             if (propostaForm.getHorarioReuniao() == null) {
                 result.addError(new FieldError("proposta", "horarioReuniao", "proposta.horarioReuniao.required"));
             }
@@ -216,9 +228,8 @@ public class PropostaController {
             }
 
         } else if (propostaForm.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
-            // AQUI: AÇÃO DE RÁDIO BUTTON É OBRIGATÓRIA QUANDO O STATUS É RESPONDER PROPOSTA
             if (acaoLojista == null || (!"contraproposta".equals(acaoLojista) && !"recusar".equals(acaoLojista))) {
-                result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.selectAction")); // Usar esta chave se nada for selecionado OU o valor for inválido
+                result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.selectAction")); 
             } else if ("contraproposta".equals(acaoLojista)) {
                 if (propostaForm.getContrapropostaValor() == null || propostaForm.getContrapropostaValor().compareTo(BigDecimal.ZERO) <= 0) {
                     result.addError(new FieldError("proposta", "contrapropostaValor", "proposta.contrapropostaValor.invalid"));
@@ -227,33 +238,44 @@ public class PropostaController {
                     result.addError(new FieldError("proposta", "contrapropostaCondicoes", "proposta.contrapropostaCondicoes.required"));
                 }
             } else if ("recusar".equals(acaoLojista)) {
-                // Nenhuma validação extra para recusar, acaoLojista já é 'recusar'.
-            } 
-        } else {
+                // No validation needed here.
+            } else {
+                result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.invalidActionValue")); 
+            }
+        } else { // Este 'else' captura se propostaForm.getStatus() é ABERTO, ou RECUSADO_LOJA
+            // e outras situações inesperadas.
             result.addError(new FieldError("proposta", "status", "proposta.status.invalidOrUnexpected")); 
         }
         
-        // SE HOUVER ERROS, RETORNA PARA A MESMA PÁGINA COM OS DADOS DO FORM
         if (result.hasErrors()) {
-            ModelMap model = new ModelMap(); // Cria um novo ModelMap para o retorno
+            ModelMap model = new ModelMap(); 
             model.addAttribute("proposta", propostaForm); 
             model.addAttribute("veiculo", propostaOriginal.getVeiculo()); 
+            // NOVO: Garantir que preSelectedStatus seja passado de volta em caso de erro.
+            if (propostaOriginal.getStatus() == StatusProposta.AGUARDANDO_FINALIZACAO_LOJA) {
+                model.addAttribute("preSelectedStatus", StatusProposta.ACEITO.name()); 
+            } else {
+                model.addAttribute("preSelectedStatus", propostaForm.getStatus() != null ? propostaForm.getStatus().name() : "");
+            }
             attr.addFlashAttribute("fail", "proposta.update.fail"); 
             return "proposta/editar-status"; 
         }
 
         // --- Lógica de Atualização da Proposta (se não houver erros de validação) ---
-        if (propostaForm.getStatus() == StatusProposta.ACEITO) {
-            propostaOriginal.setStatus(StatusProposta.ACEITO);
+        if (propostaForm.getStatus() == StatusProposta.ACEITO) { // Este é o ACEITO para proposta inicial E FINALIZAÇÃO do agendamento
+            // O status final é ACEITO
+            propostaOriginal.setStatus(StatusProposta.ACEITO); 
             propostaOriginal.setHorarioReuniao(propostaForm.getHorarioReuniao());
             propostaOriginal.setLinkReuniao(propostaForm.getLinkReuniao());
             propostaOriginal.setContrapropostaValor(null);
             propostaOriginal.setContrapropostaCondicoes(null);
             
             propostaService.salvar(propostaOriginal);
-            notificacaoPropostaService.notificarProposta(propostaOriginal, true);
+            notificacaoPropostaService.notificarProposta(propostaOriginal, true); // Notifica o cliente
             
-            attr.addFlashAttribute("success", "proposta.accept.success");
+            attr.addFlashAttribute("success", "proposta.accept.success"); // Para proposta inicial aceita
+            // OU para finalização de agendamento
+            // attr.addFlashAttribute("success", "proposta.finalize.success"); // Usar chave de finalização se for o caso
 
         } else if (propostaForm.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
             if ("contraproposta".equals(acaoLojista)) {
@@ -261,7 +283,7 @@ public class PropostaController {
                 propostaOriginal.setValor(propostaForm.getContrapropostaValor());
                 propostaOriginal.setCondicoesPagamento(propostaForm.getContrapropostaCondicoes());
                 propostaOriginal.setContrapropostaValor(propostaForm.getContrapropostaValor());
-                propostaOriginal.setContrapropostaCondicoes(propostaForm.getContrapropostaCondicoes());
+                propostaOriginal.setContrapropostaCondicoes(propostaOriginal.getContrapropostaCondicoes());
                 propostaOriginal.setHorarioReuniao(null);
                 propostaOriginal.setLinkReuniao(null);
                 
@@ -281,13 +303,14 @@ public class PropostaController {
                 notificacaoPropostaService.notificarProposta(propostaOriginal, true);
                 
                 attr.addFlashAttribute("success", "proposta.decline.success");
-            } else { // Este 'else' captura se acaoLojista não é 'contraproposta' nem 'recusar', após a seleção principal de status
-                // Este bloco não deveria ser atingido se a validação acima estiver correta,
-                // mas é uma salvaguarda.
-                attr.addFlashAttribute("fail", "proposta.acaoLojista.invalid"); // Usar chave genérica de ação inválida
+            } else { 
+                attr.addFlashAttribute("fail", "proposta.acaoLojista.invalidActionValue"); // Ação de rádio button inválida
             }
-        } else {
-            attr.addFlashAttribute("fail", "proposta.status.invalidOrUnexpected"); // Status inválido do select
+        } else { 
+            // Este 'else' captura se propostaForm.getStatus() é ABERTO (não tratado diretamente no submit POST)
+            // ou RECUSADO_LOJA (que a loja não deveria "selecionar" no select, é um status final)
+            // ou AGUARDANDO_FINALIZACAO_LOJA (que a loja só deveria enviar como ACEITO)
+            attr.addFlashAttribute("fail", "proposta.status.invalidOrUnexpected"); 
         }
         
         return "redirect:/propostas/loja/listar"; 
@@ -343,15 +366,15 @@ public class PropostaController {
         }
 
         if ("aceitar".equals(acaoCliente)) {
-            propostaOriginal.setStatus(StatusProposta.ACEITO);
+            // Se o cliente ACEITOU a contraproposta da loja, o status agora é AGUARDANDO_FINALIZACAO_LOJA
+            propostaOriginal.setStatus(StatusProposta.AGUARDANDO_FINALIZACAO_LOJA); // NOVO STATUS!
+            
             if (propostaOriginal.getContrapropostaValor() != null) {
                 propostaOriginal.setValor(propostaOriginal.getContrapropostaValor());
             }
             if (propostaOriginal.getContrapropostaCondicoes() != null && !propostaOriginal.getContrapropostaCondicoes().trim().isEmpty()) {
                 propostaOriginal.setCondicoesPagamento(propostaOriginal.getContrapropostaCondicoes());
             }
-            propostaOriginal.setContrapropostaValor(null);
-            propostaOriginal.setContrapropostaCondicoes(null);
             
             propostaService.salvar(propostaOriginal);
             notificacaoPropostaService.notificarProposta(propostaOriginal, false); 

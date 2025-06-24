@@ -50,17 +50,26 @@
                             <td th:text="${proposta.condicoesPagamento}"></td>
                             <td th:text="${proposta.status.descricao}"></td> 
                             <td>
-                                <div th:if="${proposta.status.name() == 'ABERTO' or proposta.status.name() == 'AGUARDANDO_RESPOSTA_CLIENTE'}">
+                                <div th:if="${proposta.status.name() == 'ABERTO'}">
                                     <a class="btn btn-info btn-sm" th:href="@{/propostas/loja/gerenciar/{id} (id=${proposta.id})}"
                                        role="button" th:title="#{proposta.gerenciar.label}">
-                                        <span class="oi oi-pencil"></span> Gerenciar
+                                        <span class="oi oi-pencil"></span> <span th:text="#{proposta.gerenciar.label}">Gerenciar</span>
                                     </a>
                                 </div>
+                                <div th:if="${proposta.status.name() == 'AGUARDANDO_FINALIZACAO_LOJA'}">
+                                    <a class="btn btn-success btn-sm" th:href="@{/propostas/loja/gerenciar/{id} (id=${proposta.id})}"
+                                       role="button" th:title="#{proposta.agendarReuniao.label}">
+                                        <span class="oi oi-calendar"></span> <span th:text="#{proposta.agendarReuniao.label}">Agendar Reunião</span>
+                                    </a>
+                                </div>
+                                <div th:if="${proposta.status.name() == 'AGUARDANDO_RESPOSTA_CLIENTE'}">
+                                    <span class="badge badge-info" th:text="#{proposta.aguardandoRespostaClienteLoja}">Aguardando Resposta do Cliente</span>
+                                </div>
                                 <div th:if="${proposta.status.name() == 'RECUSADO_LOJA' or proposta.status.name() == 'RECUSADO_CLIENTE'}">
-                                    <span class="badge badge-danger">Proposta Fechada</span>
+                                    <span class="badge badge-danger" th:text="#{proposta.fechada.label}">Proposta Fechada</span>
                                 </div>
                                 <div th:if="${proposta.status.name() == 'ACEITO'}">
-                                    <span class="badge badge-success">Proposta Concluída</span>
+                                    <span class="badge badge-success" th:text="#{proposta.concluida.label}">Proposta Concluída</span>
                                 </div>
                             </td>
                         </tr>
