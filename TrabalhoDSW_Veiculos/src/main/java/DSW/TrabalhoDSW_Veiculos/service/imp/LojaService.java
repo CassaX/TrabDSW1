@@ -1,14 +1,14 @@
 package DSW.TrabalhoDSW_Veiculos.service.imp;
 
-import DSW.TrabalhoDSW_Veiculos.dao.ILojaDAO;
-import DSW.TrabalhoDSW_Veiculos.domain.Loja;
-import DSW.TrabalhoDSW_Veiculos.service.spec.ILojaService;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import DSW.TrabalhoDSW_Veiculos.dao.ILojaDAO;
+import DSW.TrabalhoDSW_Veiculos.domain.Loja;
+import DSW.TrabalhoDSW_Veiculos.service.spec.ILojaService;
 
 @Service
 @Transactional(readOnly = false)

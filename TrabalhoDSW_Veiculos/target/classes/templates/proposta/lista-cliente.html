@@ -110,11 +110,8 @@
 
                 if (horarioIsoString) {
                     try {
-                        // Tenta criar o objeto Date de forma robusta
-                        // Primeiro, com o construtor direto para ISO 8601
                         horario = new Date(horarioIsoString);
 
-                        // Se o parse direto falhar (horario for 'Invalid Date'), tente o parse manual com regex
                         if (isNaN(horario.getTime())) {
                             console.warn("DEBUG: new Date() falhou com ISO string. Tentando parse manual.");
                             var match = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/.exec(horarioIsoString);

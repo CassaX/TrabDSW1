@@ -103,14 +103,13 @@ public class PropostaController {
             return "proposta/cadastro";
         }
 
-        // CORREÇÃO: Usando o método existePropostaEmAberto que verifica mais status ativos
         if(propostaService.existePropostaAberta(proposta.getCliente().getId(), proposta.getVeiculo().getId())) {
             attr.addFlashAttribute("fail", "Você já tem uma proposta ativa para este veículo. Aguarde a resposta da loja ou verifique suas propostas.");
             return "redirect:/veiculos/listar";
         }
 
         propostaService.salvar(proposta);
-        // NOVO: Notificar a loja quando o cliente faz uma nova proposta
+
         notificacaoPropostaService.notificarProposta(proposta, false); // false para notificar a loja
         
         attr.addFlashAttribute("success", "Proposta enviada com sucesso! Aguarde a resposta da loja.");
@@ -141,7 +140,7 @@ public class PropostaController {
         return "proposta/lista-loja";
     }
 
-    // --- Loja: Gerenciar Proposta (Aceitar, Contraproposta ou Recusar) ---
+
     @GetMapping("/loja/gerenciar/{id}")
     public String gerenciarPropostaLoja(@PathVariable("id") Long idProposta, ModelMap model) {
         Proposta proposta = propostaService.buscarPorId(idProposta);
@@ -191,7 +190,6 @@ public class PropostaController {
             propostaForm.setCondicoesPagamento(propostaOriginal.getCondicoesPagamento());
         }
 
-        // --- VALIDAÇÃO CONDICIONAL E LIMPEZA DE CAMPOS ---
         if (propostaForm.getStatus() != StatusProposta.ACEITO) {
             propostaForm.setHorarioReuniao(null); 
             propostaForm.setLinkReuniao(null);   
@@ -202,7 +200,6 @@ public class PropostaController {
             propostaForm.setContrapropostaCondicoes(null);
         }
         
-        // Validação customizada
         if (propostaForm.getStatus() == null) {
             result.addError(new FieldError("proposta", "status", "Selecione uma ação para a proposta."));
         } else if (propostaForm.getStatus() == StatusProposta.ACEITO) {
@@ -290,11 +287,9 @@ public class PropostaController {
             attr.addFlashAttribute("fail", "Status inválido ou ação inesperada. Nenhuma alteração realizada.");
         }
 
-        // REMOVIDO SALVAMENTO DUPLICADO: propostaService.salvar(propostaOriginal); 
         return "redirect:/propostas/loja/listar"; 
     }
 
-    // --- Cliente: Responder Contraproposta ---
     @GetMapping("/cliente/responder/{id}")
     public String responderContrapropostaCliente(@PathVariable("id") Long idProposta, ModelMap model) {
         Proposta proposta = propostaService.buscarPorId(idProposta);
@@ -332,8 +327,7 @@ public class PropostaController {
             if (propostaForm.getCondicoesPagamento() == null || propostaForm.getCondicoesPagamento().trim().isEmpty()) {
                  result.addError(new FieldError("proposta", "condicoesPagamento", "As condições da nova proposta são obrigatórias."));
             }
-            // Validação de formato de URL para o link da reunião (se for caso de nova proposta e tiver link)
-            // Normalmente, nova proposta não teria link de reunião.
+
             if (propostaForm.getLinkReuniao() != null && !propostaForm.getLinkReuniao().trim().isEmpty()) {
                 if (!isValidUrl(propostaForm.getLinkReuniao())) {
                     result.addError(new FieldError("proposta", "linkReuniao", "Formato de URL inválido para o link da reunião."));
@@ -398,7 +392,7 @@ public class PropostaController {
             attr.addFlashAttribute("fail", "Ação inválida para a contraproposta.");
             return "redirect:/propostas/listar";
         }
-        propostaService.salvar(propostaOriginal); // ESTE SALVAMENTO FINAL É REPETIDO!
+        propostaService.salvar(propostaOriginal);
         return "redirect:/propostas/listar";
     }
 

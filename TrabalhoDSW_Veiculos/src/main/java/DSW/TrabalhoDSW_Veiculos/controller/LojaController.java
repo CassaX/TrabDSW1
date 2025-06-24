@@ -94,27 +94,5 @@ public class LojaController {
         return "loja/lista";
     }
     
-    /* 
-    @GetMapping("/perfil")
-    public String perfil(ModelMap model, RedirectAttributes attr) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        Loja loja = service.buscarPorEmail(email);
-        
-        if (loja == null || !"LOJA".equals(loja.getRole())) { // Salvaguarda para garantir que é uma loja
-            System.err.println("Erro: Usuário logado como " + email + " tentou acessar perfil de loja, mas não foi encontrado ou não tem ROLE_LOJA.");
-            attr.addFlashAttribute("fail", "Seu perfil de loja não foi encontrado ou você não tem permissão para acessá-lo.");
-            // Redireciona para o perfil apropriado ou home
-            if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_CLIENTE"))) {
-                return "redirect:/cliente/perfil";
-            } else if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-                return "redirect:/admin/dashboard";
-            }
-            return "redirect:/home";
-        }
-
-        model.addAttribute("loja", loja);
-        return "loja/perfil";
-    }
-    */
+   
 }

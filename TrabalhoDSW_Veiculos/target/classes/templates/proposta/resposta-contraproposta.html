@@ -130,13 +130,10 @@
         }
 
         $(document).ready(function() {
-            toggleClienteResponseFields(); // Inicializa os campos
+            toggleClienteResponseFields();
             $('#novoValor').mask('########0.00', {reverse: true});
         });
 
-        // Este código garante que os valores dos campos visíveis sejam copiados para os hidden fields
-        // antes do submit, se a opção "nova" estiver selecionada.
-        // Isso é uma alternativa para lidar com validação de campos que só aparecem condicionalmente.
         $('form').submit(function() {
             var acaoCliente = $('input[name="acaoCliente"]:checked').val();
             if (acaoCliente === 'nova') {

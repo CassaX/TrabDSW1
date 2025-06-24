@@ -57,15 +57,13 @@ public class VeiculoController {
     @Autowired
     private IImagemService imagemService;
 
-    // ==== Métodos Auxiliares ====
-
     private Loja getLojaLogada() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // Garantir que não seja "anonymousUser" antes de buscar a loja
         if (auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
             return lojaService.buscarPorEmail(auth.getName());
         }
-        return null; // Retorna null se não houver loja logada ou for anonymous
+        return null; 
     }
 
     private Cliente getClienteLogado() {
@@ -75,10 +73,10 @@ public class VeiculoController {
                 auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_CLIENTE"))) {
             return clienteService.buscarPorEmail(auth.getName());
         }
-        return null; // Retorna null se não houver cliente logado ou não for ROLE_CLIENTE
+        return null; 
     }
 
-    // ==== Cadastro ====
+
 
     @GetMapping("/cadastrar")
     public String cadastrar(Veiculo veiculo, ModelMap model) {
@@ -140,7 +138,6 @@ public class VeiculoController {
         return "redirect:/veiculos/meus-veiculos";
     }
 
-    // ==== Edição ====
 
     @GetMapping("/editar/{id}")
     public String preEditar(@PathVariable("id") Long id, ModelMap model) {
@@ -188,16 +185,12 @@ public class VeiculoController {
         if (fotosUpload != null && !fotosUpload.isEmpty() && !fotosUpload.get(0).isEmpty()) {
             if (fotosUpload.size() > 10) {
                 attr.addFlashAttribute("fail", "Você pode enviar no máximo 10 imagens.");
-                // Em caso de erro, você pode querer manter as fotos já carregadas ou resetar.
-                // Para manter, você precisaria reatribuir 'existente.getFotos()' aqui e na view.
+
                 veiculo.setFotos(existente.getFotos());
                 return "veiculo/cadastro";
             }
 
             try {
-                // Remover imagens antigas de forma segura
-                // Primeiro desassociar as imagens do veículo, depois excluir do DB se necessário
-                // Ou, se a relação for CascadeType.ALL no Veiculo.fotos, basta limpar a coleção
                 if (existente.getFotos() != null) {
                     existente.getFotos().clear(); 
                 } else {
@@ -219,7 +212,7 @@ public class VeiculoController {
             }
         }
         
-        // Copiar os dados do formulário para a entidade existente
+
         existente.setPlaca(veiculo.getPlaca());
         existente.setModelo(veiculo.getModelo());
         existente.setChassi(veiculo.getChassi());
@@ -233,7 +226,6 @@ public class VeiculoController {
         return "redirect:/veiculos/meus-veiculos";
     }
 
-    // ==== Imagem individual ====
 
     @GetMapping("/imagens/{id}")
     public ResponseEntity<byte[]> getImagem(@PathVariable Long id) {
@@ -248,7 +240,6 @@ public class VeiculoController {
         }
     }
 
-    // ==== Meus veículos (para a loja) ====
 
     @GetMapping("/meus-veiculos")
     public String listarMeusVeiculos(ModelMap model) {
@@ -261,7 +252,6 @@ public class VeiculoController {
         return "veiculo/meus-veiculos";
     }
 
-    // ==== Todos veículos (para o cliente ou visitante) ====
 
     @GetMapping("/listar")
     public String listar(ModelMap model, @RequestParam(required = false) String modelo) {
@@ -275,25 +265,21 @@ public class VeiculoController {
 
         Cliente cliente = getClienteLogado();
         if (cliente != null) {
-            // Mapeia o ID do veículo para a PROPOSTA ativa do cliente para aquele veículo
             Map<Long, Proposta> propostasAtivasDoClientePorVeiculo = new HashMap<>();
             List<Proposta> propostasDoCliente = propostaService.buscarTodosPorCliente(cliente);
             
             for (Proposta proposta : propostasDoCliente) {
-                // Considera ativa se o status for ABERTO ou AGUARDANDO_RESPOSTA_CLIENTE
                 if (proposta.getStatus() == StatusProposta.ABERTO || 
                     proposta.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
                     propostasAtivasDoClientePorVeiculo.put(proposta.getVeiculo().getId(), proposta);
                 }
             }
-            // Nome do atributo no modelo deve corresponder ao usado no HTML
             model.addAttribute("veiculoComPropostaAberta", propostasAtivasDoClientePorVeiculo); 
         }
 
         return "veiculo/lista";
     }
 
-    // ==== Excluir ====
 
     @GetMapping("/excluir/{id}")
     public String excluir(@PathVariable("id") Long id, RedirectAttributes attr) {
@@ -304,10 +290,6 @@ public class VeiculoController {
             attr.addFlashAttribute("fail", "Permissão negada ou veículo não encontrado.");
             return "redirect:/veiculos/meus-veiculos";
         }
-
-        // TODO: Adicionar verificação se existem propostas ATIVAS para este veículo.
-        // Se houver, a exclusão pode ser bloqueada ou as propostas devem ser marcadas como canceladas.
-        // Isso depende da regra de negócio.
 
         veiculoService.excluir(id);
         attr.addFlashAttribute("success", "Veículo excluído com sucesso!");

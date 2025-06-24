@@ -4,7 +4,7 @@ public enum StatusProposta {
     ABERTO("Aguardando Resposta da Loja"),
     AGUARDANDO_RESPOSTA_CLIENTE("Aguardando Resposta do Cliente"),
     ACEITO("Aceito"),
-    RECUSADO_LOJA("Recusado pela Loja"), // Loja recusou e fechou a proposta
+    RECUSADO_LOJA("Recusado pela Loja"), 
     RECUSADO_CLIENTE("Recusado pelo Cliente");
 
     private String descricao;

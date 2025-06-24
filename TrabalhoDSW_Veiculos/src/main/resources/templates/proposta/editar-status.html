@@ -153,12 +153,7 @@
             $('#linkReuniao').val('');
             $('#contrapropostaValor').val('');
             $('#contrapropostaCondicoes').val('');
-            // Campos de reunião da contraproposta foram removidos do HTML, mas os valores podem estar no objeto JS
-            // Então é bom limpar no JS para garantir.
-            // $('#horarioReuniaoContra').val(''); // Não existe mais no HTML
-            // $('#linkReuniaoContra').val(''); // Não existe mais no HTML
 
-            // Pega os valores da proposta para preenchimento inicial (se houver)
             var proposta = [[${proposta}]];
             var currentHorarioReuniao = proposta.horarioReuniao;
             var currentLinkReuniao = proposta.linkReuniao;
@@ -196,36 +191,25 @@
         function toggleSubFieldsLoja() { 
             var acaoLojista = $('input[name="acaoLojista"]:checked').val();
             var contrapropostaInputs = document.getElementById('contrapropostaInputs');
-            
-            // Pega os valores da proposta para preenchimento inicial (se houver e a ação for contraproposta)
+
             var proposta = [[${proposta}]];
             var currentContrapropostaValor = proposta.contrapropostaValor;
             var currentContrapropostaCondicoes = proposta.contrapropostaCondicoes;
 
             if (acaoLojista === 'contraproposta') {
                 contrapropostaInputs.style.display = 'block';
-                // Preenche com os valores da contraproposta anterior (se existirem)
-                // Usar replace('.', ',') para garantir formato da máscara se o valor vier com ponto
+
                 $('#contrapropostaValor').val(currentContrapropostaValor ? currentContrapropostaValor.toFixed(2).replace('.', ',') : ''); 
                 $('#contrapropostaCondicoes').val(currentContrapropostaCondicoes || '');
-                // Nulo os campos de reunião da contraproposta aqui, se houver necessidade de apagar valores prévios
-                // Esses campos foram removidos do HTML, mas é bom garantir que não haja lixo.
-                // delete proposta.horarioReuniao; // Isso afeta o objeto JS. Cuidado.
-                // delete proposta.linkReuniao; // Isso afeta o objeto JS. Cuidado.
 
             } else { // 'recusar'
                 contrapropostaInputs.style.display = 'none';
-                // Limpar campos de contraproposta se a opção "Recusar" for selecionada
                 $('#contrapropostaValor').val('');
                 $('#contrapropostaCondicoes').val('');
-                // Limpa valores dos campos de reunião também (se existissem no HTML)
-                // $('#horarioReuniaoContra').val(''); 
-                // $('#linkReuniaoContra').val(''); 
             }
         }
 
         $(document).ready(function() {
-            // Define o status inicial no select ao carregar a página
             var initialStatusName = [[${proposta.status != null ? proposta.status.name() : ''}]];
             if (initialStatusName === 'ACEITO') {
                 document.getElementById('status').value = 'ACEITO';
@@ -236,8 +220,6 @@
             }
 
             toggleFieldsLoja(); 
-            // Máscara para o formato 0000000.00 (9 inteiros, 2 decimais com vírgula)
-            // Use reverse:true para entrada digitada da direita para a esquerda
             $('#contrapropostaValor').mask('##########0.00', {reverse: true});
         });
         /*]]>*/

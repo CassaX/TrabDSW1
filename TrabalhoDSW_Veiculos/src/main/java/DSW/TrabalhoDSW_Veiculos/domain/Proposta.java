@@ -12,31 +12,24 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-// Adicione JsonManagedReference se Loja tiver List<Proposta>
-// import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "Proposta")
 public class Proposta extends AbstractEntity<Long> {
 
-    @NotBlank // Se a data for String, deve ser preenchida
+    @NotBlank 
     @Column(nullable = false, length = 19)
     private String data;
     
     @Min(value = 0, message = "{Min.proposta.valor}")
     @Column(columnDefinition = "DECIMAL(20,2) DEFAULT 0.0")
-    // Removendo @NotNull daqui, a validação de obrigatoriedade será no controller
     private BigDecimal valor; // Valor da proposta original OU o valor da contraproposta aceita
 
-    // Certifique-se que o Veiculo está correto com JsonManaged/BackReference para evitar ciclos
-    // @NotNull(message = "{NotNull.proposta.veiculo}") // Mantenha se quiser que sempre precise de veiculo
     @ManyToOne
     @JoinColumn(name = "veiculo_id", nullable = false)
     private Veiculo veiculo;
 
-    // Certifique-se que o Cliente está correto com JsonManaged/BackReference para evitar ciclos
-    // @NotNull(message = "{NotNull.proposta.cliente}") // Mantenha se quiser que sempre precise de cliente
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
@@ -50,14 +43,11 @@ public class Proposta extends AbstractEntity<Long> {
 
     @Min(value = 0, message = "{Min.proposta.contrapropostaValor}")
     @Column(columnDefinition = "DECIMAL(8,2) DEFAULT 0.0")
-    // REMOVER @NotNull SE FOR OPCIONAL (que é o caso na contraproposta)
     private BigDecimal contrapropostaValor; 
     
     @Column(columnDefinition = "TEXT")
-    // REMOVER @NotBlank SE FOR OPCIONAL (que é o caso na contraproposta)
     private String contrapropostaCondicoes; 
 
-    // REMOVER @NotNull daqui, a validação de obrigatoriedade será no controller para ACEITO
     private LocalDateTime horarioReuniao; 
     
     
