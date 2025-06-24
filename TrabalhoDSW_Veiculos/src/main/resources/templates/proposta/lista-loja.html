@@ -48,21 +48,10 @@
                             <td th:text="${proposta.cliente.nome} + ' (' + ${proposta.cliente.email} + ')'"></td>
                             <td th:text="|R$ ${#numbers.formatDecimal(proposta.valor, 2, 'COMMA', 2, 'POINT')}|"></td>
                             <td th:text="${proposta.condicoesPagamento}"></td>
-                            <td th:text="${proposta.status}"></td>
-                            <td>
-                                <div th:if="${proposta.status == 'ABERTO'}">
-                                    <a class="btn btn-success btn-sm" th:href="@{/propostas/aceitar/{id} (id=${proposta.id})}"
-                                        role="button" th:title="#{proposta.aceitar.label}">
-                                        <span class="oi oi-check"></span> <span th:text="#{proposta.aceitar.label}">Aceitar</span>
-                                    </a>
-                                    <a class="btn btn-danger btn-sm" th:href="@{/propostas/naoaceitar/{id} (id=${proposta.id})}"
-                                        role="button" th:title="#{proposta.naoaceitar.label}">
-                                        <span class="oi oi-x"></span> <span th:text="#{proposta.naoaceitar.label}">Não Aceitar</span>
-                                    </a>
-                                </div>
-                                <a class="btn btn-info btn-sm" th:href="@{/propostas/detalhes/{id} (id=${proposta.id})}"
-                                    role="button" th:title="#{proposta.detalhes.label}">
-                                    <span class="oi oi-eye"></span> <span th:text="#{proposta.detalhes.label}">Ver Detalhes</span>
+                            <td th:text="${proposta.status.descricao}"></td> <td>
+                                <a class="btn btn-info btn-sm" th:href="@{/propostas/loja/gerenciar/{id} (id=${proposta.id})}"
+                                   role="button" th:title="#{proposta.gerenciar.label}">
+                                    <span class="oi oi-pencil"></span> Gerenciar
                                 </a>
                             </td>
                         </tr>

@@ -1,4 +1,4 @@
-package DSW.TrabalhoDSW_Veiculos.service.impl;
+package DSW.TrabalhoDSW_Veiculos.service.imp;
 
 import java.util.List;
 

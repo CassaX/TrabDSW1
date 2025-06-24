@@ -1,46 +1,23 @@
 package DSW.TrabalhoDSW_Veiculos.dao;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
+import DSW.TrabalhoDSW_Veiculos.domain.Cliente; // Importar o enum
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
-import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
-import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
+import DSW.TrabalhoDSW_Veiculos.domain.Proposta; // Para findByCliente
+import DSW.TrabalhoDSW_Veiculos.domain.StatusProposta;
 
-@SuppressWarnings("unchecked")
-public interface IPropostaDAO extends CrudRepository<Proposta, Long> {
+public interface IPropostaDAO extends JpaRepository<Proposta, Long> {
 
-    Proposta findById(long id);
+    // AQUI: Usando "StatusIn" para buscar por múltiplos status do enum
+    boolean existsByClienteIdAndVeiculoIdAndStatusIn(Long idCliente, Long idVeiculo, List<StatusProposta> status);
 
-    @SuppressWarnings("null")
-    @Override
-    List<Proposta> findAll();
+    List<Proposta> findAllByCliente(Cliente cliente);
 
-    @SuppressWarnings("null")
-    @Override
-    Proposta save(Proposta proposta);
-
-    @Override
-    void deleteById(Long id);
-
-    List<Proposta> findByCliente(Cliente cliente);
-
-    List<Proposta> findByStatus(String status);
-
-    List<Proposta> findByVeiculoLoja(Loja loja);
-
-    List<Proposta> findByVeiculoAndVeiculo_Loja(Veiculo veiculo, Loja loja);
-
-    long countByClienteAndVeiculoAndStatus(Cliente cliente, Veiculo veiculo, String status);
-
-    List<Proposta> findByVeiculo(Veiculo veiculo);
-
-    List<Proposta> findAllByCliente(Cliente c);
-
-    boolean existsByClienteIdAndVeiculoIdAndStatus(Long idCliente, Long idVeiculo, String string);
+    Optional<Proposta> findByCliente(Cliente cliente); // Retorna Optional
 
     List<Proposta> findAllByVeiculo_Loja(Loja loja);
-
 }
