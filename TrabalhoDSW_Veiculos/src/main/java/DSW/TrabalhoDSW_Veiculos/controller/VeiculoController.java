@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors; // Adicione este import
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -19,7 +20,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PostMapping; // Inclui StatusProposta
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,7 +60,6 @@ public class VeiculoController {
 
     private Loja getLojaLogada() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        // Garantir que não seja "anonymousUser" antes de buscar a loja
         if (auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
             return lojaService.buscarPorEmail(auth.getName());
         }
@@ -91,7 +91,7 @@ public class VeiculoController {
 
     @PostMapping("/salvar")
     public String salvar(@Valid Veiculo veiculo, BindingResult result,
-                         @RequestParam("fotosUpload") MultipartFile fotosUpload,
+                         @RequestParam("fotosUpload") List<MultipartFile> fotosUpload,
                          RedirectAttributes attr) {
     
         Loja loja = getLojaLogada();
@@ -104,27 +104,32 @@ public class VeiculoController {
         if (result.hasErrors()) {
             return "veiculo/cadastro";
         }
-    
-        veiculo.setFotos(new ArrayList<>());
-        veiculoService.salvar(veiculo);
-    
-        if (!fotosUpload.isEmpty()) {
-            try {
-                String fileName = StringUtils.cleanPath(fotosUpload.getOriginalFilename());
-                Imagem imagem = new Imagem(fileName, fotosUpload.getContentType(), fotosUpload.getBytes());
-                imagem.setVeiculo(veiculo); 
-                imagemService.salvar(imagem);
-            } catch (IOException e) {
-                e.printStackTrace();
-                attr.addFlashAttribute("fail", "Erro ao processar a imagem.");
-                return "veiculo/cadastro";
+        veiculoService.salvar(veiculo); 
+
+        
+        if (fotosUpload != null && !fotosUpload.isEmpty()) {
+            for (MultipartFile foto : fotosUpload) {
+                if (foto != null && !foto.isEmpty()) {
+                    try {
+                        Imagem imagem = new Imagem(
+                            StringUtils.cleanPath(foto.getOriginalFilename()),
+                            foto.getContentType(),
+                            foto.getBytes()
+                        );
+                        imagem.setVeiculo(veiculo);
+                        imagemService.salvar(imagem);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        attr.addFlashAttribute("fail", "Erro ao processar uma das imagens.");
+                        return "veiculo/cadastro";
+                    }
+                }
             }
         }
-    
-        attr.addFlashAttribute("success", "Veículo cadastrado com sucesso!");
+                attr.addFlashAttribute("success", "Veículo cadastrado com sucesso!");
         return "redirect:/veiculos/meus-veiculos";
     }
-    
+
 
     @GetMapping("/editar/{id}")
     public String preEditar(@PathVariable("id") Long id, ModelMap model) {
@@ -157,9 +162,9 @@ public class VeiculoController {
             return "redirect:/veiculos/meus-veiculos";
         }
         
-        // Mantém as fotos existentes caso nenhuma nova foto seja enviada
+
         if (fotosUpload == null || fotosUpload.isEmpty() || fotosUpload.get(0).isEmpty()) {
-             veiculo.setFotos(existente.getFotos());
+             veiculo.setFotos(existente.getFotos()); 
         }
 
         if (result.hasErrors()) {
@@ -176,26 +181,29 @@ public class VeiculoController {
                 return "veiculo/cadastro";
             }
 
-            try {
-                if (existente.getFotos() != null) {
-                    existente.getFotos().clear(); 
-                } else {
-                    existente.setFotos(new ArrayList<>());
-                }
+            if (existente.getFotos() == null) {
+                existente.setFotos(new ArrayList<>());
+            } else {
+                existente.getFotos().clear();
+            }
+            
 
-                for (MultipartFile file : fotosUpload) {
-                    Imagem img = new Imagem(
-                        file.getOriginalFilename(),
-                        file.getContentType(),
-                        file.getBytes()
-                    );
-                    img.setVeiculo(existente);
-                    existente.getFotos().add(img);
+            for (MultipartFile foto : fotosUpload) {
+                if (foto != null && !foto.isEmpty()) {
+                    try {
+                        Imagem imagem = new Imagem(
+                            StringUtils.cleanPath(foto.getOriginalFilename()),
+                            foto.getContentType(),
+                            foto.getBytes()
+                        );
+                        imagem.setVeiculo(veiculo);
+                        imagemService.salvar(imagem);
+                    } catch (IOException e) {
+                        attr.addFlashAttribute("fail", "Erro ao processar imagens: " + e.getMessage());
+                        veiculo.setFotos(existente.getFotos()); 
+                        return "veiculo/cadastro";
+                    }
                 }
-            } catch (IOException e) {
-                attr.addFlashAttribute("fail", "Erro ao processar imagens: " + e.getMessage());
-                veiculo.setFotos(existente.getFotos()); 
-                return "veiculo/cadastro";
             }
         }
         
@@ -242,20 +250,17 @@ public class VeiculoController {
 
     @GetMapping("/listar")
     public String listar(ModelMap model, @RequestParam(required = false) String modelo) {
-        List<Veiculo> veiculos;
-        
-        if (modelo != null && !modelo.trim().isEmpty()) {
-            veiculos = veiculoService.buscarPorModeloCompleto(modelo.toLowerCase());
-        } else {
-            veiculos = veiculoService.buscarTodosCompleto();
-        }
+        List<Veiculo> veiculos = (modelo != null && !modelo.trim().isEmpty())
+                ? veiculoService.buscarTodos().stream()
+                .filter(v -> v.getModelo().toLowerCase().contains(modelo.toLowerCase()))
+                .collect(Collectors.toList())
+                : veiculoService.buscarTodos();
 
         model.addAttribute("veiculos", veiculos);
 
-        Map<Long, Proposta> propostasAtivasDoClientePorVeiculo = new HashMap<>();
-        
         Cliente cliente = getClienteLogado();
         if (cliente != null) {
+            Map<Long, Proposta> propostasAtivasDoClientePorVeiculo = new HashMap<>();
             List<Proposta> propostasDoCliente = propostaService.buscarTodosPorCliente(cliente);
             
             for (Proposta proposta : propostasDoCliente) {
@@ -264,9 +269,8 @@ public class VeiculoController {
                     propostasAtivasDoClientePorVeiculo.put(proposta.getVeiculo().getId(), proposta);
                 }
             }
+            model.addAttribute("veiculoComPropostaAberta", propostasAtivasDoClientePorVeiculo); 
         }
-        
-        model.addAttribute("veiculoComPropostaAberta", propostasAtivasDoClientePorVeiculo); 
 
         return "veiculo/lista";
     }

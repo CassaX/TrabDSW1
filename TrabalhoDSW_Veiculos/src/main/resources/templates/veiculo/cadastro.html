@@ -105,7 +105,7 @@
                     <div class="form-group col-md-6">
                         <label th:text="#{veiculo.fotos.label}" for="fotos">Fotos (até 10)</label>
                         <div class="row">
-                            <input type="file" class="form-control-file mb-2" name="fotosUpload" accept="image/*" />
+                            <input type="file" name="fotosUpload" accept="image/*" multiple />
                         </div>
                         <div class="invalid-feedback">
                             <span th:errors="*{fotos}"></span>
@@ -118,9 +118,9 @@
 
                         <label th:text="#{veiculo.fotosExistentes.label}">Fotos Existentes:</label>
                         <div class="row">
-                            <div class="col-md-3 mb-2" th:each="foto : ${veiculo.fotos}">
+                            <div  th:each="foto : ${veiculo.fotos}">
                                 <!-- O caminho da imagem agora é um endpoint que serve a imagem pelo ID -->
-                                <img th:src="@{/veiculos/imagens    /{id}(id=${foto.id})}" class="img-thumbnail" alt="Foto do Veículo" style="max-height: 150px;" />
+                                <img th:src="@{/veiculos/imagens/{id}(id=${foto.id})}" class="img-thumbnail" alt="Foto do Veículo" style="max-height: 150px;" />
                             </div>
                         </div>
                     </div>
