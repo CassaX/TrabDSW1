@@ -26,34 +26,28 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Rotas públicas (acessíveis a todos, incluindo não logados)
                         .requestMatchers("/", "/home", "/error", "/login", "/registro", "/registro/**").permitAll()
                         .requestMatchers("/webjars/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/veiculos", "/veiculos/listar").permitAll()
-                        // Novas rotas para servir imagens - tornadas públicas para visualização
                         .requestMatchers("/veiculos/imagem/**", "/veiculos/veiculo/**").permitAll()
 
-                        // Admin (AGORA O ADMIN PODE ACESSAR TUDO RELACIONADO A CLIENTE E LOJA)
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/cliente/**").hasRole("ADMIN")
                         .requestMatchers("/loja/**").hasRole("ADMIN")
 
-                        // Cliente (acesso restrito aos CLIENTES, exceto se for ADMIN)
                         .requestMatchers("/propostas/criar/**", "/propostas/minhas-propostas").hasRole("CLIENTE")
 
-                        // Loja (acesso restrito às LOJAS, exceto se for ADMIN)
-                        // Permissões para GET e POST para rotas de veículos
+
                         .requestMatchers(HttpMethod.GET, "/veiculos/cadastrar", "/veiculos/meus-veiculos", "/veiculos/editar/**").hasRole("LOJA")
                         .requestMatchers(HttpMethod.POST, "/veiculos/salvar", "/veiculos/editar").hasRole("LOJA")
-                        .requestMatchers(HttpMethod.GET, "/veiculos/excluir/**").hasRole("LOJA") // Exclusão via GET (se seu botão é link)
-                        .requestMatchers(HttpMethod.POST, "/veiculos/excluir/**").hasRole("LOJA") // Exclusão via POST (se você mudar para formulário)
+                        .requestMatchers(HttpMethod.GET, "/veiculos/excluir/**").hasRole("LOJA") 
+                        .requestMatchers(HttpMethod.POST, "/veiculos/excluir/**").hasRole("LOJA") 
 
                         .requestMatchers("/propostas/loja/**", "/propostas/editar-status/**").hasRole("LOJA")
 
-                        // Rotas compartilhadas (ADMIN, CLIENTE, LOJA - dependendo do contexto)
                         .requestMatchers("/propostas/salvar").hasAnyRole("CLIENTE", "LOJA", "ADMIN")
 
-                        // Qualquer outra requisição precisa estar autenticada
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

@@ -199,11 +199,9 @@ public class PropostaController {
             propostaForm.setContrapropostaCondicoes(null);
         }
         
-        //  VALIDAÇÕES MANUAIS 
         if (propostaForm.getStatus() == null) {
             result.addError(new FieldError("proposta", "status", "proposta.status.selectAction")); 
         } else if (propostaForm.getStatus() == StatusProposta.ACEITO) { 
-            // Este bloco agora serve para ACEITAR proposta inicial E para FINALIZAR o agendamento
             if (propostaForm.getHorarioReuniao() == null) {
                 result.addError(new FieldError("proposta", "horarioReuniao", "proposta.horarioReuniao.required"));
             }
@@ -227,7 +225,6 @@ public class PropostaController {
                     result.addError(new FieldError("proposta", "contrapropostaCondicoes", "proposta.contrapropostaCondicoes.required"));
                 }
             } else if ("recusar".equals(acaoLojista)) {
-                // No validation needed here.
             } else {
                 result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.invalidActionValue")); 
             }
@@ -239,7 +236,6 @@ public class PropostaController {
             ModelMap model = new ModelMap(); 
             model.addAttribute("proposta", propostaForm); 
             model.addAttribute("veiculo", propostaOriginal.getVeiculo()); 
-            // NOVO: Garantir que preSelectedStatus seja passado de volta em caso de erro.
             if (propostaOriginal.getStatus() == StatusProposta.AGUARDANDO_FINALIZACAO_LOJA) {
                 model.addAttribute("preSelectedStatus", StatusProposta.ACEITO.name()); 
             } else {
@@ -258,7 +254,7 @@ public class PropostaController {
             propostaOriginal.setContrapropostaCondicoes(null);
             
             propostaService.salvar(propostaOriginal);
-            notificacaoPropostaService.notificarProposta(propostaOriginal, true); // Notifica o cliente
+            notificacaoPropostaService.notificarProposta(propostaOriginal, true);
             
             attr.addFlashAttribute("success", "proposta.accept.success");
 
@@ -289,7 +285,7 @@ public class PropostaController {
                 
                 attr.addFlashAttribute("success", "proposta.decline.success");
             } else { 
-                attr.addFlashAttribute("fail", "proposta.acaoLojista.invalidActionValue"); // Ação de rádio button inválida
+                attr.addFlashAttribute("fail", "proposta.acaoLojista.invalidActionValue");
             }
         } else { 
             attr.addFlashAttribute("fail", "proposta.status.invalidOrUnexpected"); 
@@ -401,7 +397,6 @@ public class PropostaController {
         return "redirect:/propostas/listar";
     }
 
-    // Método auxiliar para validação de URL
     private boolean isValidUrl(String url) {
         try {
             new java.net.URL(url).toURI();

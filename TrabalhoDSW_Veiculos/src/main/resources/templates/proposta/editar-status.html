@@ -222,7 +222,6 @@
                 } else if (statusValue === 'AGUARDANDO_RESPOSTA_CLIENTE') {
                     $("#responderPropostaFields").show();
                     
-                    // Configura radio button se aplicável
                     if ('[[${proposta.status.name}]]' === 'AGUARDANDO_RESPOSTA_CLIENTE') {
                         $("#comContraproposta").prop("checked", true);
                         $("#contrapropostaInputs").show();

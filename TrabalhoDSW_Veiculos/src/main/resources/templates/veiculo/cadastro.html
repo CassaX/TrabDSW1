@@ -113,13 +113,11 @@
                     </div>
                     
 
-                    <!-- Alteração aqui: para exibir as imagens do banco de dados -->
                     <div th:if="${veiculo != null and veiculo.id != null and veiculo.fotos != null and !veiculo.fotos.isEmpty()}" class="form-group col-md-12">
 
                         <label th:text="#{veiculo.fotosExistentes.label}">Fotos Existentes:</label>
                         <div class="row">
                             <div  th:each="foto : ${veiculo.fotos}">
-                                <!-- O caminho da imagem agora é um endpoint que serve a imagem pelo ID -->
                                 <img th:src="@{/veiculos/imagens/{id}(id=${foto.id})}" class="img-thumbnail" alt="Foto do Veículo" style="max-height: 150px;" />
                             </div>
                         </div>

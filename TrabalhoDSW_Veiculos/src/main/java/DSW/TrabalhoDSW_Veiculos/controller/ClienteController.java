@@ -34,17 +34,14 @@ public class ClienteController {
     
     @PostMapping("/salvar")
     public String salvar(@Valid Cliente cliente, BindingResult result, RedirectAttributes attr, ModelMap model) {
-        // Validação da senha no cadastro 
         if (cliente.getSenha() == null || cliente.getSenha().trim().isEmpty()) {
             result.addError(new FieldError("cliente", "senha", "cliente.senha.notblank"));
         }
         
-        // VALIDAÇÃO DE UNICIDADE DE CPF PARA CADASTRO
         if (service.buscarPorCPF(cliente.getCPF()) != null) { 
             result.addError(new FieldError("cliente", "CPF", "cliente.cpf.cadastrado")); 
         }
 
-        // Validação de unicidade de email para cadastro (se email já existe)
         if (service.buscarPorEmail(cliente.getEmail()) != null) {
             result.addError(new FieldError("cliente", "email", "cliente.email.cadastrado"));
         }
@@ -76,19 +73,17 @@ public class ClienteController {
             attr.addFlashAttribute("fail", "cliente.notfound"); 
         }
 
-        // VALIDAÇÃO DE UNICIDADE DE CPF PARA EDIÇÃO
         Cliente clienteByCPF = service.buscarPorCPF(cliente.getCPF());
         if (clienteByCPF != null && !clienteByCPF.getId().equals(cliente.getId())) { 
             result.addError(new FieldError("cliente", "CPF", "cliente.cpf.cadastradoOutro")); 
         }
 
-        // Validação de unicidade de email para edição
+
         Cliente clienteByEmail = service.buscarPorEmail(cliente.getEmail());
         if (clienteByEmail != null && !clienteByEmail.getId().equals(cliente.getId())) {
             result.addError(new FieldError("cliente", "email", "cliente.email.cadastradoOutro"));
         }
 
-        // Lógica da Senha
         if (novaSenha != null && !novaSenha.trim().isEmpty()) {
             cliente.setSenha(encoder.encode(novaSenha)); 
         } else {
@@ -98,7 +93,7 @@ public class ClienteController {
         if (result.hasErrors()) {
             cliente.setRole(clienteOriginal.getRole());
             cliente.setEnabled(clienteOriginal.isEnabled());
-            attr.addFlashAttribute("fail", "cliente.edit.fail"); // Mensagem geral de falha na edição
+            attr.addFlashAttribute("fail", "cliente.edit.fail"); 
             return "cliente/cadastro"; 
         }
         
@@ -106,7 +101,7 @@ public class ClienteController {
         cliente.setEnabled(clienteOriginal.isEnabled());
 
         service.salvar(cliente);
-        attr.addFlashAttribute("success", "cliente.edit.success"); // Chave para mensagem de sucesso
+        attr.addFlashAttribute("success", "cliente.edit.success"); 
         return "redirect:/cliente/listar";
     }
     
@@ -114,7 +109,7 @@ public class ClienteController {
     public String excluir(@PathVariable("id") Long id, RedirectAttributes attr) {
 
         service.excluir(id);
-        attr.addFlashAttribute("success", "cliente.delete.success"); // Chave para mensagem de sucesso
+        attr.addFlashAttribute("success", "cliente.delete.success"); 
         return "redirect:/cliente/listar";
     }
     

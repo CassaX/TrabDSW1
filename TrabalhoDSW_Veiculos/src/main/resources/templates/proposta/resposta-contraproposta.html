@@ -112,18 +112,14 @@
 
             if (acaoCliente === 'nova') {
                 novaPropostaFields.style.display = 'block';
-                // Define o name dos campos para serem submetidos diretamente para o controller
                 novoValorInput.setAttribute('name', 'valor'); 
                 novasCondicoesInput.setAttribute('name', 'condicoesPagamento');
             } else {
                 novaPropostaFields.style.display = 'none';
-                // Remove o name dos campos para que não sejam submetidos se a opção "nova" não for selecionada
                 novoValorInput.removeAttribute('name');
                 novasCondicoesInput.removeAttribute('name');
-                // Limpar campos da nova proposta se não estiver selecionada
                 novoValorInput.value = '';
                 novasCondicoesInput.value = '';
-                // Limpa os hidden fields também
                 hiddenValorNovaProposta.value = '';
                 hiddenCondicoesNovaProposta.value = '';
             }

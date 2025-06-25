@@ -38,7 +38,6 @@ public class Imagem extends AbstractEntity<Long> {
         this.veiculo = veiculo;
     }    
 
-    // Getters e Setters
 
     public String getNome() {
         return nome;

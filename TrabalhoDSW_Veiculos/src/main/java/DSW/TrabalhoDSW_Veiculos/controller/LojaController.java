@@ -42,15 +42,15 @@ public class LojaController {
     @PostMapping("/salvar")
     public String salvar(@Valid Loja loja, BindingResult result, RedirectAttributes attr, ModelMap model) {
         if (loja.getSenha() == null || loja.getSenha().trim().isEmpty()) {
-            result.addError(new FieldError("loja", "senha", "loja.senha.notblank")); // Mensagem de erro via chave
+            result.addError(new FieldError("loja", "senha", "loja.senha.notblank")); 
         }
         
         if (service.buscarPorCNPJ(loja.getCNPJ()) != null) { 
-            result.addError(new FieldError("loja", "CNPJ", "loja.cnpj.cadastrado")); // Mensagem de erro via chave
+            result.addError(new FieldError("loja", "CNPJ", "loja.cnpj.cadastrado")); 
         }
 
         if (service.buscarPorEmail(loja.getEmail()) != null) {
-            result.addError(new FieldError("loja", "email", "loja.email.cadastrado")); // Mensagem de erro via chave
+            result.addError(new FieldError("loja", "email", "loja.email.cadastrado")); 
         }
 
         if (result.hasErrors()) {
@@ -62,7 +62,7 @@ public class LojaController {
                     logger.warn("     Campo: " + fieldError.getField() + ", Valor Rejeitado: " + fieldError.getRejectedValue() + ", Códigos: " + Arrays.toString(fieldError.getCodes()));
                 }
             });
-            attr.addFlashAttribute("fail", "loja.create.fail"); // Mensagem geral de falha no cadastro
+            attr.addFlashAttribute("fail", "loja.create.fail"); 
             return "loja/cadastro"; 
         }
         
@@ -70,7 +70,7 @@ public class LojaController {
         loja.setEnabled(true);
         loja.setSenha(encoder.encode(loja.getSenha()));
         service.salvar(loja); 
-        attr.addFlashAttribute("success", "loja.create.success"); // Chave para mensagem de sucesso
+        attr.addFlashAttribute("success", "loja.create.success"); 
         return "redirect:/loja/listar";
     }
 
@@ -86,23 +86,20 @@ public class LojaController {
         
         Loja lojaOriginal = service.buscarPorId(loja.getId());
         if (lojaOriginal == null) {
-            attr.addFlashAttribute("fail", "loja.notfound"); // Mensagem de loja não encontrada
+            attr.addFlashAttribute("fail", "loja.notfound"); 
             return "redirect:/loja/listar";
         }
 
-        // VALIDAÇÃO DE UNICIDADE DE CNPJ PARA EDIÇÃO
         Loja lojaByCNPJ = service.buscarPorCNPJ(loja.getCNPJ());
         if (lojaByCNPJ != null && !lojaByCNPJ.getId().equals(loja.getId())) {
-            result.addError(new FieldError("loja", "CNPJ", "loja.cnpj.cadastradoOutro")); // Mensagem de erro via chave
+            result.addError(new FieldError("loja", "CNPJ", "loja.cnpj.cadastradoOutro"));
         }
 
-        // Validação de unicidade de email para edição
         Loja lojaByEmail = service.buscarPorEmail(loja.getEmail());
         if (lojaByEmail != null && !lojaByEmail.getId().equals(loja.getId())) {
-            result.addError(new FieldError("loja", "email", "loja.email.cadastradoOutro")); // Mensagem de erro via chave
+            result.addError(new FieldError("loja", "email", "loja.email.cadastradoOutro")); 
         }
 
-        // Lógica da Senha
         if (novaSenha != null && !novaSenha.trim().isEmpty()) {
             loja.setSenha(encoder.encode(novaSenha));
         } else {
@@ -112,23 +109,23 @@ public class LojaController {
         if (result.hasErrors()) {
             loja.setRole(lojaOriginal.getRole());
             loja.setEnabled(lojaOriginal.isEnabled());
-            attr.addFlashAttribute("fail", "loja.edit.fail"); // Mensagem geral de falha na edição
+            attr.addFlashAttribute("fail", "loja.edit.fail");
             return "loja/cadastro"; 
         }
         
-        // Copiar outros dados que não vêm do formulário diretamente (role, enabled)
+   
         loja.setRole(lojaOriginal.getRole());
         loja.setEnabled(lojaOriginal.isEnabled());
 
         service.salvar(loja); 
-        attr.addFlashAttribute("success", "loja.edit.success"); // Chave para mensagem de sucesso
+        attr.addFlashAttribute("success", "loja.edit.success"); 
         return "redirect:/loja/listar";
     }
     
     @GetMapping("/excluir/{id}")
     public String excluir(@PathVariable("id") Long id, RedirectAttributes attr) {
         service.excluir(id);
-        attr.addFlashAttribute("success", "loja.delete.success"); // Chave para mensagem de sucesso
+        attr.addFlashAttribute("success", "loja.delete.success"); 
         return "redirect:/loja/listar";
     }
     

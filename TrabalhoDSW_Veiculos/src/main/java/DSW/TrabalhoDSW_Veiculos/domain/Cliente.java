@@ -50,7 +50,7 @@ public class Cliente extends AbstractEntity<Long> {
 
     @Column(nullable = false)
     private boolean enabled; 
-    // --- Getters e Setters ---
+
     public String getEmail() {
         return email;
     }

@@ -50,7 +50,6 @@ public class Loja extends AbstractEntity<Long> {
     @OneToMany(mappedBy = "loja")
     private List<Veiculo> veiculos;
 
-    // --- Getters e Setters ---
     public void setCNPJ(String CNPJ) {
         this.CNPJ = CNPJ;
     }

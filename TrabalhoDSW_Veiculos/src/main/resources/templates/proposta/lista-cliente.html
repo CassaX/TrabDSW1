@@ -128,7 +128,6 @@
                             }
                         }
 
-                        // Se o objeto Date for válido após qualquer tentativa, formata para exibição
                         if (horario && !isNaN(horario.getTime())) { 
                             var ano = horario.getFullYear();
                             var mes = ('0' + (horario.getMonth() + 1)).slice(-2); 
@@ -150,10 +149,8 @@
                     console.log("DEBUG: horarioIsoString é vazia ou nula.");
                 }
                 
-                // Atribui o texto final à modal
                 modal.find('#horarioReuniaoModal').text(displayHorario);
                 
-                // Link funciona como antes
                 modal.find('#linkReuniaoModal').attr('href', link).text(link ? 'Acessar Reunião' : 'Não definido');
             });
         </script>
