@@ -98,12 +98,12 @@
         <script>
             $('#modalReuniao').on('show.bs.modal', function (event) {
                 var button = $(event.relatedTarget);
-                var horarioIsoString = button.data('horario'); // "yyyy-MM-ddTHH:mm:ss"
+                var horarioIsoString = button.data('horario'); 
                 var link = button.data('link');
 
                 var modal = $(this);
                 var horario = null;
-                var displayHorario = 'Não definido'; // Valor padrão se não conseguir exibir
+                var displayHorario = 'Não definido'; 
 
                 console.log("DEBUG: String de horário recebida:", horarioIsoString); 
                 console.log("DEBUG: Link recebido:", link);
@@ -117,12 +117,11 @@
                             var match = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/.exec(horarioIsoString);
                             if (match) {
                                 horario = new Date(
-                                    parseInt(match[1]),      // Ano
-                                    parseInt(match[2]) - 1,   // Mês (0-11)
-                                    parseInt(match[3]),      // Dia
-                                    parseInt(match[4]),      // Hora
-                                    parseInt(match[5]),      // Minuto
-                                    parseInt(match[6])       // Segundo
+                                    parseInt(match[1]),      
+                                    parseInt(match[2]) - 1,   
+                                    parseInt(match[3]),      
+                                    parseInt(match[4]),      
+                                    parseInt(match[6])       
                                 );
                             } else {
                                 console.warn("DEBUG: String não corresponde ao formato esperado para parse manual.");

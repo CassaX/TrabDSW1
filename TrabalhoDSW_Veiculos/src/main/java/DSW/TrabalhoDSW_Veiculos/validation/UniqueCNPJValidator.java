@@ -41,7 +41,6 @@ public class UniqueCNPJValidator implements ConstraintValidator<UniqueCNPJ, Stri
             try {
                 currentId = Long.valueOf(pathVariables.get("id"));
             } catch (NumberFormatException e) {
-                // Não é um ID válido, continue sem ignorar
             }
         }
         

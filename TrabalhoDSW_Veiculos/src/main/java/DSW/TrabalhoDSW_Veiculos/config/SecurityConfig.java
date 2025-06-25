@@ -3,7 +3,7 @@ package DSW.TrabalhoDSW_Veiculos.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod; // Importe HttpMethod
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +14,7 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 import DSW.TrabalhoDSW_Veiculos.security.ClienteDetailsServiceimpl;
+
 
 @Configuration
 public class SecurityConfig {
@@ -57,7 +58,7 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/home", true) // Ou "/veiculos/meus-veiculos" se a loja for a principal
+                        .defaultSuccessUrl("/home", true) 
                         .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -66,7 +67,7 @@ public class SecurityConfig {
                 .userDetailsService(usuarioDetailsService)
                 .requestCache(cache -> cache
                         .requestCache(httpSessionRequestCache()))
-                .csrf(csrf -> csrf.disable()); // <--- PARA DEPURAR, DESATIVE TEMPORARIAMENTE AQUI!
+                .csrf(csrf -> csrf.disable()); 
 
         return http.build();
     }

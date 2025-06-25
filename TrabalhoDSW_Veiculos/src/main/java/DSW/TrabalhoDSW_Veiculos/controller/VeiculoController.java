@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors; // Adicione este import
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -21,7 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping; // Inclui StatusProposta
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -106,15 +105,14 @@ public class VeiculoController {
             return "veiculo/cadastro";
         }
     
-        // Salvar o veículo primeiro (sem imagens)
         veiculo.setFotos(new ArrayList<>());
-        veiculoService.salvar(veiculo); // Agora ele tem ID
+        veiculoService.salvar(veiculo);
     
         if (!fotosUpload.isEmpty()) {
             try {
                 String fileName = StringUtils.cleanPath(fotosUpload.getOriginalFilename());
                 Imagem imagem = new Imagem(fileName, fotosUpload.getContentType(), fotosUpload.getBytes());
-                imagem.setVeiculo(veiculo); // Aqui é essencial
+                imagem.setVeiculo(veiculo); 
                 imagemService.salvar(imagem);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -161,11 +159,10 @@ public class VeiculoController {
         
         // Mantém as fotos existentes caso nenhuma nova foto seja enviada
         if (fotosUpload == null || fotosUpload.isEmpty() || fotosUpload.get(0).isEmpty()) {
-             veiculo.setFotos(existente.getFotos()); // Reatribui as fotos existentes para a validação
+             veiculo.setFotos(existente.getFotos());
         }
 
         if (result.hasErrors()) {
-            // Se houver erro de validação, reatribui a loja e as fotos existentes para a view
             veiculo.setLoja(loja);
             veiculo.setFotos(existente.getFotos()); 
             return "veiculo/cadastro";
@@ -197,7 +194,7 @@ public class VeiculoController {
                 }
             } catch (IOException e) {
                 attr.addFlashAttribute("fail", "Erro ao processar imagens: " + e.getMessage());
-                veiculo.setFotos(existente.getFotos()); // Tentar manter as fotos existentes em caso de erro
+                veiculo.setFotos(existente.getFotos()); 
                 return "veiculo/cadastro";
             }
         }
@@ -248,16 +245,13 @@ public class VeiculoController {
         List<Veiculo> veiculos;
         
         if (modelo != null && !modelo.trim().isEmpty()) {
-            // Usa a nova consulta que carrega relações
             veiculos = veiculoService.buscarPorModeloCompleto(modelo.toLowerCase());
         } else {
-            // Usa a nova consulta que carrega relações
             veiculos = veiculoService.buscarTodosCompleto();
         }
 
         model.addAttribute("veiculos", veiculos);
 
-        // Inicializa o mapa mesmo para não-clientes
         Map<Long, Proposta> propostasAtivasDoClientePorVeiculo = new HashMap<>();
         
         Cliente cliente = getClienteLogado();

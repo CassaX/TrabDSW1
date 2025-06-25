@@ -1,5 +1,9 @@
 package DSW.TrabalhoDSW_Veiculos.controller;
 
+import java.util.Arrays;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -16,10 +20,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.service.spec.ILojaService;
 import jakarta.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.util.Arrays;
 
 
 @Controller
@@ -92,7 +92,7 @@ public class LojaController {
 
         // VALIDAÇÃO DE UNICIDADE DE CNPJ PARA EDIÇÃO
         Loja lojaByCNPJ = service.buscarPorCNPJ(loja.getCNPJ());
-        if (lojaByCNPJ != null && !lojaByCNPJ.getId().equals(loja.getId())) { // Se encontrou CNPJ diferente do próprio ID
+        if (lojaByCNPJ != null && !lojaByCNPJ.getId().equals(loja.getId())) {
             result.addError(new FieldError("loja", "CNPJ", "loja.cnpj.cadastradoOutro")); // Mensagem de erro via chave
         }
 

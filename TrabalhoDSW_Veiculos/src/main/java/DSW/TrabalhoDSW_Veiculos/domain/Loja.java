@@ -2,15 +2,14 @@ package DSW.TrabalhoDSW_Veiculos.domain;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference; 
+import jakarta.validation.constraints.Size; 
 
 @SuppressWarnings("serial")
 @Entity
@@ -39,7 +38,7 @@ public class Loja extends AbstractEntity<Long> {
     @Column(nullable = true, length = 500) 
     private String descricao;
 
-    @NotBlank(message = "{NotBlank.loja.email}") // Validação de email padrão
+    @NotBlank(message = "{NotBlank.loja.email}")
     @Column(nullable = false, length = 100, unique = true)
     private String email;
 

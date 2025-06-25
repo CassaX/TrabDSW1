@@ -68,7 +68,6 @@ public class PropostaController {
         return null;
     }
 
-    // --- Cliente: Fazer Proposta ---
     @GetMapping("/cadastrar/{id}")
     public String cadastrar(@PathVariable("id") Long idVeiculo, Proposta proposta, ModelMap model) {
         Veiculo veiculo = veiculoService.buscarPorIdComFotos(idVeiculo);
@@ -115,7 +114,6 @@ public class PropostaController {
         return "redirect:/propostas/listar";
     }
 
-    // --- Cliente: Listar Propostas ---
     @GetMapping("/listar")
     public String listarPropostasCliente(ModelMap model) {
         Cliente cliente = getClienteLogado();
@@ -127,7 +125,6 @@ public class PropostaController {
         return "proposta/lista-cliente";
     }
 
-    // --- Loja: Listar Propostas ---
     @GetMapping("/loja/listar")
     public String listarPropostasLoja(ModelMap model) {
         Loja loja = getLojaLogada();
@@ -154,15 +151,10 @@ public class PropostaController {
             return "redirect:/propostas/loja/listar";
         }
         
-        // NOVO: Se o status é AGUARDANDO_FINALIZACAO_LOJA, pré-seleciona a opção de ACEITO no HTML.
-        // Isso fará com que os campos de horário e link da reunião apareçam para edição/confirmação.
+
         if (proposta.getStatus() == StatusProposta.AGUARDANDO_FINALIZACAO_LOJA) {
-            // No ModelMap, defina o status do formulário como ACEITO para que o select seja pré-selecionado.
-            // O objeto 'proposta' no modelo ainda mantém o status real 'AGUARDANDO_FINALIZACAO_LOJA'.
-            // O JavaScript no HTML vai pegar 'preSelectedStatus' para setar o select.
             model.addAttribute("preSelectedStatus", StatusProposta.ACEITO.name()); 
         } else {
-            // Para todos os outros status, o preSelectedStatus é o status atual da proposta.
             model.addAttribute("preSelectedStatus", proposta.getStatus() != null ? proposta.getStatus().name() : "");
         }
 
@@ -191,26 +183,23 @@ public class PropostaController {
             return "redirect:/propostas/loja/listar";
         }
 
-        // --- Preparar propostaForm para validação e re-exibição ---
         propostaForm.setCliente(propostaOriginal.getCliente());
         propostaForm.setVeiculo(propostaOriginal.getVeiculo());
         propostaForm.setData(propostaOriginal.getData());
         propostaForm.setValor(propostaOriginal.getValor()); 
         propostaForm.setCondicoesPagamento(propostaOriginal.getCondicoesPagamento()); 
 
-        // --- Limpeza Condicional para Validação ---
-        // Se o status NÃO for ACEITO (vindo do form), zera campos de reunião.
+
         if (propostaForm.getStatus() != StatusProposta.ACEITO) { 
             propostaForm.setHorarioReuniao(null); 
             propostaForm.setLinkReuniao(null);   
         }
-        // Se o status NÃO for AGUARDANDO_RESPOSTA_CLIENTE, zera campos de contraproposta.
         if (propostaForm.getStatus() != StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
             propostaForm.setContrapropostaValor(null);
             propostaForm.setContrapropostaCondicoes(null);
         }
         
-        // --- VALIDAÇÕES MANUAIS ---
+        //  VALIDAÇÕES MANUAIS 
         if (propostaForm.getStatus() == null) {
             result.addError(new FieldError("proposta", "status", "proposta.status.selectAction")); 
         } else if (propostaForm.getStatus() == StatusProposta.ACEITO) { 
@@ -242,8 +231,7 @@ public class PropostaController {
             } else {
                 result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.invalidActionValue")); 
             }
-        } else { // Este 'else' captura se propostaForm.getStatus() é ABERTO, ou RECUSADO_LOJA
-            // e outras situações inesperadas.
+        } else { 
             result.addError(new FieldError("proposta", "status", "proposta.status.invalidOrUnexpected")); 
         }
         
@@ -261,9 +249,8 @@ public class PropostaController {
             return "proposta/editar-status"; 
         }
 
-        // --- Lógica de Atualização da Proposta (se não houver erros de validação) ---
-        if (propostaForm.getStatus() == StatusProposta.ACEITO) { // Este é o ACEITO para proposta inicial E FINALIZAÇÃO do agendamento
-            // O status final é ACEITO
+
+        if (propostaForm.getStatus() == StatusProposta.ACEITO) { 
             propostaOriginal.setStatus(StatusProposta.ACEITO); 
             propostaOriginal.setHorarioReuniao(propostaForm.getHorarioReuniao());
             propostaOriginal.setLinkReuniao(propostaForm.getLinkReuniao());
@@ -273,9 +260,7 @@ public class PropostaController {
             propostaService.salvar(propostaOriginal);
             notificacaoPropostaService.notificarProposta(propostaOriginal, true); // Notifica o cliente
             
-            attr.addFlashAttribute("success", "proposta.accept.success"); // Para proposta inicial aceita
-            // OU para finalização de agendamento
-            // attr.addFlashAttribute("success", "proposta.finalize.success"); // Usar chave de finalização se for o caso
+            attr.addFlashAttribute("success", "proposta.accept.success");
 
         } else if (propostaForm.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
             if ("contraproposta".equals(acaoLojista)) {
@@ -307,16 +292,12 @@ public class PropostaController {
                 attr.addFlashAttribute("fail", "proposta.acaoLojista.invalidActionValue"); // Ação de rádio button inválida
             }
         } else { 
-            // Este 'else' captura se propostaForm.getStatus() é ABERTO (não tratado diretamente no submit POST)
-            // ou RECUSADO_LOJA (que a loja não deveria "selecionar" no select, é um status final)
-            // ou AGUARDANDO_FINALIZACAO_LOJA (que a loja só deveria enviar como ACEITO)
             attr.addFlashAttribute("fail", "proposta.status.invalidOrUnexpected"); 
         }
         
         return "redirect:/propostas/loja/listar"; 
     }
 
-    // --- Cliente: Responder Contraproposta ---
     @GetMapping("/cliente/responder/{id}")
     public String responderContrapropostaCliente(@PathVariable("id") Long idProposta, ModelMap model) {
         Proposta proposta = propostaService.buscarPorId(idProposta);
@@ -366,8 +347,7 @@ public class PropostaController {
         }
 
         if ("aceitar".equals(acaoCliente)) {
-            // Se o cliente ACEITOU a contraproposta da loja, o status agora é AGUARDANDO_FINALIZACAO_LOJA
-            propostaOriginal.setStatus(StatusProposta.AGUARDANDO_FINALIZACAO_LOJA); // NOVO STATUS!
+            propostaOriginal.setStatus(StatusProposta.AGUARDANDO_FINALIZACAO_LOJA);
             
             if (propostaOriginal.getContrapropostaValor() != null) {
                 propostaOriginal.setValor(propostaOriginal.getContrapropostaValor());

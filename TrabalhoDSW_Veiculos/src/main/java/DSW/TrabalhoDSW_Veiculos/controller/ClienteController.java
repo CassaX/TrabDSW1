@@ -34,23 +34,23 @@ public class ClienteController {
     
     @PostMapping("/salvar")
     public String salvar(@Valid Cliente cliente, BindingResult result, RedirectAttributes attr, ModelMap model) {
-        // Validação da senha no cadastro (obrigatória)
+        // Validação da senha no cadastro 
         if (cliente.getSenha() == null || cliente.getSenha().trim().isEmpty()) {
-            result.addError(new FieldError("cliente", "senha", "cliente.senha.notblank")); // Mensagem de erro via chave
+            result.addError(new FieldError("cliente", "senha", "cliente.senha.notblank"));
         }
         
         // VALIDAÇÃO DE UNICIDADE DE CPF PARA CADASTRO
         if (service.buscarPorCPF(cliente.getCPF()) != null) { 
-            result.addError(new FieldError("cliente", "CPF", "cliente.cpf.cadastrado")); // Mensagem de erro via chave
+            result.addError(new FieldError("cliente", "CPF", "cliente.cpf.cadastrado")); 
         }
 
         // Validação de unicidade de email para cadastro (se email já existe)
         if (service.buscarPorEmail(cliente.getEmail()) != null) {
-            result.addError(new FieldError("cliente", "email", "cliente.email.cadastrado")); // Mensagem de erro via chave
+            result.addError(new FieldError("cliente", "email", "cliente.email.cadastrado"));
         }
 
         if (result.hasErrors()) {
-            attr.addFlashAttribute("fail", "cliente.create.fail"); // Mensagem geral de falha no cadastro
+            attr.addFlashAttribute("fail", "cliente.create.fail");
             return "cliente/cadastro"; 
         }
         
@@ -58,7 +58,7 @@ public class ClienteController {
         cliente.setEnabled(true);
         cliente.setSenha(encoder.encode(cliente.getSenha()));
         service.salvar(cliente);
-        attr.addFlashAttribute("success", "cliente.create.success"); // Chave para mensagem de sucesso
+        attr.addFlashAttribute("success", "cliente.create.success");
         return "redirect:/cliente/listar";
     }
     
@@ -73,20 +73,19 @@ public class ClienteController {
         
         Cliente clienteOriginal = service.buscarPorId(cliente.getId());
         if (clienteOriginal == null) {
-            attr.addFlashAttribute("fail", "cliente.notfound"); // Mensagem de cliente não encontrado
-            return "redirect:/cliente/listar";
+            attr.addFlashAttribute("fail", "cliente.notfound"); 
         }
 
         // VALIDAÇÃO DE UNICIDADE DE CPF PARA EDIÇÃO
         Cliente clienteByCPF = service.buscarPorCPF(cliente.getCPF());
         if (clienteByCPF != null && !clienteByCPF.getId().equals(cliente.getId())) { 
-            result.addError(new FieldError("cliente", "CPF", "cliente.cpf.cadastradoOutro")); // Mensagem de erro via chave
+            result.addError(new FieldError("cliente", "CPF", "cliente.cpf.cadastradoOutro")); 
         }
 
         // Validação de unicidade de email para edição
         Cliente clienteByEmail = service.buscarPorEmail(cliente.getEmail());
         if (clienteByEmail != null && !clienteByEmail.getId().equals(cliente.getId())) {
-            result.addError(new FieldError("cliente", "email", "cliente.email.cadastradoOutro")); // Mensagem de erro via chave
+            result.addError(new FieldError("cliente", "email", "cliente.email.cadastradoOutro"));
         }
 
         // Lógica da Senha
@@ -103,7 +102,6 @@ public class ClienteController {
             return "cliente/cadastro"; 
         }
         
-        // Copiar outros dados que não vêm do formulário diretamente (role, enabled)
         cliente.setRole(clienteOriginal.getRole());
         cliente.setEnabled(clienteOriginal.isEnabled());
 

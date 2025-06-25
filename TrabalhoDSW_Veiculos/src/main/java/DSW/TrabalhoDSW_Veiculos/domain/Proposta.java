@@ -24,7 +24,7 @@ public class Proposta extends AbstractEntity<Long> {
     
     @Min(value = 0, message = "{Min.proposta.valor}")
     @Column(columnDefinition = "DECIMAL(20,2) DEFAULT 0.0")
-    private BigDecimal valor; // Valor da proposta original OU o valor da contraproposta aceita
+    private BigDecimal valor; 
 
     @ManyToOne
     @JoinColumn(name = "veiculo_id", nullable = false)
