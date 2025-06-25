@@ -92,6 +92,14 @@ public class PropostaController {
         }
         proposta.setStatus(StatusProposta.ABERTO);
 
+        if (proposta.getValor() == null || proposta.getValor().compareTo(BigDecimal.ZERO) <= 0) { 
+            result.addError(new FieldError("proposta", "valor", "proposta.valor.requiredAndPositive")); 
+        }
+        if (proposta.getCondicoesPagamento() == null || proposta.getCondicoesPagamento().trim().isEmpty()) {
+            result.addError(new FieldError("proposta", "condicoesPagamento", "proposta.condicoesPagamento.required")); 
+        }
+
+
         if (result.hasErrors()) {
             Veiculo veiculo = null;
             if (proposta.getVeiculo() != null && proposta.getVeiculo().getId() != null) {
@@ -125,6 +133,7 @@ public class PropostaController {
         return "proposta/lista-cliente";
     }
 
+
     @GetMapping("/loja/listar")
     public String listarPropostasLoja(ModelMap model) {
         Loja loja = getLojaLogada();
@@ -151,7 +160,6 @@ public class PropostaController {
             return "redirect:/propostas/loja/listar";
         }
         
-
         if (proposta.getStatus() == StatusProposta.AGUARDANDO_FINALIZACAO_LOJA) {
             model.addAttribute("preSelectedStatus", StatusProposta.ACEITO.name()); 
         } else {
@@ -187,13 +195,13 @@ public class PropostaController {
         propostaForm.setVeiculo(propostaOriginal.getVeiculo());
         propostaForm.setData(propostaOriginal.getData());
         propostaForm.setValor(propostaOriginal.getValor()); 
-        propostaForm.setCondicoesPagamento(propostaOriginal.getCondicoesPagamento()); 
-
+        propostaForm.setCondicoesPagamento(propostaOriginal.getCondicoesPagamento());
 
         if (propostaForm.getStatus() != StatusProposta.ACEITO) { 
             propostaForm.setHorarioReuniao(null); 
             propostaForm.setLinkReuniao(null);   
         }
+
         if (propostaForm.getStatus() != StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
             propostaForm.setContrapropostaValor(null);
             propostaForm.setContrapropostaCondicoes(null);
@@ -219,12 +227,13 @@ public class PropostaController {
                 result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.selectAction")); 
             } else if ("contraproposta".equals(acaoLojista)) {
                 if (propostaForm.getContrapropostaValor() == null || propostaForm.getContrapropostaValor().compareTo(BigDecimal.ZERO) <= 0) {
-                    result.addError(new FieldError("proposta", "contrapropostaValor", "proposta.contrapropostaValor.invalid"));
+                    result.addError(new FieldError("proposta", "contrapropostaValor", "proposta.contrapropostaValor.requiredAndPositive")); // NOVA CHAVE
                 }
                 if (propostaForm.getContrapropostaCondicoes() == null || propostaForm.getContrapropostaCondicoes().trim().isEmpty()) {
                     result.addError(new FieldError("proposta", "contrapropostaCondicoes", "proposta.contrapropostaCondicoes.required"));
                 }
             } else if ("recusar".equals(acaoLojista)) {
+
             } else {
                 result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.invalidActionValue")); 
             }
@@ -247,14 +256,14 @@ public class PropostaController {
 
 
         if (propostaForm.getStatus() == StatusProposta.ACEITO) { 
-            propostaOriginal.setStatus(StatusProposta.ACEITO); 
+            propostaOriginal.setStatus(StatusProposta.ACEITO);
             propostaOriginal.setHorarioReuniao(propostaForm.getHorarioReuniao());
             propostaOriginal.setLinkReuniao(propostaForm.getLinkReuniao());
             propostaOriginal.setContrapropostaValor(null);
             propostaOriginal.setContrapropostaCondicoes(null);
             
             propostaService.salvar(propostaOriginal);
-            notificacaoPropostaService.notificarProposta(propostaOriginal, true);
+            notificacaoPropostaService.notificarProposta(propostaOriginal, true); 
             
             attr.addFlashAttribute("success", "proposta.accept.success");
 
@@ -285,9 +294,19 @@ public class PropostaController {
                 
                 attr.addFlashAttribute("success", "proposta.decline.success");
             } else { 
-                attr.addFlashAttribute("fail", "proposta.acaoLojista.invalidActionValue");
+                attr.addFlashAttribute("fail", "proposta.acaoLojista.invalidActionValue"); 
             }
-        } else { 
+        } else if (propostaForm.getStatus() == StatusProposta.AGUARDANDO_FINALIZACAO_LOJA) { 
+             propostaOriginal.setStatus(StatusProposta.ACEITO);
+             propostaOriginal.setHorarioReuniao(propostaForm.getHorarioReuniao());
+             propostaOriginal.setLinkReuniao(propostaForm.getLinkReuniao());
+             propostaOriginal.setContrapropostaValor(null);
+             propostaOriginal.setContrapropostaCondicoes(null);
+
+             propostaService.salvar(propostaOriginal);
+             notificacaoPropostaService.notificarProposta(propostaOriginal, true); 
+             attr.addFlashAttribute("success", "proposta.finalize.success"); 
+        } else {
             attr.addFlashAttribute("fail", "proposta.status.invalidOrUnexpected"); 
         }
         
@@ -343,7 +362,7 @@ public class PropostaController {
         }
 
         if ("aceitar".equals(acaoCliente)) {
-            propostaOriginal.setStatus(StatusProposta.AGUARDANDO_FINALIZACAO_LOJA);
+            propostaOriginal.setStatus(StatusProposta.AGUARDANDO_FINALIZACAO_LOJA); 
             
             if (propostaOriginal.getContrapropostaValor() != null) {
                 propostaOriginal.setValor(propostaOriginal.getContrapropostaValor());
@@ -396,6 +415,7 @@ public class PropostaController {
         }
         return "redirect:/propostas/listar";
     }
+
 
     private boolean isValidUrl(String url) {
         try {

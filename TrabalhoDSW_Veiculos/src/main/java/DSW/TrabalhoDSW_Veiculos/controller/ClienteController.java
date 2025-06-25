@@ -14,12 +14,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
+import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IClienteService;
+import DSW.TrabalhoDSW_Veiculos.service.spec.ILojaService;
 import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/cliente")
 public class ClienteController {
+    
+    @Autowired
+    private ILojaService lojaService;
     
     @Autowired
     private IClienteService service;
@@ -42,8 +47,10 @@ public class ClienteController {
             result.addError(new FieldError("cliente", "CPF", "cliente.cpf.cadastrado")); 
         }
 
-        if (service.buscarPorEmail(cliente.getEmail()) != null) {
-            result.addError(new FieldError("cliente", "email", "cliente.email.cadastrado"));
+        Cliente clienteByEmail = service.buscarPorEmail(cliente.getEmail());
+        Loja lojaByEmail = lojaService.buscarPorEmail(cliente.getEmail());
+        if (clienteByEmail != null || lojaByEmail != null) {
+            result.addError(new FieldError("cliente", "email", "email.cadastrado")); 
         }
 
         if (result.hasErrors()) {
@@ -71,6 +78,7 @@ public class ClienteController {
         Cliente clienteOriginal = service.buscarPorId(cliente.getId());
         if (clienteOriginal == null) {
             attr.addFlashAttribute("fail", "cliente.notfound"); 
+            return "redirect:/cliente/listar";
         }
 
         Cliente clienteByCPF = service.buscarPorCPF(cliente.getCPF());
@@ -81,6 +89,10 @@ public class ClienteController {
 
         Cliente clienteByEmail = service.buscarPorEmail(cliente.getEmail());
         if (clienteByEmail != null && !clienteByEmail.getId().equals(cliente.getId())) {
+            result.addError(new FieldError("cliente", "email", "cliente.email.cadastradoOutro"));
+        }
+        Loja lojaByEmail = lojaService.buscarPorEmail(cliente.getEmail());
+        if (lojaByEmail != null && !lojaByEmail.getId().equals(cliente.getId())) {
             result.addError(new FieldError("cliente", "email", "cliente.email.cadastradoOutro"));
         }
 

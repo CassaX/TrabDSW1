@@ -33,7 +33,7 @@ public class Proposta extends AbstractEntity<Long> {
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
-
+	
     @Enumerated(EnumType.STRING)
     @Column(length = 30, nullable=false)
     private StatusProposta status;

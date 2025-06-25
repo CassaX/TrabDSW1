@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
+import DSW.TrabalhoDSW_Veiculos.service.spec.IClienteService;
 import DSW.TrabalhoDSW_Veiculos.service.spec.ILojaService;
 import jakarta.validation.Valid;
 
@@ -30,6 +32,9 @@ public class LojaController {
 
     @Autowired
     private ILojaService service;
+
+    @Autowired
+    private IClienteService clienteService;
     
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -49,9 +54,12 @@ public class LojaController {
             result.addError(new FieldError("loja", "CNPJ", "loja.cnpj.cadastrado")); 
         }
 
-        if (service.buscarPorEmail(loja.getEmail()) != null) {
-            result.addError(new FieldError("loja", "email", "loja.email.cadastrado")); 
+        Loja lojaByEmail = service.buscarPorEmail(loja.getEmail());
+        Cliente clienteByEmail = clienteService.buscarPorEmail(loja.getEmail());
+        if (lojaByEmail != null || clienteByEmail != null) {
+            result.addError(new FieldError("loja", "email", "email.cadastrado")); 
         }
+
 
         if (result.hasErrors()) {
             logger.warn("Erros de validação encontrados ao tentar salvar a loja:");
@@ -97,6 +105,11 @@ public class LojaController {
 
         Loja lojaByEmail = service.buscarPorEmail(loja.getEmail());
         if (lojaByEmail != null && !lojaByEmail.getId().equals(loja.getId())) {
+            result.addError(new FieldError("loja", "email", "loja.email.cadastradoOutro")); 
+        }
+
+        Cliente clienteByEmail = clienteService.buscarPorEmail(loja.getEmail());
+        if (clienteByEmail != null && !clienteByEmail.getId().equals(loja.getId())) {
             result.addError(new FieldError("loja", "email", "loja.email.cadastradoOutro")); 
         }
 

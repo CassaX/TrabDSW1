@@ -38,6 +38,7 @@ public class Loja extends AbstractEntity<Long> {
     @Column(nullable = true, length = 500) 
     private String descricao;
 
+    
     @NotBlank(message = "{NotBlank.loja.email}")
     @Column(nullable = false, length = 100, unique = true)
     private String email;
