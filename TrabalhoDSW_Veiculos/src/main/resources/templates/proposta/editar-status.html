@@ -173,8 +173,7 @@
                 var status = document.getElementById('status').value;
                 var responderPropostaFields = document.getElementById('responderPropostaFields');
                 var aceitoFields = document.getElementById('aceitoFields');
-
-                // Limpa todos os campos dinâmicos ao mudar de opção
+        
                 $('input[name="acaoLojista"]').prop('checked', false);
                 $('#contrapropostaInputs').hide();
                 $('#horarioReuniao').val('');
@@ -182,71 +181,59 @@
                 $('#contrapropostaValor').val('');
                 $('#contrapropostaCondicoes').val('');
                 
-                // Pega os valores da proposta para preenchimento inicial (se houver)
-                var proposta = /*[[${proposta}]]*/ {}; // Pega o objeto proposta do modelo Thymeleaf
-                var currentHorarioReuniao = proposta.horarioReuniao;
-                var currentLinkReuniao = proposta.linkReuniao;
-                var currentContrapropostaValor = proposta.contrapropostaValor;
-                var currentContrapropostaCondicoes = proposta.contrapropostaCondicoes;
-
-
                 if (status === 'AGUARDANDO_RESPOSTA_CLIENTE') {
                     responderPropostaFields.style.display = 'block';
                     aceitoFields.style.display = 'none';
-
-                    // Pré-seleciona rádio button e exibe sub-campos com base no status original da proposta
-                    if (proposta.status && proposta.status.name === 'AGUARDANDO_RESPOSTA_CLIENTE') {
-                        $('#comContraproposta').prop('checked', true);
-                        toggleSubFieldsLoja(); // Chama para exibir/preencher os campos de contraproposta
-                    } else if (proposta.status && proposta.status.name === 'RECUSADO_LOJA') {
-                        $('#recusarProposta').prop('checked', true);
-                        toggleSubFieldsLoja(); // Chama para esconder os campos de contraproposta
-                    }
-
                 } else if (status === 'ACEITO') {
                     responderPropostaFields.style.display = 'none';
                     aceitoFields.style.display = 'block';
-
-                    $('#horarioReuniao').val(currentHorarioReuniao ? new Date(currentHorarioReuniao).toISOString().slice(0, 16) : '');
-                    $('#linkReuniao').val(currentLinkReuniao || '');
-
                 } else {
                     responderPropostaFields.style.display = 'none';
                     aceitoFields.style.display = 'none';
                 }
             }
-
+        
             function toggleSubFieldsLoja() {
                 var acaoLojista = $('input[name="acaoLojista"]:checked').val();
                 var contrapropostaInputs = document.getElementById('contrapropostaInputs');
-
+        
                 if (acaoLojista === 'contraproposta') {
                     contrapropostaInputs.style.display = 'block';
-                    var proposta = /*[[${proposta}]]*/ {};
-                    $('#contrapropostaValor').val(proposta.contrapropostaValor ? proposta.contrapropostaValor.toFixed(2).replace('.', ',') : '');
-                    $('#contrapropostaCondicoes').val(proposta.contrapropostaCondicoes || '');
-                } else { // 'recusar'
+                } else {
                     contrapropostaInputs.style.display = 'none';
-                    $('#contrapropostaValor').val('');
-                    $('#contrapropostaCondicoes').val('');
                 }
             }
-
+        
             $(document).ready(function () {
                 var initialStatusName = /*[[${proposta.status != null ? proposta.status.name() : ''}]]*/ '';
-
+                var statusSelect = document.getElementById('status');
+        
                 if (initialStatusName === 'ACEITO') {
-                    document.getElementById('status').value = 'ACEITO';
+                    statusSelect.value = 'ACEITO';
                 } else if (initialStatusName === 'AGUARDANDO_RESPOSTA_CLIENTE' || initialStatusName === 'RECUSADO_LOJA') {
-                    document.getElementById('status').value = 'AGUARDANDO_RESPOSTA_CLIENTE';
+                    statusSelect.value = 'AGUARDANDO_RESPOSTA_CLIENTE';
                 } else {
-                    document.getElementById('status').value = '';
+                    statusSelect.value = '';
                 }
-
-                toggleFieldsLoja();
+        
+                const statusValue = statusSelect.value;
+                if (statusValue === 'ACEITO') {
+                    $("#aceitoFields").show();
+                } else if (statusValue === 'AGUARDANDO_RESPOSTA_CLIENTE') {
+                    $("#responderPropostaFields").show();
+                    
+                    // Configura radio button se aplicável
+                    if ('[[${proposta.status.name}]]' === 'AGUARDANDO_RESPOSTA_CLIENTE') {
+                        $("#comContraproposta").prop("checked", true);
+                        $("#contrapropostaInputs").show();
+                    } else if ('[[${proposta.status.name()}]]' === 'RECUSADO_LOJA') {
+                        $("#recusarProposta").prop("checked", true);
+                    }
+                }
+        
                 $('#contrapropostaValor').mask('##########0.00', { reverse: true });
-
-
+                $("#status").change(toggleFieldsLoja);
+                $('input[name="acaoLojista"]').change(toggleSubFieldsLoja);
             });
             /*]]>*/
         </script>
