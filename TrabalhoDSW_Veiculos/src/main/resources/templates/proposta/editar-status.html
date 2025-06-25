@@ -169,9 +169,6 @@
 
         <script th:inline="javascript">
             /*<![CDATA[*/
-            // ATENÇÃO: updateHiddenAcaoLojista e o campo oculto hiddenAcaoLojista foram removidos para simplificar o binding.
-            // O @RequestParam('acaoLojista') agora pega direto do rádio button selecionado.
-
             function toggleFieldsLoja() {
                 var status = document.getElementById('status').value;
                 var responderPropostaFields = document.getElementById('responderPropostaFields');
@@ -249,8 +246,6 @@
                 toggleFieldsLoja();
                 $('#contrapropostaValor').mask('##########0.00', { reverse: true });
 
-                // Removido: updateHiddenAcaoLojista() em $(document).ready e nos .change() de radio
-                // Removido: $('form').submit(function (e) { ... }); // Validação JavaScript já no controller
 
             });
             /*]]>*/
