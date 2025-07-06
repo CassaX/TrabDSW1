@@ -120,8 +120,16 @@ public class ClienteController {
     @GetMapping("/excluir/{id}")
     public String excluir(@PathVariable("id") Long id, RedirectAttributes attr) {
 
-        service.excluir(id);
-        attr.addFlashAttribute("success", "cliente.delete.success"); 
+        try {
+            if (service.existePropostasAbertas(id)) {
+                attr.addFlashAttribute("fail", "Não é possível excluir: Cliente possui propostas em aberto");
+                return "redirect:/cliente/listar";
+            }
+            service.excluir(id);
+            attr.addFlashAttribute("success", "cliente.delete.success"); 
+        } catch (Exception e) {
+            attr.addFlashAttribute("fail", e.getMessage());
+        }
         return "redirect:/cliente/listar";
     }
     

@@ -17,4 +17,6 @@ public interface IClienteService {
     Cliente buscarPorEmail(String email);
 
     Cliente buscarPorCPF(String cpf);
+    
+    boolean existePropostasAbertas(Long id);
 }

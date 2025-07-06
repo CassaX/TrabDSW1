@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import DSW.TrabalhoDSW_Veiculos.validation.UniqueCPF;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -18,7 +17,6 @@ import jakarta.validation.constraints.NotNull;
 public class Cliente extends Usuario {
 
     
-	@UniqueCPF (message = "{Unique.cliente.CPF}")
     @NotBlank(message = "{NotBlank.cliente.CPF}") 
     @Column(nullable = false, length = 14,unique = true)
     private String CPF;
