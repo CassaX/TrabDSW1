@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -58,8 +56,7 @@ public class Veiculo extends AbstractEntity<Long> {
 
     @NotNull(message = "{NotNull.veiculo.loja}") 
     @ManyToOne
-    @JoinColumn(name = "loja_id", nullable = false)
-	@JsonBackReference("loja-veiculos") 
+    @JoinColumn(name = "loja_id")
     private Loja loja;
 
 	@OneToMany(mappedBy = "veiculo")

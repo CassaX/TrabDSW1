@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 
 @SuppressWarnings("serial")
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Usuario extends AbstractEntity<Long>{
 
     @NotBlank(message = "{NotBlank.email}") 

@@ -13,7 +13,7 @@ import jakarta.persistence.MappedSuperclass;
 public abstract class AbstractEntity<ID extends Serializable> implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private ID id;
 
     public ID getId() {

@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import DSW.TrabalhoDSW_Veiculos.validation.UniqueCNPJ;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -18,7 +17,6 @@ import jakarta.validation.constraints.Size;
 public class Loja extends Usuario {
 
     
-	@UniqueCNPJ (message = "{Unique.loja.CNPJ}")
     @NotBlank(message = "{NotBlank.loja.CNPJ}") 
     @Size(min = 18, max = 18, message = "{Size.loja.CNPJ}")
     @Column(nullable = false, unique = true, length = 60)
