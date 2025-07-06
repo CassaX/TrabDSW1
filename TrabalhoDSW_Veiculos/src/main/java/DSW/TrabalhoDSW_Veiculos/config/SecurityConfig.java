@@ -13,14 +13,15 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
-import DSW.TrabalhoDSW_Veiculos.security.ClienteDetailsServiceimpl;
+import DSW.TrabalhoDSW_Veiculos.security.UsuarioDetailsServiceImpl;
+
 
 
 @Configuration
 public class SecurityConfig {
 
     @Autowired
-    private ClienteDetailsServiceimpl usuarioDetailsService;
+    private UsuarioDetailsServiceImpl usuarioDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
