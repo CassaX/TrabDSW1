@@ -3,7 +3,9 @@ package DSW.TrabalhoDSW_Veiculos.dao;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 
@@ -26,5 +28,8 @@ public interface IClienteDAO extends CrudRepository<Cliente, Long> {
 	void deleteById(Long id);
 	
     Cliente findByEmail(String email);
+
+	@Query("SELECT COUNT(p) > 0 FROM Proposta p WHERE p.cliente.id = :clienteId AND p.status = 'ABERTO'")
+	boolean existsPropostasAbertas(@Param("clienteId") Long clienteId);
 
 }

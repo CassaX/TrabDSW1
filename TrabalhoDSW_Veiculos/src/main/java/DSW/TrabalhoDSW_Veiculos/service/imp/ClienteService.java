@@ -16,11 +16,19 @@ public class ClienteService implements IClienteService {
     @Autowired
     IClienteDAO dao;
 
+    @Transactional(readOnly = true)
+    public boolean existePropostasAbertas(Long id) {
+        return dao.existsPropostasAbertas(id);
+    }
+
     public void salvar(Cliente cliente) {
         dao.save(cliente);
     }
 
     public void excluir(Long id) {
+        if(existePropostasAbertas(id)) {
+            throw new RuntimeException("Cliente possui propostas abertas e não pode ser excluído.");
+        }
         dao.deleteById(id);
     }
 
@@ -44,5 +52,6 @@ public class ClienteService implements IClienteService {
         return dao.findByCPF(cpf);
     }
 
+    
     
 }
