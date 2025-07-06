@@ -21,6 +21,7 @@ import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IClienteService;
 import DSW.TrabalhoDSW_Veiculos.service.spec.ILojaService;
+import DSW.TrabalhoDSW_Veiculos.service.spec.IPropostaService;
 import jakarta.validation.Valid;
 
 
@@ -36,6 +37,9 @@ public class LojaController {
     @Autowired
     private IClienteService clienteService;
     
+    @Autowired
+    private IPropostaService propostaService;
+
     @Autowired
     private BCryptPasswordEncoder encoder;
 
@@ -65,8 +69,7 @@ public class LojaController {
             logger.warn("Erros de validação encontrados ao tentar salvar a loja:");
             result.getAllErrors().forEach(error -> {
                 logger.warn("   - Mensagem de Erro: " + error.getDefaultMessage());
-                if (error instanceof FieldError) {
-                    FieldError fieldError = (FieldError) error;
+                if (error instanceof FieldError fieldError) {
                     logger.warn("     Campo: " + fieldError.getField() + ", Valor Rejeitado: " + fieldError.getRejectedValue() + ", Códigos: " + Arrays.toString(fieldError.getCodes()));
                 }
             });
@@ -137,9 +140,15 @@ public class LojaController {
     
     @GetMapping("/excluir/{id}")
     public String excluir(@PathVariable("id") Long id, RedirectAttributes attr) {
-        service.excluir(id);
-        attr.addFlashAttribute("success", "loja.delete.success"); 
-        return "redirect:/loja/listar";
+
+        if(propostaService.buscarTodosPorLoja(service.buscarPorId(id)) == null){
+            service.excluir(id);
+            attr.addFlashAttribute("success", "loja.delete.success"); 
+            return "redirect:/loja/listar";
+        }else{
+            attr.addFlashAttribute("fail", "loja.delete.proposta");      
+            return "redirect:/loja/listar";
+        }
     }
     
     @GetMapping("/listar")
