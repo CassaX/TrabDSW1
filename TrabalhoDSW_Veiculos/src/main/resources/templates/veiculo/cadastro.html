@@ -34,7 +34,7 @@
                         <label th:text="#{veiculo.placa.label}" for="placa">Placa</label>
                         <input type="text" class="form-control" id="placa"
                             placeholder="ABC-1234" data-mask="AAA-0000"   th:field="*{placa}"
-                            th:classappend="${#fields.hasErrors('placa')} ? is-invalid" />
+                            th:classappend="${#fields.hasErrors('placa')} ? is-invalid" pattern="[A-Za-z]{3}-[0-9]{4}" title="Formato: ABC-1234" />
                         <div class="invalid-feedback">
                             <span th:errors="*{placa}"></span>
                         </div>
