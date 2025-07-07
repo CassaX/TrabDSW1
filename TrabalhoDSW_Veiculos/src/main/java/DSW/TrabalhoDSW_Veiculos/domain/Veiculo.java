@@ -31,8 +31,8 @@
 		private String modelo;
 
 		@NotBlank(message = "{NotBlank.veiculo.chassi}")
-		@Size(max = 50, message = "{Size.veiculo.chassi}")
-		@Column(nullable = false, unique = true, length = 50)
+		@Size(max = 17, message = "{Size.veiculo.chassi}")
+		@Column(nullable = false, unique = true, length = 17)
 		private String chassi;
 
 		@NotBlank(message = "{NotBlank.veiculo.ano}")
@@ -54,7 +54,7 @@
 		@Column(nullable = false, precision = 10, scale = 2)
 		private BigDecimal valor;
 
-		@NotNull(message = "{NotNull.veiculo.loja}") 
+		//@NotNull(message = "{NotNull.veiculo.loja}") 
 		@ManyToOne
 		@JoinColumn(name = "loja_id")
 		private Loja loja;
