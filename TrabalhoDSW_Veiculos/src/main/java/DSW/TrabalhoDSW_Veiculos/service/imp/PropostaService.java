@@ -13,6 +13,7 @@ import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
 import DSW.TrabalhoDSW_Veiculos.domain.StatusProposta;
 import DSW.TrabalhoDSW_Veiculos.service.spec.IPropostaService;
+import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
 
 @Service
 @Transactional(readOnly = false)
@@ -49,6 +50,11 @@ public class PropostaService implements IPropostaService {
     @Transactional(readOnly = true)
     public List<Proposta> buscarTodosPorLoja(Loja loja) {
         return dao.findAllByVeiculo_Loja(loja); 
+    }
+
+    @Transactional(readOnly = true)
+    public List<Proposta> buscarPorVeiculo(Veiculo veiculo) {
+        return dao.findAllByVeiculo(veiculo);
     }
     
 }

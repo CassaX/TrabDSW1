@@ -48,4 +48,5 @@ public interface IVeiculoDAO extends CrudRepository<Veiculo, Long> {
 
 	List<Veiculo> findByModelo(String modelo);
 
+
 }

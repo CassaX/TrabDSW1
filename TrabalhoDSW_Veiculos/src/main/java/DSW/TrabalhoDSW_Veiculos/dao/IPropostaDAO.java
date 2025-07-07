@@ -9,6 +9,7 @@ import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
 import DSW.TrabalhoDSW_Veiculos.domain.StatusProposta;
+import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
 
 public interface IPropostaDAO extends CrudRepository<Proposta, Long> {
 
@@ -19,4 +20,6 @@ public interface IPropostaDAO extends CrudRepository<Proposta, Long> {
     Optional<Proposta> findByCliente(Cliente cliente);
 
     List<Proposta> findAllByVeiculo_Loja(Loja loja);
+
+    List<Proposta> findAllByVeiculo(Veiculo veiculo);
 }

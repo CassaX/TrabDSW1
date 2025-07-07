@@ -6,6 +6,7 @@ import java.util.Optional;
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
+import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
 
 public interface IPropostaService {
 
@@ -21,5 +22,7 @@ public interface IPropostaService {
     Optional<Proposta> buscarPorCliente(Cliente cliente);
 
     List<Proposta> buscarTodosPorLoja(Loja loja);
+
+    List<Proposta> buscarPorVeiculo(Veiculo veiculo);
 
 }

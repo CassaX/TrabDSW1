@@ -242,50 +242,60 @@ public class VeiculoController {
             model.addAttribute("fail", "Loja não identificada. Por favor, faça login como loja.");
             return "redirect:/login";
         }
-        model.addAttribute("veiculos", veiculoService.buscarPorLoja(loja));
+        
+        List<Veiculo> veiculosDaLoja = veiculoService.buscarPorLoja(loja);
+        
+        List<Veiculo> veiculos = veiculosDaLoja.stream()
+                .filter(veiculo -> {
+                    List<Proposta> propostasDoVeiculo = propostaService.buscarPorVeiculo(veiculo);
+                    return propostasDoVeiculo.stream()
+                            .noneMatch(p -> p.getStatus() == StatusProposta.ACEITO);
+                })
+                .collect(Collectors.toList());
+        
+        model.addAttribute("veiculos", veiculos);
         return "veiculo/meus-veiculos";
     }
 
 
- @GetMapping("/listar")
-public String listar(ModelMap model, @RequestParam(required = false) String modelo) {
-    Cliente cliente = getClienteLogado();
-
-    List<Veiculo> veiculos;
-
-    if (cliente == null) {
-        veiculos = veiculoService.buscarTodos().stream()
-            .filter(v -> {
-                boolean modeloCorresponde = (modelo == null || modelo.trim().isEmpty()) || v.getModelo().toLowerCase().contains(modelo.toLowerCase());
-                boolean temPropostaAberta = v.getPropostas().stream().anyMatch(p ->
-                        p.getStatus() == StatusProposta.ABERTO ||
-                        p.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE
-                );
-                return modeloCorresponde && temPropostaAberta;
-            })
-            .collect(Collectors.toList());
-    } else {
-        veiculos = (modelo != null && !modelo.trim().isEmpty())
-            ? veiculoService.buscarTodos().stream()
+    @GetMapping("/listar")
+    public String listar(ModelMap model, @RequestParam(required = false) String modelo) {
+        List<Veiculo> todosVeiculos = (modelo != null && !modelo.trim().isEmpty())
+                ? veiculoService.buscarTodos().stream()
                 .filter(v -> v.getModelo().toLowerCase().contains(modelo.toLowerCase()))
                 .collect(Collectors.toList())
-            : veiculoService.buscarTodos();
+                : veiculoService.buscarTodos();
 
-        Map<Long, Proposta> propostasAtivasDoClientePorVeiculo = new HashMap<>();
-        List<Proposta> propostasDoCliente = propostaService.buscarTodosPorCliente(cliente);
-        
-        for (Proposta proposta : propostasDoCliente) {
-            if (proposta.getStatus() == StatusProposta.ABERTO || 
-                proposta.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
-                propostasAtivasDoClientePorVeiculo.put(proposta.getVeiculo().getId(), proposta);
+                List<Veiculo> veiculos = todosVeiculos.stream()
+                .filter(veiculo -> {
+                    List<Proposta> propostasDoVeiculo = propostaService.buscarPorVeiculo(veiculo);
+                    return propostasDoVeiculo.stream()
+                            .noneMatch(p -> p.getStatus() == StatusProposta.ACEITO);
+                })
+                .collect(Collectors.toList());
+    
+    
+
+        model.addAttribute("veiculos", veiculos);
+
+        Cliente cliente = getClienteLogado();
+        if (cliente != null) {
+            Map<Long, Proposta> propostasAtivasDoClientePorVeiculo = new HashMap<>();
+            List<Proposta> propostasDoCliente = propostaService.buscarTodosPorCliente(cliente);
+            
+            for (Proposta proposta : propostasDoCliente) {
+                if (proposta.getStatus() == StatusProposta.ABERTO || 
+                    proposta.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
+                    propostasAtivasDoClientePorVeiculo.put(proposta.getVeiculo().getId(), proposta);
+                }
             }
+            model.addAttribute("veiculoComPropostaAberta", propostasAtivasDoClientePorVeiculo); 
         }
-        model.addAttribute("veiculoComPropostaAberta", propostasAtivasDoClientePorVeiculo); 
-    }
 
-    model.addAttribute("veiculos", veiculos);
-    return "veiculo/lista";
-}
+
+
+        return "veiculo/lista";
+    }
 
     @GetMapping("/excluir/{id}")
     public String excluir(@PathVariable("id") Long id, RedirectAttributes attr) {
