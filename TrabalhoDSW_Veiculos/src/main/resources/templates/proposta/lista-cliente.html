@@ -57,8 +57,8 @@
                                     </a>
                                 </div>
                                 <div th:if="${proposta.status.name() == 'ACEITO'}">
-                                    <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalReuniao"
-                                            th:attr="data-horario=${proposta.horarioReuniao != null ? #temporals.format(proposta.horarioReuniao, 'yyyy-MM-dd''T''HH:mm:ss') : ''}, data-link=${proposta.linkReuniao}">
+                                   <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalReuniao"
+                                        th:attr="data-horario=${proposta.horarioReuniao != null ? #temporals.format(proposta.horarioReuniao, 'yyyy-MM-dd''T''HH:mm:ss') : ''}, data-link=${proposta.linkReuniao}">
                                         <span class="oi oi-calendar"></span> Ver Reunião
                                     </button>
                                 </div>
@@ -95,65 +95,56 @@
             </div>
         </div>
 
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        
         <script>
             $('#modalReuniao').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget);
-                var horarioIsoString = button.data('horario'); 
-                var link = button.data('link');
+            var button = $(event.relatedTarget);
+            var horarioIsoString = button.data('horario'); 
+            var link = button.data('link');
 
-                var modal = $(this);
-                var horario = null;
-                var displayHorario = 'Não definido'; 
+            var modal = $(this);
+            var displayHorario = 'Não definido';
 
-                console.log("DEBUG: String de horário recebida:", horarioIsoString); 
-                console.log("DEBUG: Link recebido:", link);
+            if (horarioIsoString) {
+                var partesDataHora = horarioIsoString.split('T'); 
 
-                if (horarioIsoString) {
-                    try {
-                        horario = new Date(horarioIsoString);
+                if (partesDataHora.length === 2) {
+                    var partesData = partesDataHora[0].split('-'); 
+                    var partesHora = partesDataHora[1].split(':'); 
 
-                        if (isNaN(horario.getTime())) {
-                            console.warn("DEBUG: new Date() falhou com ISO string. Tentando parse manual.");
-                            var match = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/.exec(horarioIsoString);
-                            if (match) {
-                                horario = new Date(
-                                    parseInt(match[1]),      
-                                    parseInt(match[2]) - 1,   
-                                    parseInt(match[3]),      
-                                    parseInt(match[4]),      
-                                    parseInt(match[6])       
-                                );
-                            } else {
-                                console.warn("DEBUG: String não corresponde ao formato esperado para parse manual.");
-                            }
+                    if (partesData.length === 3 && partesHora.length >= 2) {
+                        var ano = parseInt(partesData[0]);
+                        var mes = parseInt(partesData[1]) - 1; 
+                        var dia = parseInt(partesData[2]);
+                        var hora = parseInt(partesHora[0]);
+                        var minuto = parseInt(partesHora[1]);
+
+                        var horario = new Date(ano, mes, dia, hora, minuto);
+
+                        if (!isNaN(horario.getTime())) {
+                            var diaStr = ('0' + horario.getDate()).slice(-2);
+                            var mesStr = ('0' + (horario.getMonth() + 1)).slice(-2);
+                            var anoStr = horario.getFullYear();
+                            var horaStr = ('0' + horario.getHours()).slice(-2);
+                            var minStr = ('0' + horario.getMinutes()).slice(-2);
+
+                            displayHorario = `${diaStr}/${mesStr}/${anoStr} ${horaStr}:${minStr}`;
                         }
-
-                        if (horario && !isNaN(horario.getTime())) { 
-                            var ano = horario.getFullYear();
-                            var mes = ('0' + (horario.getMonth() + 1)).slice(-2); 
-                            var dia = ('0' + horario.getDate()).slice(-2);
-                            var horas = ('0' + horario.getHours()).slice(-2);
-                            var minutos = ('0' + horario.getMinutes()).slice(-2);
-                            var segundos = ('0' + horario.getSeconds()).slice(-2);
-
-                            displayHorario = `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
-                            console.log("DEBUG: Horário formatado para exibição:", displayHorario);
-                        } else {
-                            console.warn("DEBUG: Objeto Date ainda inválido após todas as tentativas de parse.");
-                        }
-
-                    } catch (error) {
-                        console.error("DEBUG: Erro fatal durante o processamento da data:", error); 
                     }
-                } else {
-                    console.log("DEBUG: horarioIsoString é vazia ou nula.");
                 }
-                
-                modal.find('#horarioReuniaoModal').text(displayHorario);
-                
-                modal.find('#linkReuniaoModal').attr('href', link).text(link ? 'Acessar Reunião' : 'Não definido');
-            });
+            }
+
+            modal.find('#horarioReuniaoModal').text(displayHorario);
+            modal.find('#linkReuniaoModal').attr('href', link).text(link ? 'Acessar Reunião' : 'Não definido');
+        });
+
         </script>
+
 
     </section>
 </body>

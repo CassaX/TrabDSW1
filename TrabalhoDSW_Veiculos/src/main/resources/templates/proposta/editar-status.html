@@ -102,7 +102,8 @@
                         <label for="horarioReuniao" class="col-sm-3 col-form-label">Horário da Reunião:</label>
                         <div class="col-sm-9">
                             <input type="datetime-local" class="form-control" id="horarioReuniao"
-                                th:field="*{horarioReuniao}">
+                                th:field="*{horarioReuniao}"
+                                th:value="*{#temporals.format(horarioReuniao, 'yyyy-MM-dd\'T\'HH:mm')}">
                             <div class="invalid-feedback" th:errors="*{horarioReuniao}"></div>
                         </div>
                     </div>

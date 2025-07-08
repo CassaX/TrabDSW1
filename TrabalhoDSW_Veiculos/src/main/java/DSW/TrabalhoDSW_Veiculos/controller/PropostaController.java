@@ -3,6 +3,7 @@ package DSW.TrabalhoDSW_Veiculos.controller;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -264,6 +265,24 @@ public class PropostaController {
             
             propostaService.salvar(propostaOriginal);
             notificacaoPropostaService.notificarProposta(propostaOriginal, true); 
+
+            List<Proposta> outrasPropostas = propostaService.buscarPorVeiculo(propostaOriginal.getVeiculo());
+            for (Proposta outra : outrasPropostas) {
+                if (!outra.getId().equals(propostaOriginal.getId()) && 
+                    (outra.getStatus() == StatusProposta.ABERTO ||
+                    outra.getStatus() == StatusProposta.AGUARDANDO_FINALIZACAO_LOJA ||
+                    outra.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE)) {
+
+                    outra.setStatus(StatusProposta.RECUSADO_LOJA);
+                    outra.setContrapropostaValor(null);
+                    outra.setContrapropostaCondicoes(null);
+                    outra.setHorarioReuniao(null);
+                    outra.setLinkReuniao(null);
+                    propostaService.salvar(outra);
+
+                    notificacaoPropostaService.notificarProposta(outra, false);
+                }
+            }
             
             attr.addFlashAttribute("success", "proposta.accept.success");
 

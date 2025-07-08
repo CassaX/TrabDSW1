@@ -3,6 +3,8 @@ package DSW.TrabalhoDSW_Veiculos.domain;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,6 +50,7 @@ public class Proposta extends AbstractEntity<Long> {
     @Column(columnDefinition = "TEXT")
     private String contrapropostaCondicoes; 
 
+	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime horarioReuniao; 
     
     
