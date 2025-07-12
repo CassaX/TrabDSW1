@@ -65,7 +65,7 @@
                     <div class="form-group col-md-6">
                         <label th:text="#{proposta.condicoesPagamento.label}" for="condicoesPagamento">Condições de Pagamento</label>
                         <input type="text" class="form-control" id="condicoesPagamento"
-                            placeholder="Ex: Pagamento à vista, 10x no cartão, etc."
+                            th:placeholder="#{proposta.condicoesPagamento.placeholder}"
                             th:field="*{condicoesPagamento}"
                             th:classappend="${#fields.hasErrors('condicoesPagamento')} ? is-invalid" />
                         <div class="invalid-feedback">
