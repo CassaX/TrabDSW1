@@ -1,10 +1,13 @@
 package DSW.TrabalhoDSW_Veiculos.controller;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -28,6 +31,8 @@ import jakarta.validation.Valid;
 @Controller
 @RequestMapping("/loja")
 public class LojaController {
+
+    private final MessageSource messageSource;
     
     private static final Logger logger = LoggerFactory.getLogger(LojaController.class);
 
@@ -42,6 +47,10 @@ public class LojaController {
 
     @Autowired
     private BCryptPasswordEncoder encoder;
+
+    LojaController(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
     @GetMapping("/cadastrar")
     public String cadastrar(Loja loja, ModelMap model) {
@@ -66,11 +75,11 @@ public class LojaController {
 
 
         if (result.hasErrors()) {
-            logger.warn("Erros de validação encontrados ao tentar salvar a loja:");
+            logger.warn(messageSource.getMessage("log.validacao.erros.salvar", null, LocaleContextHolder.getLocale()));
             result.getAllErrors().forEach(error -> {
-                logger.warn("   - Mensagem de Erro: " + error.getDefaultMessage());
+                logger.warn(messageSource.getMessage("log.validacao.mensagem", new Object[] {error.getDefaultMessage()}, LocaleContextHolder.getLocale()));
                 if (error instanceof FieldError fieldError) {
-                    logger.warn("     Campo: " + fieldError.getField() + ", Valor Rejeitado: " + fieldError.getRejectedValue() + ", Códigos: " + Arrays.toString(fieldError.getCodes()));
+                    logger.warn(messageSource.getMessage("log.validacao.detalhes.campo", new Object[] {fieldError.getField(),fieldError.getRejectedValue(),Arrays.toString(fieldError.getCodes())},LocaleContextHolder.getLocale()));
                 }
             });
             attr.addFlashAttribute("fail", "loja.create.fail"); 

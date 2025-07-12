@@ -122,7 +122,7 @@ public class ClienteController {
 
         try {
             if (service.existePropostasAbertas(id)) {
-                attr.addFlashAttribute("fail", "Não é possível excluir: Cliente possui propostas em aberto");
+                attr.addFlashAttribute("fail", "cliente.excluir.comPropostas");
                 return "redirect:/cliente/listar";
             }
             service.excluir(id);

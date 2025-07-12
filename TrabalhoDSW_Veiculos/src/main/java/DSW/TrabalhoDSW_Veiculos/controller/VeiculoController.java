@@ -81,7 +81,7 @@ public class VeiculoController {
     public String cadastrar(Veiculo veiculo, ModelMap model) {
         Loja loja = getLojaLogada();
         if (loja == null) {
-            model.addAttribute("fail", "Loja não identificada. Por favor, faça login como loja.");
+            model.addAttribute("fail", "loja.nao.identificada");
             return "redirect:/login";
         }
         veiculo.setLoja(loja);
@@ -95,7 +95,7 @@ public class VeiculoController {
     
         Loja loja = getLojaLogada();
         if (loja == null) {
-            attr.addFlashAttribute("fail", "Sessão expirada. Por favor, faça login novamente.");
+            attr.addFlashAttribute("fail", "sessao.expirada");
             return "redirect:/login";
         }
         veiculo.setLoja(loja);
@@ -119,13 +119,13 @@ public class VeiculoController {
                         imagemService.salvar(imagem);
                     } catch (IOException e) {
                         e.printStackTrace();
-                        attr.addFlashAttribute("fail", "Erro ao processar uma das imagens.");
+                        attr.addFlashAttribute("fail", "erro.processar.imagem");
                         return "veiculo/cadastro";
                     }
                 }
             }
         }
-                attr.addFlashAttribute("success", "Veículo cadastrado com sucesso!");
+        attr.addFlashAttribute("success", "veiculo.cadastro.success");
         return "redirect:/veiculos/meus-veiculos";
     }
 
@@ -136,7 +136,7 @@ public class VeiculoController {
         Loja loja = getLojaLogada();
 
         if (veiculo == null || loja == null || !veiculo.getLoja().getId().equals(loja.getId())) {
-            model.addAttribute("fail", "Permissão negada ou veículo não encontrado.");
+            model.addAttribute("fail", "veiculo.editar.permissao");
             return "redirect:/veiculos/meus-veiculos";
         }
 
@@ -151,13 +151,13 @@ public class VeiculoController {
 
         Loja loja = getLojaLogada();
         if (loja == null) {
-            attr.addFlashAttribute("fail", "Sessão expirada. Por favor, faça login novamente.");
+            attr.addFlashAttribute("fail", "sessao.expirada");
             return "redirect:/login";
         }
 
         Veiculo existente = veiculoService.buscarPorId(veiculo.getId());
         if (existente == null || !existente.getLoja().getId().equals(loja.getId())) {
-            attr.addFlashAttribute("fail", "Veículo não encontrado ou não pertence à loja.");
+            attr.addFlashAttribute("fail", "veiculo.nao.encontrado");
             return "redirect:/veiculos/meus-veiculos";
         }
         
@@ -174,7 +174,7 @@ public class VeiculoController {
 
         if (fotosUpload != null && !fotosUpload.isEmpty() && !fotosUpload.get(0).isEmpty()) {
             if (fotosUpload.size() > 10) {
-                attr.addFlashAttribute("fail", "Você pode enviar no máximo 10 imagens.");
+                attr.addFlashAttribute("fail", "veiculo.maximo.imagens");
 
                 veiculo.setFotos(existente.getFotos());
                 return "veiculo/cadastro";
@@ -216,7 +216,8 @@ public class VeiculoController {
         existente.setValor(veiculo.getValor());
 
         veiculoService.salvar(existente);
-        attr.addFlashAttribute("success", "Veículo atualizado com sucesso!");
+        
+        attr.addFlashAttribute("success", "veiculo.atualizado.success");
         return "redirect:/veiculos/meus-veiculos";
     }
 
@@ -239,7 +240,7 @@ public class VeiculoController {
     public String listarMeusVeiculos(ModelMap model) {
         Loja loja = getLojaLogada();
         if (loja == null) {
-            model.addAttribute("fail", "Loja não identificada. Por favor, faça login como loja.");
+            model.addAttribute("fail", "loja.nao.identificada");
             return "redirect:/login";
         }
         
@@ -303,12 +304,12 @@ public class VeiculoController {
         Veiculo veiculo = veiculoService.buscarPorId(id);
 
         if (veiculo == null || loja == null || !veiculo.getLoja().getId().equals(loja.getId())) {
-            attr.addFlashAttribute("fail", "Permissão negada ou veículo não encontrado.");
+            attr.addFlashAttribute("fail", "veiculo.excluir.permissao");
             return "redirect:/veiculos/meus-veiculos";
         }
 
         veiculoService.excluir(id);
-        attr.addFlashAttribute("success", "Veículo excluído com sucesso!");
+        attr.addFlashAttribute("success", "veiculo.excluir.success");
         return "redirect:/veiculos/meus-veiculos";
     }
 }

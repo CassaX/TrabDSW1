@@ -81,6 +81,7 @@ public class TrabalhoDswVeiculosApplication {
 			v1.setDescricao("Veículo em ótimo estado, com manutenção em dia.");
 			v1.setValor(new BigDecimal(45000.00));
 			v1.setLoja(l1);
+			v1.setFotos(null);
 			veiculoDAO.save(v1);
 
 			Veiculo v2 = new Veiculo();
