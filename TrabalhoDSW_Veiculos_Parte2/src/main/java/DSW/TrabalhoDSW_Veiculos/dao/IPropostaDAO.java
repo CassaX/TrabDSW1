@@ -17,7 +17,7 @@ public interface IPropostaDAO extends CrudRepository<Proposta, Long> {
 
     List<Proposta> findAllByCliente(Cliente cliente);
 
-    Optional<Proposta> findByCliente(Cliente cliente);
+    List<Proposta> findByCliente(Cliente cliente);
 
     List<Proposta> findAllByVeiculo_Loja(Loja loja);
 

@@ -18,8 +18,7 @@ public interface IPropostaService {
 
     boolean existePropostaAberta(Long idCliente, Long idVeiculo);
 
-    //Object buscarPorCliente(Cliente cliente);
-    Optional<Proposta> buscarPorCliente(Cliente cliente);
+    List<Proposta> buscarPorCliente(Cliente cliente);
 
     List<Proposta> buscarTodosPorLoja(Loja loja);
 
