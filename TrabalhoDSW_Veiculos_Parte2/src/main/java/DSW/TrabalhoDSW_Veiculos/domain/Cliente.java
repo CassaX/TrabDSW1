@@ -10,6 +10,9 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull; 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+
 
 @SuppressWarnings("serial")
 @Entity
@@ -30,7 +33,8 @@ public class Cliente extends Usuario {
     private String sexo;
 
     @NotNull(message = "{NotNull.cliente.dataNascimento}") 
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(nullable = false, length = 10)
     private LocalDate dataNascimento;
 

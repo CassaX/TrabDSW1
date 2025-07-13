@@ -15,8 +15,6 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 import DSW.TrabalhoDSW_Veiculos.security.UsuarioDetailsServiceImpl;
 
-
-
 @Configuration
 public class SecurityConfig {
 
@@ -27,6 +25,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/**").permitAll()
+                        
                         .requestMatchers("/", "/home", "/error", "/login", "/registro", "/registro/**").permitAll()
                         .requestMatchers("/webjars/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/veiculos", "/veiculos/listar").permitAll()
@@ -38,22 +38,19 @@ public class SecurityConfig {
 
                         .requestMatchers("/propostas/criar/**", "/propostas/minhas-propostas").hasRole("CLIENTE")
 
-
                         .requestMatchers(HttpMethod.GET, "/veiculos/cadastrar", "/veiculos/meus-veiculos", "/veiculos/editar/**").hasRole("LOJA")
                         .requestMatchers(HttpMethod.POST, "/veiculos/salvar", "/veiculos/editar").hasRole("LOJA")
-                        .requestMatchers(HttpMethod.GET, "/veiculos/excluir/**").hasRole("LOJA") 
-                        .requestMatchers(HttpMethod.POST, "/veiculos/excluir/**").hasRole("LOJA") 
+                        .requestMatchers(HttpMethod.GET, "/veiculos/excluir/**").hasRole("LOJA")
+                        .requestMatchers(HttpMethod.POST, "/veiculos/excluir/**").hasRole("LOJA")
 
                         .requestMatchers("/propostas/loja/**", "/propostas/editar-status/**").hasRole("LOJA")
-
                         .requestMatchers("/propostas/salvar").hasAnyRole("CLIENTE", "LOJA", "ADMIN")
-
 
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/home", true) 
+                        .defaultSuccessUrl("/home", true)
                         .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -62,7 +59,7 @@ public class SecurityConfig {
                 .userDetailsService(usuarioDetailsService)
                 .requestCache(cache -> cache
                         .requestCache(httpSessionRequestCache()))
-                .csrf(csrf -> csrf.disable()); 
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
@@ -72,6 +69,7 @@ public class SecurityConfig {
         HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
         requestCache.setRequestMatcher(new NegatedRequestMatcher(
                 new OrRequestMatcher(
+                        new AntPathRequestMatcher("/api/**"), 
                         new AntPathRequestMatcher("/css/**"),
                         new AntPathRequestMatcher("/js/**"),
                         new AntPathRequestMatcher("/images/**"),
