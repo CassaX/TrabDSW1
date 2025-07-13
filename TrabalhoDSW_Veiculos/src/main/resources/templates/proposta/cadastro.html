@@ -67,7 +67,7 @@
                         <input type="text" class="form-control" id="condicoesPagamento"
                             th:placeholder="#{proposta.condicoesPagamento.placeholder}"
                             th:field="*{condicoesPagamento}"
-                            th:classappend="${#fields.hasErrors('condicoesPagamento')} ? is-invalid" />
+                            th:classappend="${#fields.hasErrors('condicoesPagamento')} ? 'is-invalid' : ''" />
                         <div class="invalid-feedback">
                             <span th:errors="*{condicoesPagamento}"></span>
                         </div>

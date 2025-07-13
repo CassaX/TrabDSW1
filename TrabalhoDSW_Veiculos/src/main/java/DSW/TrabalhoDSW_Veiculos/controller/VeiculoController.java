@@ -308,6 +308,7 @@ public class VeiculoController {
             return "redirect:/veiculos/meus-veiculos";
         }
 
+
         veiculoService.excluir(id);
         attr.addFlashAttribute("success", "veiculo.excluir.success");
         return "redirect:/veiculos/meus-veiculos";

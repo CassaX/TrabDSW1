@@ -93,12 +93,13 @@ public class PropostaController {
         }
         proposta.setStatus(StatusProposta.ABERTO);
 
-        if (proposta.getValor() == null || proposta.getValor().compareTo(BigDecimal.ZERO) <= 0) { 
-            result.addError(new FieldError("proposta", "valor", "proposta.valor.requiredAndPositive")); 
+        if (proposta.getValor() == null || proposta.getValor().compareTo(BigDecimal.ZERO) <= 0) {
+            result.addError(new FieldError("proposta", "valor", null, false, new String[]{"proposta.valor.requiredAndPositive"}, null, null));
         }
         if (proposta.getCondicoesPagamento() == null || proposta.getCondicoesPagamento().trim().isEmpty()) {
-            result.addError(new FieldError("proposta", "condicoesPagamento", "proposta.condicoesPagamento.required")); 
+            result.addError(new FieldError("proposta", "condicoesPagamento", null, false, new String[]{"proposta.condicoesPagamento.required"}, null, null));
         }
+
 
 
         if (result.hasErrors()) {
@@ -209,35 +210,42 @@ public class PropostaController {
         }
         
         if (propostaForm.getStatus() == null) {
-            result.addError(new FieldError("proposta", "status", "proposta.status.selectAction")); 
-        } else if (propostaForm.getStatus() == StatusProposta.ACEITO) { 
+            result.addError(new FieldError("proposta", "status", null, false, new String[]{"proposta.status.selectAction"}, null, null));
+        } else if (propostaForm.getStatus() == StatusProposta.ACEITO) {
             if (propostaForm.getHorarioReuniao() == null) {
-                result.addError(new FieldError("proposta", "horarioReuniao", "proposta.horarioReuniao.required"));
+                result.addError(new FieldError("proposta", "horarioReuniao", null, false, new String[]{"proposta.horarioReuniao.required"}, null, null));
             }
             if (propostaForm.getLinkReuniao() == null || propostaForm.getLinkReuniao().trim().isEmpty()) {
-                result.addError(new FieldError("proposta", "linkReuniao", "proposta.linkReuniao.required"));
+                result.addError(new FieldError("proposta", "linkReuniao", null, false, new String[]{"proposta.linkReuniao.required"}, null, null));
+            } else if (!isValidUrl(propostaForm.getLinkReuniao())) {
+                result.addError(new FieldError("proposta", "linkReuniao", null, false, new String[]{"proposta.linkReuniao.invalidFormat"}, null, null));
             }
-            if (propostaForm.getLinkReuniao() != null && !propostaForm.getLinkReuniao().trim().isEmpty()) {
-                if (!isValidUrl(propostaForm.getLinkReuniao())) {
-                    result.addError(new FieldError("proposta", "linkReuniao", "proposta.linkReuniao.invalidFormat"));
-                }
-            }
-
         } else if (propostaForm.getStatus() == StatusProposta.AGUARDANDO_RESPOSTA_CLIENTE) {
             if (acaoLojista == null || (!"contraproposta".equals(acaoLojista) && !"recusar".equals(acaoLojista))) {
-                result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.selectAction")); 
+                result.addError(new FieldError("proposta", "acaoLojista", null, false, new String[]{"proposta.acaoLojista.selectAction"}, null, null));
             } else if ("contraproposta".equals(acaoLojista)) {
                 if (propostaForm.getContrapropostaValor() == null || propostaForm.getContrapropostaValor().compareTo(BigDecimal.ZERO) <= 0) {
-                    result.addError(new FieldError("proposta", "contrapropostaValor", "proposta.contrapropostaValor.requiredAndPositive")); // NOVA CHAVE
+                    result.addError(new FieldError("proposta", "contrapropostaValor", null, false, new String[]{"proposta.contrapropostaValor.requiredAndPositive"}, null, null));
                 }
                 if (propostaForm.getContrapropostaCondicoes() == null || propostaForm.getContrapropostaCondicoes().trim().isEmpty()) {
-                    result.addError(new FieldError("proposta", "contrapropostaCondicoes", "proposta.contrapropostaCondicoes.required"));
+                    result.addError(new FieldError("proposta", "contrapropostaCondicoes", null, false, new String[]{"proposta.contrapropostaCondicoes.required"}, null, null));
                 }
-            } else if ("recusar".equals(acaoLojista)) {
-
-            } else {
-                result.addError(new FieldError("proposta", "acaoLojista", "proposta.acaoLojista.invalidActionValue")); 
             }
+        } else {
+            result.addError(new FieldError("proposta", "status", null, false, new String[]{"proposta.status.invalidOrUnexpected"}, null, null));
+        }
+
+        if (result.hasErrors()) {
+            ModelMap model = new ModelMap();
+            model.addAttribute("proposta", propostaForm);
+            model.addAttribute("veiculo", propostaOriginal.getVeiculo());
+            if (propostaOriginal.getStatus() == StatusProposta.AGUARDANDO_FINALIZACAO_LOJA) {
+                model.addAttribute("preSelectedStatus", StatusProposta.ACEITO.name());
+            } else {
+                model.addAttribute("preSelectedStatus", propostaForm.getStatus() != null ? propostaForm.getStatus().name() : "");
+            }
+            attr.addFlashAttribute("fail", "proposta.update.fail");
+            return "proposta/editar-status";
         } else { 
             result.addError(new FieldError("proposta", "status", "proposta.status.invalidOrUnexpected")); 
         }
@@ -364,18 +372,18 @@ public class PropostaController {
         
         if ("nova".equals(acaoCliente)) {
             if (propostaForm.getValor() == null || propostaForm.getValor().compareTo(BigDecimal.ZERO) <= 0) {
-                 result.addError(new FieldError("proposta", "valor", "proposta.newValue.invalid")); 
+                result.addError(new FieldError("proposta", "valor", null, false, new String[]{"proposta.newValue.invalid"}, null, null));
             }
             if (propostaForm.getCondicoesPagamento() == null || propostaForm.getCondicoesPagamento().trim().isEmpty()) {
-                 result.addError(new FieldError("proposta", "condicoesPagamento", "proposta.newConditions.required")); 
+                result.addError(new FieldError("proposta", "condicoesPagamento", null, false, new String[]{"proposta.newConditions.required"}, null, null));
             }
             if (propostaForm.getLinkReuniao() != null && !propostaForm.getLinkReuniao().trim().isEmpty()) {
                 if (!isValidUrl(propostaForm.getLinkReuniao())) {
-                    result.addError(new FieldError("proposta", "linkReuniao", "proposta.linkReuniao.invalidFormat")); 
+                    result.addError(new FieldError("proposta", "linkReuniao", null, false, new String[]{"proposta.linkReuniao.invalidFormat"}, null, null));
                 }
             }
             if (result.hasErrors()) {
-                attr.addFlashAttribute("fail", "proposta.newProposal.fail"); 
+                attr.addFlashAttribute("fail", "proposta.newProposal.fail");
                 return "redirect:/propostas/cliente/responder/" + propostaForm.getId();
             }
         }

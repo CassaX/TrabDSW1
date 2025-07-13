@@ -39,18 +39,14 @@ public class ClienteController {
     
     @PostMapping("/salvar")
     public String salvar(@Valid Cliente cliente, BindingResult result, RedirectAttributes attr, ModelMap model) {
-        if (cliente.getSenha() == null || cliente.getSenha().trim().isEmpty()) {
-            result.addError(new FieldError("cliente", "senha", "cliente.senha.notblank"));
-        }
-        
         if (service.buscarPorCPF(cliente.getCPF()) != null) { 
-            result.addError(new FieldError("cliente", "CPF", "cliente.cpf.cadastrado")); 
+            result.addError(new FieldError("cliente", "cpf", null, false, new String[]{"cliente.cpf.cadastrado"}, null, null)); 
         }
 
         Cliente clienteByEmail = service.buscarPorEmail(cliente.getEmail());
         Loja lojaByEmail = lojaService.buscarPorEmail(cliente.getEmail());
         if (clienteByEmail != null || lojaByEmail != null) {
-            result.addError(new FieldError("cliente", "email", "email.cadastrado")); 
+            result.addError(new FieldError("cliente", "email", null, false, new String[]{"email.cadastrado"}, null, null)); 
         }
 
         if (result.hasErrors()) {
@@ -83,17 +79,16 @@ public class ClienteController {
 
         Cliente clienteByCPF = service.buscarPorCPF(cliente.getCPF());
         if (clienteByCPF != null && !clienteByCPF.getId().equals(cliente.getId())) { 
-            result.addError(new FieldError("cliente", "CPF", "cliente.cpf.cadastradoOutro")); 
+            result.addError(new FieldError("cliente", "cpf", null, false, new String[]{"cliente.cpf.cadastradoOutro"}, null, null)); 
         }
-
 
         Cliente clienteByEmail = service.buscarPorEmail(cliente.getEmail());
         if (clienteByEmail != null && !clienteByEmail.getId().equals(cliente.getId())) {
-            result.addError(new FieldError("cliente", "email", "cliente.email.cadastradoOutro"));
+            result.addError(new FieldError("cliente", "email", null, false, new String[]{"cliente.email.cadastradoOutro"}, null, null));
         }
         Loja lojaByEmail = lojaService.buscarPorEmail(cliente.getEmail());
         if (lojaByEmail != null && !lojaByEmail.getId().equals(cliente.getId())) {
-            result.addError(new FieldError("cliente", "email", "cliente.email.cadastradoOutro"));
+            result.addError(new FieldError("cliente", "email", null, false, new String[]{"cliente.email.cadastradoOutro"}, null, null));
         }
 
         if (novaSenha != null && !novaSenha.trim().isEmpty()) {

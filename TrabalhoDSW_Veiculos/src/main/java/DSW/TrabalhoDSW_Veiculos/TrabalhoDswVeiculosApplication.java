@@ -34,7 +34,7 @@ public class TrabalhoDswVeiculosApplication {
 			u1.setNome("Nathalia");
 			u1.setTelefone("(14) 99800-8495");
 			u1.setDataNascimento(LocalDate.of(2003, 2, 12));
-			u1.setSexo("Feminino");
+			u1.setSexo("FEMININO");
 			u1.setRole("CLIENTE");
 			u1.setEnabled(true);
 			clienteDAO.save(u1);
@@ -46,7 +46,7 @@ public class TrabalhoDswVeiculosApplication {
 			u2.setNome("Matheus");
 			u2.setTelefone("(16) 99731-8013");
 			u2.setDataNascimento(LocalDate.of(2000, 1, 30));
-			u2.setSexo("Masculino");
+			u2.setSexo("MASCULINO");
 			u2.setRole("CLIENTE");
 			u2.setEnabled(true);
 			clienteDAO.save(u2);
