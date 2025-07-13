@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Responder Contraproposta</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+</head>
+<body>
+<section class="layout-content" layout:fragment="corpo">
+    <div class="container">
+        <h2>Responder Contraproposta #<span th:text="${proposta.id}"></span></h2>
+
+        <div th:replace="~{fragments/alert}"></div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                Detalhes da Sua Proposta Original
+            </div>
+            <div class="card-body">
+                <p><strong>Veículo:</strong> <span th:text="${proposta.veiculo.modelo} + ' (' + ${proposta.veiculo.ano} + ')'"></span></p>
+                <p><strong>Loja:</strong> <span th:text="${proposta.veiculo.loja.nome}"></span></p>
+                <p><strong>Seu Valor Proposto:</strong> <span th:text="|R$ ${#numbers.formatDecimal(proposta.valor,2,2,'COMMA')}|"></span></p>
+                <p><strong>Suas Condições de Pagamento:</strong> <span th:text="${proposta.condicoesPagamento}"></span></p>
+                <p><strong>Data da Proposta:</strong> <span th:text="${proposta.data}"></span></p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                Contraproposta da Loja
+            </div>
+            <div class="card-body">
+                <p><strong>Valor da Contraproposta:</strong> <span th:text="${proposta.contrapropostaValor != null ? '|R$ ' + #numbers.formatDecimal(proposta.contrapropostaValor,2,2,'COMMA') + '|' : 'Não informado'}"></span></p>
+                <p><strong>Condições da Contraproposta:</strong> <span th:text="${proposta.contrapropostaCondicoes != null and not #strings.isEmpty(proposta.contrapropostaCondicoes) ? proposta.contrapropostaCondicoes : 'Não informadas'}"></span></p>
+                <p th:if="${proposta.horarioReuniao}"><strong>Horário Sugerido para Reunião:</strong> <span th:text="${#temporals.format(proposta.horarioReuniao, 'dd/MM/yyyy HH:mm')}"></span></p>
+                <p th:if="${proposta.linkReuniao}"><strong>Link da Reunião Sugerido:</strong> <a th:href="${proposta.linkReuniao}" target="_blank">Acessar Reunião</a></p>
+            </div>
+        </div>
+
+        <form th:action="@{/propostas/cliente/processar-resposta}" th:object="${proposta}" method="post" class="form-horizontal">
+            <div th:replace="~{fragments/validacao::validacao}"></div>
+
+            <input type="hidden" th:field="*{id}" />
+            <input type="hidden" th:field="*{cliente.id}" />
+            <input type="hidden" th:field="*{veiculo.id}" />
+            <input type="hidden" th:field="*{data}" />
+            <input type="hidden" th:field="*{status}" />
+            <input type="hidden" id="hiddenValorNovaProposta" name="valor" th:value="${proposta.valor}"/>
+            <input type="hidden" id="hiddenCondicoesNovaProposta" name="condicoesPagamento" th:value="${proposta.condicoesPagamento}"/>
+
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">Sua Resposta à Contraproposta:</label>
+                <div class="col-sm-9">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="acaoCliente" id="aceitarContra" value="aceitar" onclick="toggleClienteResponseFields()">
+                        <label class="form-check-label" for="aceitarContra">
+                            Aceitar Contraproposta da Loja
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="acaoCliente" id="recusarContra" value="recusar" onclick="toggleClienteResponseFields()">
+                        <label class="form-check-label" for="recusarContra">
+                            Recusar Contraproposta e Fechar Proposta
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="acaoCliente" id="novaProposta" value="nova" onclick="toggleClienteResponseFields()">
+                        <label class="form-check-label" for="novaProposta">
+                            Recusar Contraproposta e Fazer Nova Proposta
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="novaPropostaFields" style="display:none;" class="mt-3">
+                <h4>Sua Nova Proposta:</h4>
+                <div class="form-group row">
+                    <label for="novoValor" class="col-sm-3 col-form-label">Novo Valor Proposto:</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="novoValor" 
+                               data-mask="#########.00" data-mask-reverse="true">
+                        <div class="invalid-feedback" th:errors="*{valor}"></div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="novasCondicoes" class="col-sm-3 col-form-label">Novas Condições de Pagamento:</label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control" id="novasCondicoes" rows="3"></textarea>
+                        <div class="invalid-feedback" th:errors="*{condicoesPagamento}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group row mt-4">
+                <div class="col-sm-9 offset-sm-3">
+                    <button type="submit" class="btn btn-primary">Enviar Resposta</button>
+                    <a th:href="@{/propostas/listar}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function toggleClienteResponseFields() {
+            var acaoCliente = $('input[name="acaoCliente"]:checked').val();
+            var novaPropostaFields = document.getElementById('novaPropostaFields');
+            var novoValorInput = document.getElementById('novoValor');
+            var novasCondicoesInput = document.getElementById('novasCondicoes');
+            var hiddenValorNovaProposta = document.getElementById('hiddenValorNovaProposta');
+            var hiddenCondicoesNovaProposta = document.getElementById('hiddenCondicoesNovaProposta');
+
+            if (acaoCliente === 'nova') {
+                novaPropostaFields.style.display = 'block';
+                novoValorInput.setAttribute('name', 'valor'); 
+                novasCondicoesInput.setAttribute('name', 'condicoesPagamento');
+            } else {
+                novaPropostaFields.style.display = 'none';
+                novoValorInput.removeAttribute('name');
+                novasCondicoesInput.removeAttribute('name');
+                novoValorInput.value = '';
+                novasCondicoesInput.value = '';
+                hiddenValorNovaProposta.value = '';
+                hiddenCondicoesNovaProposta.value = '';
+            }
+        }
+
+        $(document).ready(function() {
+            toggleClienteResponseFields();
+            $('#novoValor').mask('########0.00', {reverse: true});
+        });
+
+        $('form').submit(function() {
+            var acaoCliente = $('input[name="acaoCliente"]:checked').val();
+            if (acaoCliente === 'nova') {
+                var novoValor = $('#novoValor').val();
+                var novasCondicoes = $('#novasCondicoes').val();
+                $('#hiddenValorNovaProposta').val(novoValor);
+                $('#hiddenCondicoesNovaProposta').val(novasCondicoes);
+            }
+        });
+        /*]]>*/
+    </script>
+</section>
+</body>
+</html>

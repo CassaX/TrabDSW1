@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title th:text="#{proposta.listar.label}">Minhas Propostas</title>
+</head>
+<body>
+    <section class="layout-content" layout:fragment="corpo">
+
+        <nav class="navbar navbar-expand-md bg-light">
+            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <i class="oi oi-caret-right"></i>
+                        <span th:text="#{proposta.listar.label}">Minhas Propostas</span>
+                    </li>
+                </ul>
+                <a class="btn btn-primary btn-md" th:href="@{/veiculos/listar}" role="button">
+                    <span class="oi oi-plus" th:title="#{proposta.novaProposta.title}" aria-hidden="true"></span>
+                    <span th:text="#{proposta.novaProposta.label}">Nova Proposta</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="container" id="listagem">
+
+            <div th:replace="~{fragments/alert}"></div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th class="bg-warning">#</th>
+                            <th class="bg-warning" th:text="#{proposta.data.label}">Data da Proposta</th>
+                            <th class="bg-warning" th:text="#{proposta.veiculo.label}">Veículo</th>
+                            <th class="bg-warning" th:text="#{proposta.loja.label}">Loja</th>
+                            <th class="bg-warning" th:text="#{proposta.valor.label}">Valor Proposto</th>
+                            <th class="bg-warning" th:text="#{proposta.condicoesPagamento.label}">Condições de Pagamento</th>
+                            <th class="bg-warning" th:text="#{proposta.status.label}">Status</th>
+                            <th class="bg-warning" th:text="#{acao.label}">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="proposta : ${propostas}">
+                            <td th:text="${proposta.id}"></td>
+                            <td th:text="${proposta.data}"></td>
+                            <td th:text="${proposta.veiculo.modelo} + ' (' + ${proposta.veiculo.placa} + ')'"></td>
+                            <td th:text="${proposta.veiculo.loja.nome}"></td>
+                            <td th:text="|R$ ${#numbers.formatDecimal(proposta.valor, 2, 'COMMA', 2, 'POINT')}|"></td>
+                            <td th:text="${proposta.condicoesPagamento}"></td>
+                            <td th:text="${proposta.status.descricao}"></td>
+                            <td>
+                                <div th:if="${proposta.status.name() == 'AGUARDANDO_RESPOSTA_CLIENTE'}">
+                                    <a class="btn btn-info btn-sm" th:href="@{/propostas/cliente/responder/{id} (id=${proposta.id})}"
+                                       role="button" title="Responder Contraproposta">
+                                        <span class="oi oi-comment-square"></span> Responder Contraproposta
+                                    </a>
+                                </div>
+                                <div th:if="${proposta.status.name() == 'ACEITO'}">
+                                   <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalReuniao"
+                                        th:attr="data-horario=${proposta.horarioReuniao != null ? #temporals.format(proposta.horarioReuniao, 'yyyy-MM-dd''T''HH:mm:ss') : ''}, data-link=${proposta.linkReuniao}">
+                                        <span class="oi oi-calendar"></span> Ver Reunião
+                                    </button>
+                                </div>
+                                <div th:if="${proposta.status.name() == 'ABERTO'}">
+                                    <span class="badge badge-primary">Aguardando Resposta da Loja</span>
+                                </div>
+                                <div th:if="${proposta.status.name() == 'RECUSADO_LOJA' or proposta.status.name() == 'RECUSADO_CLIENTE'}">
+                                    <span class="badge badge-danger">Proposta Fechada</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalReuniao" tabindex="-1" role="dialog" aria-labelledby="modalReuniaoLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalReuniaoLabel">Detalhes da Reunião</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Horário:</strong> <span id="horarioReuniaoModal"></span></p>
+                        <p><strong>Link:</strong> <a href="#" id="linkReuniaoModal" target="_blank">Clique para a Reunião</a></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        
+        <script>
+            $('#modalReuniao').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var horarioIsoString = button.data('horario'); 
+            var link = button.data('link');
+
+            var modal = $(this);
+            var displayHorario = 'Não definido';
+
+            if (horarioIsoString) {
+                var partesDataHora = horarioIsoString.split('T'); 
+
+                if (partesDataHora.length === 2) {
+                    var partesData = partesDataHora[0].split('-'); 
+                    var partesHora = partesDataHora[1].split(':'); 
+
+                    if (partesData.length === 3 && partesHora.length >= 2) {
+                        var ano = parseInt(partesData[0]);
+                        var mes = parseInt(partesData[1]) - 1; 
+                        var dia = parseInt(partesData[2]);
+                        var hora = parseInt(partesHora[0]);
+                        var minuto = parseInt(partesHora[1]);
+
+                        var horario = new Date(ano, mes, dia, hora, minuto);
+
+                        if (!isNaN(horario.getTime())) {
+                            var diaStr = ('0' + horario.getDate()).slice(-2);
+                            var mesStr = ('0' + (horario.getMonth() + 1)).slice(-2);
+                            var anoStr = horario.getFullYear();
+                            var horaStr = ('0' + horario.getHours()).slice(-2);
+                            var minStr = ('0' + horario.getMinutes()).slice(-2);
+
+                            displayHorario = `${diaStr}/${mesStr}/${anoStr} ${horaStr}:${minStr}`;
+                        }
+                    }
+                }
+            }
+
+            modal.find('#horarioReuniaoModal').text(displayHorario);
+            modal.find('#linkReuniaoModal').attr('href', link).text(link ? 'Acessar Reunião' : 'Não definido');
+        });
+
+        </script>
+
+
+    </section>
+</body>
+</html>
