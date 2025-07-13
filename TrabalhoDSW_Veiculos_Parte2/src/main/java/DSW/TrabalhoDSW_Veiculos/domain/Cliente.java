@@ -11,6 +11,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull; 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 
 
@@ -19,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @Table(name = "Cliente")
 public class Cliente extends Usuario {
 
-    
+    @JsonProperty("CPF")
     @NotBlank(message = "{NotBlank.cliente.CPF}") 
     @Column(nullable = false, length = 14,unique = true)
     private String CPF;
@@ -33,8 +35,8 @@ public class Cliente extends Usuario {
     private String sexo;
 
     @NotNull(message = "{NotNull.cliente.dataNascimento}") 
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")  
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false, length = 10)
     private LocalDate dataNascimento;
 

@@ -56,7 +56,7 @@ public class ClienteRestController {
         }
         return ResponseEntity.ok(cliente);
     }
-
+    
     @PostMapping(path = "/clientes")
     @ResponseBody
     public ResponseEntity<Cliente> adiciona(@Valid @RequestBody Cliente cliente, BindingResult result) {
@@ -81,6 +81,10 @@ public class ClienteRestController {
         
         
     }
+     
+
+     
+     
 
     @PutMapping(path = "/clientes/{id}")
     public ResponseEntity<Cliente> atualiza(@PathVariable("id") Long id, @RequestBody Cliente cliente, BindingResult result) {
