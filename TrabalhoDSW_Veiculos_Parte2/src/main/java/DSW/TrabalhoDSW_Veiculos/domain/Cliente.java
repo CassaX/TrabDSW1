@@ -35,8 +35,8 @@ public class Cliente extends Usuario {
     private String sexo;
 
     @NotNull(message = "{NotNull.cliente.dataNascimento}") 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")  
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(nullable = false, length = 10)
     private LocalDate dataNascimento;
 

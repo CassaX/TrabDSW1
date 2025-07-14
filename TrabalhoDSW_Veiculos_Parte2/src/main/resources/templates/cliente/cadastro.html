@@ -111,8 +111,8 @@
 					<div class="form-group col-md-6">
                         <label th:text="#{cliente.dataNascimento.label}" for="dataNascimento"></label>
                         <input type="text" class="form-control" id="dataNascimento" th:field="*{dataNascimento}"
-                            placeholder="DD/MM/AAAA"
-                            data-mask="00/00/0000" th:classappend="${#fields.hasErrors('dataNascimento')} ? is-invalid" />
+                            placeholder="DD-MM-AAAA"
+                            data-mask="00-00-0000" th:classappend="${#fields.hasErrors('dataNascimento')} ? is-invalid" />
                         <div class="invalid-feedback">
                             <span th:errors="*{dataNascimento}"></span>
                         </div>
