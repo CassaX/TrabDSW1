@@ -15,10 +15,10 @@
 -  **R4**: Listagem pública de veículos com filtro por modelo (Pedro)
 -  **R6**: Listagem de veículos por loja (apenas para a loja dona) (Pedro)
 -  **R5**: Proposta de compra por clientes autenticados (valor, condições, data) (Nathalia)
--  **R7**: Listagem de propostas por cliente com status (ABERTO, ACEITO, NÃO ACEITO) (Nathalia)
+-  **R7**: Listagem de propostas por cliente com status (ABERTO, ACEITO, NÃO ACEITO) (Matheus)
 -  **R8**: Processamento de propostas por lojas (com notificação por email) (Matheus)
 -  **R9**: Internacionalização (Português e Inglês) (Matheus)
--  **R10**: Validação de formulários e tratamento de erros (Matheus)
+-  **R10**: Validação de formulários e tratamento de erros (Nathalia)
 -  Upload de até 10 fotos por veículo (Pedro)
 -  Sistema de autenticação segura (roles: ADMIN, LOJA, CLIENTE) (Matheus)
 -  Envio de emails automáticos (confirmações e notificações) (Matheus)
@@ -40,3 +40,30 @@ Email: `admin@veiculos.com`
 Senha: `admin123`
 
 *O sistema já inclui alguns dados iniciais para facilitar os testes.*
+
+## REST API
+### Exemplos para Clientes
+- POST `http://localhost:8080/api/clientes`
+  `{
+    "nome": "Cliente Teste",
+    "email": "teste@email.com",
+    "senha": "123456",
+    "CPF": "123.456.789-00",
+    "telefone": "(11) 91234-5678",
+    "sexo": "Feminino",
+    "dataNascimento": "2000-05-15"
+  }`
+
+- GET `http://localhost:8080/api/clientes`
+- GET `http://localhost:8080/api/clientes/1`
+- PUT `http://localhost:8080/api/clientes/6`
+  `{
+    "nome": "Cliente teste atualizado",
+    "email": "teste@email.com",
+    "senha": "123456",
+    "CPF": "123.456.789-00",
+    "telefone": "(11) 90000-0000",
+    "sexo": "Feminino",
+    "dataNascimento": "2000-05-15"
+  }`
+- DELETE `http://localhost:8080/api/clientes/6`
