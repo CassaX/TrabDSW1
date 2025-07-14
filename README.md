@@ -44,7 +44,8 @@ Senha: `admin123`
 ## REST API
 ### Exemplos para Clientes
 - POST `http://localhost:8080/api/clientes`
-  ```{
+  ``` json
+  {
     "nome": "Cliente Teste",
     "email": "teste@email.com",
     "senha": "123456",
@@ -52,12 +53,13 @@ Senha: `admin123`
     "telefone": "(11) 91234-5678",
     "sexo": "Feminino",
     "dataNascimento": "2000-05-15"
-  }```
+  }
 
 - GET `http://localhost:8080/api/clientes`
 - GET `http://localhost:8080/api/clientes/1`
 - PUT `http://localhost:8080/api/clientes/6`
-  ```{
+  ``` json
+  {
     "nome": "Cliente teste atualizado",
     "email": "teste@email.com",
     "senha": "123456",
@@ -65,5 +67,5 @@ Senha: `admin123`
     "telefone": "(11) 90000-0000",
     "sexo": "Feminino",
     "dataNascimento": "2000-05-15"
-  }``` 
+  }
 - DELETE `http://localhost:8080/api/clientes/6`
