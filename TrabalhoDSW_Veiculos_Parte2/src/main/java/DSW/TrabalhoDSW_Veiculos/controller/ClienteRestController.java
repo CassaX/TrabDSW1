@@ -95,6 +95,12 @@ public class ClienteRestController {
         if (clienteExistente == null) {
             return ResponseEntity.notFound().build();
         }
+
+        cliente.setRole("CLIENTE");
+        cliente.setEnabled(true);
+        cliente.setSenha(encoder.encode(cliente.getSenha()));
+        
+
         cliente.setId(id);
         clienteService.salvar(cliente);
         return ResponseEntity.ok(cliente);
