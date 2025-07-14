@@ -47,7 +47,7 @@ public class LojaRestController {
 
         loja.setNome(lojaAtualizada.getNome());
         loja.setEmail(lojaAtualizada.getEmail());
-        loja.setCNPJ(lojaAtualizada.getCNPJ()); // estava escrito errado como getCnpj()
+        loja.setCNPJ(lojaAtualizada.getCNPJ());
         loja.setDescricao(lojaAtualizada.getDescricao());
 
         service.salvar(loja);

@@ -22,7 +22,7 @@ public class VeiculoRestController {
 
     @PostMapping(path = "/api/veiculos/lojas/{id}")
     @ResponseBody
-    public ResponseEntity<Veiculo> cria(@PathVariable long lojaId, 
+    public ResponseEntity<Veiculo> cria(@PathVariable("id") long lojaId, 
                                   @Valid @RequestBody Veiculo veiculo,
                                   BindingResult result) {
         
@@ -36,7 +36,7 @@ public class VeiculoRestController {
     }
 
     @GetMapping(path = "/api/veiculos/lojas/{id}")
-    public ResponseEntity<List<Veiculo>> lista(@PathVariable("id") long id) {
+    public ResponseEntity<List<Veiculo>> veiculoPorLoja(@PathVariable("id") long id) {
         List<Veiculo> lista = service.buscarPorLoja(lojaService.buscarPorId(id));
         if (lista.isEmpty()) {
             return ResponseEntity.notFound().build();

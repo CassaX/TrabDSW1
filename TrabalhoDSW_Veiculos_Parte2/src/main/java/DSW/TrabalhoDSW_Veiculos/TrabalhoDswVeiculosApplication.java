@@ -2,6 +2,7 @@ package DSW.TrabalhoDSW_Veiculos;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -11,10 +12,20 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import DSW.TrabalhoDSW_Veiculos.dao.IClienteDAO;
 import DSW.TrabalhoDSW_Veiculos.dao.ILojaDAO;
+import DSW.TrabalhoDSW_Veiculos.dao.IPropostaDAO;
 import DSW.TrabalhoDSW_Veiculos.dao.IVeiculoDAO;
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
+import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
+import DSW.TrabalhoDSW_Veiculos.domain.StatusProposta;
 import DSW.TrabalhoDSW_Veiculos.domain.Veiculo;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 
 @SpringBootApplication
 public class TrabalhoDswVeiculosApplication {
@@ -24,7 +35,7 @@ public class TrabalhoDswVeiculosApplication {
 	}
 
 	@Bean
-	public CommandLineRunner demo(IClienteDAO clienteDAO, BCryptPasswordEncoder encoder, ILojaDAO lojaDAO, IVeiculoDAO veiculoDAO) {
+	public CommandLineRunner demo(IClienteDAO clienteDAO, BCryptPasswordEncoder encoder, ILojaDAO lojaDAO, IVeiculoDAO veiculoDAO, IPropostaDAO propostaDAO) {
 		return (args) -> {
 			
 			Cliente u1 = new Cliente();
@@ -94,6 +105,24 @@ public class TrabalhoDswVeiculosApplication {
 			v2.setValor(new BigDecimal(55000.00));
 			v2.setLoja(l2);
 			veiculoDAO.save(v2);
+
+			Proposta p1 = new Proposta();
+			p1.setData("LocalDateTime.now()");		
+			p1.setValor(new BigDecimal(45000.00));
+			p1.setVeiculo(v1);
+			p1.setCliente(u1);
+			p1.setStatus(StatusProposta.ABERTO);
+			p1.setCondicoesPagamento("10x no cartão");
+			propostaDAO.save(p1);
+
+			Proposta p2 = new Proposta();
+			p2.setData("LocalDateTime.now()");		
+			p2.setValor(new BigDecimal(47000.00));
+			p2.setVeiculo(v2);
+			p2.setCliente(u2);
+			p2.setStatus(StatusProposta.ABERTO);
+			p2.setCondicoesPagamento("12x no cartão");
+			propostaDAO.save(p2);
 
 		};
 	}

@@ -4,7 +4,10 @@
 	import java.util.ArrayList;
 	import java.util.List;
 
-	import jakarta.persistence.Column;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.Column;
 	import jakarta.persistence.Entity;
 	import jakarta.persistence.JoinColumn;
 	import jakarta.persistence.ManyToOne;
@@ -56,6 +59,7 @@
 
 		//@NotNull(message = "{NotNull.veiculo.loja}") 
 		@ManyToOne
+		@JsonBackReference("loja-veiculos") 
 		@JoinColumn(name = "loja_id")
 		private Loja loja;
 
@@ -63,6 +67,7 @@
 		private List<Imagem> fotos = new ArrayList<>();
 
 		@OneToMany(mappedBy = "veiculo")
+		@JsonManagedReference("veiculos-propostas")
 		private List<Proposta> propostas = new ArrayList<>();
 
 

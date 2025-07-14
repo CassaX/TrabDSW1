@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -29,10 +31,12 @@ public class Proposta extends AbstractEntity<Long> {
     private BigDecimal valor; 
 
     @ManyToOne
+	@JsonBackReference("veiculos-propostas") 
     @JoinColumn(name = "veiculo_id", nullable = false)
     private Veiculo veiculo;
 
     @ManyToOne
+	@JsonBackReference("clientes-propostas") 
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 	
