@@ -1,6 +1,10 @@
 package DSW.TrabalhoDSW_Veiculos;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -11,10 +15,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import DSW.TrabalhoDSW_Veiculos.dao.IClienteDAO;
+import DSW.TrabalhoDSW_Veiculos.dao.IImagemDAO;
 import DSW.TrabalhoDSW_Veiculos.dao.ILojaDAO;
 import DSW.TrabalhoDSW_Veiculos.dao.IPropostaDAO;
 import DSW.TrabalhoDSW_Veiculos.dao.IVeiculoDAO;
 import DSW.TrabalhoDSW_Veiculos.domain.Cliente;
+import DSW.TrabalhoDSW_Veiculos.domain.Imagem;
 import DSW.TrabalhoDSW_Veiculos.domain.Loja;
 import DSW.TrabalhoDSW_Veiculos.domain.Proposta;
 import DSW.TrabalhoDSW_Veiculos.domain.StatusProposta;
@@ -35,7 +41,7 @@ public class TrabalhoDswVeiculosApplication {
 	}
 
 	@Bean
-	public CommandLineRunner demo(IClienteDAO clienteDAO, BCryptPasswordEncoder encoder, ILojaDAO lojaDAO, IVeiculoDAO veiculoDAO, IPropostaDAO propostaDAO) {
+	public CommandLineRunner demo(IClienteDAO clienteDAO, BCryptPasswordEncoder encoder, ILojaDAO lojaDAO, IVeiculoDAO veiculoDAO, IPropostaDAO propostaDAO, IImagemDAO imagemDAO) {
 		return (args) -> {
 			
 			Cliente u1 = new Cliente();
@@ -123,6 +129,33 @@ public class TrabalhoDswVeiculosApplication {
 			p2.setStatus(StatusProposta.ABERTO);
 			p2.setCondicoesPagamento("12x no cartão");
 			propostaDAO.save(p2);
+
+			// Adicionando imagens aos veículos
+            try {
+                // Caminho da imagem do Fiesta
+                Path pathFiesta = Paths.get("src/main/resources/static/image/fiesta.jpg");
+                Imagem imgFiesta = new Imagem(
+                    "fiesta.jpg",
+                    Files.probeContentType(pathFiesta),
+                    Files.readAllBytes(pathFiesta)
+                );
+                imgFiesta.setVeiculo(v1);
+                imagemDAO.save(imgFiesta);
+
+                // Caminho da imagem do Onix
+                Path pathOnix = Paths.get("src/main/resources/static/image/onix.JPG");
+                Imagem imgOnix = new Imagem(
+                    "onix.JPG",
+                    Files.probeContentType(pathOnix),
+                    Files.readAllBytes(pathOnix)
+                );
+                imgOnix.setVeiculo(v2);
+                imagemDAO.save(imgOnix);
+
+            } catch (IOException e) {
+                System.err.println("Erro ao carregar imagens: " + e.getMessage());
+                e.printStackTrace();
+            }
 
 		};
 	}
