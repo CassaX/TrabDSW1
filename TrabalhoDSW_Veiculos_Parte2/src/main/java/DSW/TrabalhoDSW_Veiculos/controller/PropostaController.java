@@ -246,22 +246,8 @@ public class PropostaController {
             }
             attr.addFlashAttribute("fail", "proposta.update.fail");
             return "proposta/editar-status";
-        } else { 
-            result.addError(new FieldError("proposta", "status", "proposta.status.invalidOrUnexpected")); 
         }
-        
-        if (result.hasErrors()) {
-            ModelMap model = new ModelMap(); 
-            model.addAttribute("proposta", propostaForm); 
-            model.addAttribute("veiculo", propostaOriginal.getVeiculo()); 
-            if (propostaOriginal.getStatus() == StatusProposta.AGUARDANDO_FINALIZACAO_LOJA) {
-                model.addAttribute("preSelectedStatus", StatusProposta.ACEITO.name()); 
-            } else {
-                model.addAttribute("preSelectedStatus", propostaForm.getStatus() != null ? propostaForm.getStatus().name() : "");
-            }
-            attr.addFlashAttribute("fail", "proposta.update.fail"); 
-            return "proposta/editar-status"; 
-        }
+       
 
 
         if (propostaForm.getStatus() == StatusProposta.ACEITO) { 

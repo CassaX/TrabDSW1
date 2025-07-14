@@ -73,13 +73,17 @@
                             </p>
                             <p>
                                 <strong th:text="#{valor}">Valor:</strong>
-                                <span
-                                    th:text="${proposta.contrapropostaValor != null ? '|R$ ' + #numbers.formatDecimal(proposta.contrapropostaValor,2,2,'COMMA') + '|' : #{nao_informada}}"></span>
+                                <span th:if="${proposta.contrapropostaValor != null}"
+                                    th:text="|R$ ${#numbers.formatDecimal(proposta.contrapropostaValor,2,2,'COMMA')}|"></span>
+                                <span th:unless="${proposta.contrapropostaValor != null}"
+                                    th:text="#{nao_informada}">Não informada</span>
                             </p>
-                            <p>
+                           <p>
                                 <strong th:text="#{condicoes}">Condições:</strong>
-                                <span
-                                    th:text="${proposta.contrapropostaCondicoes != null and not #strings.isEmpty(proposta.contrapropostaCondicoes) ? proposta.contrapropostaCondicoes : #{nao_informadas}}"></span>
+                                <span th:if="${proposta.contrapropostaCondicoes != null and not #strings.isEmpty(proposta.contrapropostaCondicoes)}"
+                                    th:text="${proposta.contrapropostaCondicoes}"></span>
+                                <span th:unless="${proposta.contrapropostaCondicoes != null and not #strings.isEmpty(proposta.contrapropostaCondicoes)}"
+                                    th:text="#{nao_informadas}">Não informadas</span>
                             </p>
                             <p th:if="${proposta.horarioReuniao}">
                                 <strong th:text="#{horario_reuniao_sugerido}">Horário Sugerido para Reunião:</strong>

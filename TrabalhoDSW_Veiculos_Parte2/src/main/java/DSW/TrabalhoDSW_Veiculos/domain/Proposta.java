@@ -48,7 +48,7 @@ public class Proposta extends AbstractEntity<Long> {
     private String condicoesPagamento;
 
     @Min(value = 0, message = "{Min.proposta.contrapropostaValor}")
-    @Column(columnDefinition = "DECIMAL(8,2) DEFAULT 0.0")
+    @Column(columnDefinition = "DECIMAL(20,2) DEFAULT 0.0")
     private BigDecimal contrapropostaValor; 
     
     @Column(columnDefinition = "TEXT")
