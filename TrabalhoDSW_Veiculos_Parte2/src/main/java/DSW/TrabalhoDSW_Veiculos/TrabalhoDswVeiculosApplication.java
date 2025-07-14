@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -40,10 +41,15 @@ public class TrabalhoDswVeiculosApplication {
 		SpringApplication.run(TrabalhoDswVeiculosApplication.class, args);
 	}
 
+	
+
 	@Bean
 	public CommandLineRunner demo(IClienteDAO clienteDAO, BCryptPasswordEncoder encoder, ILojaDAO lojaDAO, IVeiculoDAO veiculoDAO, IPropostaDAO propostaDAO, IImagemDAO imagemDAO) {
 		return (args) -> {
 			
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+			String agoraFormatado = LocalDateTime.now().format(formatter);
+
 			Cliente u1 = new Cliente();
 			u1.setEmail("nathalia@email.com");
 			u1.setSenha(encoder.encode("123"));
@@ -113,7 +119,7 @@ public class TrabalhoDswVeiculosApplication {
 			veiculoDAO.save(v2);
 
 			Proposta p1 = new Proposta();
-			p1.setData("LocalDateTime.now()");		
+			p1.setData(agoraFormatado);		
 			p1.setValor(new BigDecimal(45000.00));
 			p1.setVeiculo(v1);
 			p1.setCliente(u1);
@@ -122,7 +128,7 @@ public class TrabalhoDswVeiculosApplication {
 			propostaDAO.save(p1);
 
 			Proposta p2 = new Proposta();
-			p2.setData("LocalDateTime.now()");		
+			p2.setData(agoraFormatado);		
 			p2.setValor(new BigDecimal(47000.00));
 			p2.setVeiculo(v2);
 			p2.setCliente(u2);
